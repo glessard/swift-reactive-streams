@@ -42,7 +42,7 @@ class mergeTests: XCTestCase
         XCTAssert(value == count)
         if value != count { print(value) }
       case .error(let error):
-        if error is StreamClosed { e.fulfill() }
+        if error is StreamCompleted { e.fulfill() }
       }
     }
 
@@ -75,7 +75,7 @@ class mergeTests: XCTestCase
         if value != count { print(value) }
       case .error(let error):
         e.fulfill()
-        if error is StreamClosed {}
+        if error is StreamCompleted {}
         else { print(error) }
       }
     }
@@ -139,7 +139,7 @@ class mergeTests: XCTestCase
         XCTAssert(value == count*s.count)
         if value != count*s.count { print(value) }
       case .error(let error):
-        if error is StreamClosed { e.fulfill() }
+        if error is StreamCompleted { e.fulfill() }
       }
     }
     merged.close()
@@ -172,7 +172,7 @@ class mergeTests: XCTestCase
 
     let f = expectationWithDescription("observation ends \(random())")
 
-    s.onEnd { f.fulfill() }
+    s.onComplete { _ in f.fulfill() }
     s.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -202,7 +202,7 @@ class mergeTests: XCTestCase
 
     let g = expectationWithDescription("observation ends \(random())")
 
-    merged.onEnd { g.fulfill() }
+    merged.onComplete { _ in g.fulfill() }
     merged.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)

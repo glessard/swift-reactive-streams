@@ -8,9 +8,9 @@
 
 import Dispatch
 
-public class MergeStream<Value>: SerialStream<Value>
+public class MergeStream<Value>: SerialSubStream<Value,Value>
 {
-  private var sources = Set<Stream<Value>>()
+  private var sources = Set<Subscription>()
   private var closed = false
 
   override init(validated: ValidatedQueue)
@@ -25,28 +25,33 @@ public class MergeStream<Value>: SerialStream<Value>
     dispatch_barrier_async(self.queue) {
       guard !self.closed else { return }
 
-      self.sources.insert(source)
-      source.addObserver(self) {
-        result in
-        self.process {
-          switch result
-          {
-          case .value:
-            return result
-          case .error(_ as StreamClosed):
-            self.sources.remove(source)
-            source.removeObserver(self)
-            if self.closed && self.sources.isEmpty
-            { return result }
-            else
-            { return nil }
-          case .error:
-            self.sources.remove(source)
-            source.removeObserver(self)
-            return result
+      source.subscribe({
+        subscription in
+        self.sources.insert(subscription)
+        subscription.request(self.requested)
+        },
+        handler: {
+          subscription, result in
+          self.process {
+            switch result
+            {
+            case .value:
+              return result
+            case .error(_ as StreamCompleted):
+              subscription.cancel()
+              self.sources.remove(subscription)
+              if self.closed && self.sources.isEmpty
+              { return result }
+              else
+              { return nil }
+            case .error:
+              subscription.cancel()
+              self.sources.remove(subscription)
+              return result
+            }
           }
         }
-      }
+      )
     }
   }
 
@@ -55,9 +60,9 @@ public class MergeStream<Value>: SerialStream<Value>
   public override func finalizeStream()
   {
     closed = true
-    for source in sources
+    for subscription in sources
     {
-      source.removeObserver(self)
+      subscription.cancel()
     }
     sources.removeAll()
     super.finalizeStream()
@@ -69,9 +74,22 @@ public class MergeStream<Value>: SerialStream<Value>
       self.closed = true
       if self.sources.isEmpty
       {
-        return Result.error(StreamClosed.ended)
+        return Result.error(StreamCompleted.terminated)
       }
       return nil
     }
+  }
+
+  public override func setRequested(requested: Int64) -> Int64
+  {
+    let additional = super.setRequested(requested)
+    // copy sources so that a modification in the main queue doesn't interfere.
+    // (optimistic?)
+    let s = sources
+    for subscription in s
+    {
+      subscription.request(additional)
+    }
+    return additional
   }
 }
