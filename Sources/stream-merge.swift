@@ -20,32 +20,34 @@ public class MergeStream<Value>: SerialSubStream<Value,Value>
 
   public func merge(source: Stream<Value>)
   {
-    if state == StreamState.ended { return }
+    if self.closed { return }
 
     dispatch_barrier_async(self.queue) {
       guard !self.closed else { return }
 
-      source.subscribe({
-        subscription in
-        self.sources.insert(subscription)
-        subscription.request(self.requested)
+      let subscription = Subscription(source: source)
+
+      source.addSubscription(
+        subscription,
+        subscriptionHandler: {
+          subscription in
+          self.sources.insert(subscription)
+          subscription.request(self.requested)
         },
-        handler: {
-          subscription, result in
+        notificationHandler: {
+          result in
           self.process {
             switch result
             {
             case .value:
               return result
             case .error(_ as StreamCompleted):
-              subscription.cancel()
               self.sources.remove(subscription)
               if self.closed && self.sources.isEmpty
               { return result }
               else
               { return nil }
             case .error:
-              subscription.cancel()
               self.sources.remove(subscription)
               return result
             }
@@ -60,9 +62,9 @@ public class MergeStream<Value>: SerialSubStream<Value,Value>
   public override func finalizeStream()
   {
     closed = true
-    for subscription in sources
-    {
-      subscription.cancel()
+    for source in sources
+    { // sources may not be empty if we have an actual error as a terminating event
+      source.cancel()
     }
     sources.removeAll()
     super.finalizeStream()
@@ -80,11 +82,11 @@ public class MergeStream<Value>: SerialSubStream<Value,Value>
     }
   }
 
-  public override func setRequested(requested: Int64) -> Int64
+  public override func updateRequest(requested: Int64) -> Int64
   {
-    let additional = super.setRequested(requested)
+    let additional = super.updateRequest(requested)
     // copy sources so that a modification in the main queue doesn't interfere.
-    // (optimistic?)
+    // (optimistic? should this use dispatch_barrier_async instead?)
     let s = sources
     for subscription in s
     {

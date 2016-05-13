@@ -33,7 +33,7 @@ public class Stream<Value>: Source
   private var observers = Dictionary<Subscription, (Result<Value>) -> Void>()
 
   private var currentState: Int32 = 0
-  internal private(set) var requested: Int64 = 0
+  public private(set) var requested: Int64 = 0
 
   public convenience init(qos: qos_class_t = qos_class_self())
   {
@@ -68,16 +68,18 @@ public class Stream<Value>: Source
     switch result
     {
     case .value:
-      if requested > 0 && OSAtomicAdd64(-1, &requested) >= 0
+      if requested > 0
       {
-        if state == StreamState.waiting.rawValue
+        if OSAtomicDecrement64(&requested) >= 0
         {
-          // this should be an unconditional atomic store
-          OSAtomicCompareAndSwap32(StreamState.waiting.rawValue, StreamState.streaming.rawValue, &currentState)
+          for (subscription, handler) in self.observers
+          {
+            if subscription.shouldNotify() { handler(result) }
+          }
         }
-        for (subscription, handler) in self.observers
-        {
-          if subscription.shouldNotify() { handler(result) }
+        else
+        { // Weirdness happened
+          OSAtomicIncrement64Barrier(&requested)
         }
       }
 
@@ -131,10 +133,8 @@ public class Stream<Value>: Source
 
       if OSAtomicCompareAndSwap32(state, StreamState.ended.rawValue, &self.currentState)
       {
-        for notificationHandler in self.observers.values
-        {
-          notificationHandler(Result.error(StreamCompleted.terminated))
-        }
+        let result = Result<Value>.error(StreamCompleted.terminated)
+        for notificationHandler in self.observers.values { notificationHandler(result) }
         self.finalizeStream()
       }
     }
@@ -149,37 +149,40 @@ public class Stream<Value>: Source
 
   // subscription methods
 
-  final public func subscribe(@noescape onSubscribe: (Subscription) -> Void, handler: (Subscription, Result<Value>) -> Void)
-  {
-    let subscription = Subscription(source: self)
-    onSubscribe(subscription)
-    addObserver(subscription, handler: { result in handler(subscription, result) })
-  }
-
   final public func subscribe<O: Observer where O.EventValue == Value>(observer: O)
   {
-    let subscription = Subscription(source: self)
-    observer.onSubscribe(subscription)
-    addObserver(subscription, handler: observer.notify)
+    subscribe(observer.onSubscribe, notificationHandler: observer.notify)
   }
 
-  final public func subscribe(handler: (Result<Value>) -> Void) -> Subscription
+  final public func subscribe<U>(substream: SubStream<U, Value>,
+                                 notificationHandler: (Result<Value>) -> Void)
+  {
+    subscribe(substream.setSubscription,
+              notificationHandler: notificationHandler)
+  }
+
+  final public func subscribe(subscriptionHandler: (Subscription) -> Void,
+                              notificationHandler: (Result<Value>) -> Void)
   {
     let subscription = Subscription(source: self)
-    addObserver(subscription, handler: handler)
-    return subscription
+    addSubscription(subscription,
+                    subscriptionHandler: subscriptionHandler,
+                    notificationHandler: notificationHandler)
   }
 
-  private func addObserver(subscription: Subscription, handler: (Result<Value>) -> Void)
+  internal func addSubscription(subscription: Subscription,
+                                subscriptionHandler: (Subscription) -> Void,
+                                notificationHandler: (Result<Value>) -> Void)
   {
     if currentState == StreamState.waiting.rawValue &&
        OSAtomicCompareAndSwap32(StreamState.waiting.rawValue, transientState, &currentState)
     { // the queue isn't running yet, no observers
       assert(observers.isEmpty)
-      observers[subscription] = handler
+      observers[subscription] = notificationHandler
       // this should be a simple atomic store
       OSAtomicAdd32(StreamState.streaming.rawValue &- transientState, &currentState)
       assert(currentState == StreamState.streaming.rawValue)
+      subscriptionHandler(subscription)
       dispatch_resume(queue)
       return
     }
@@ -187,42 +190,41 @@ public class Stream<Value>: Source
     if currentState < StreamState.ended.rawValue
     {
       dispatch_barrier_async(queue) {
+        subscriptionHandler(subscription)
         if self.currentState < StreamState.ended.rawValue
-        { // duplicate additions of the same observer are dealt with trapping
-          if let o = self.observers.updateValue(handler, forKey: subscription)
-          {
-            _ = o
-            fatalError("Duplicate subscription?")
-          }
+        {
+          self.observers[subscription] = notificationHandler
         }
         else
         { // the stream was closed between the block's dispatch and its execution
-          handler(Result.error(StreamCompleted.terminated))
+          notificationHandler(Result.error(StreamCompleted.terminated))
         }
       }
       return
     }
 
     // dispatching on a queue is unnecessary in this case
-    handler(Result.error(StreamCompleted.terminated))
+    subscriptionHandler(subscription)
+    notificationHandler(Result.error(StreamCompleted.terminated))
   }
 
   // MARK: Source
 
-  public func setRequested(requested: Int64) -> Int64
+  public func updateRequest(requested: Int64) -> Int64
   {
-    precondition(requested >= 0)
+    precondition(requested > 0)
     guard currentState < StreamState.ended.rawValue else { return 0 }
 
-    while true
+    var cur = self.requested
+    while cur < requested && cur >= 0
     { // an atomic store wouldn't really be better
-      let cur = self.requested
-      if cur > requested { return 0 }
       if OSAtomicCompareAndSwap64(cur, requested, &self.requested)
       {
         return (requested-cur)
       }
+      cur = self.requested
     }
+    return 0
   }
 
   final public func cancel(subscription subscription: Subscription)
@@ -231,25 +233,13 @@ public class Stream<Value>: Source
     {
       dispatch_barrier_async(queue) {
         guard self.currentState < StreamState.ended.rawValue else { return }
-        guard let eventHandler = self.observers.removeValueForKey(subscription)
-          else { fatalError("Tried to cancel a subscription which was not active") }
+        guard let notificationHandler = self.observers.removeValueForKey(subscription)
+          else { fatalError("Tried to cancel an inactive subscription") }
 
-        eventHandler(Result.error(StreamCompleted.observerRemoved))
+        notificationHandler(Result.error(StreamCompleted.observerRemoved))
       }
     }
   }
-}
-
-extension Stream: Equatable {}
-
-public func ==<Value>(lhs: Stream<Value>, rhs: Stream<Value>) -> Bool
-{
-  return lhs === rhs
-}
-
-extension Stream: Hashable
-{
-  public var hashValue: Int { return unsafeAddressOf(self).hashValue }
 }
 
 public class SerialStream<Value>: Stream<Value>

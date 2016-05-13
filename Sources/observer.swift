@@ -13,7 +13,7 @@ public protocol Observer: class
   func onSubscribe(subscription: Subscription)
   func onValue(value: EventValue)
   func onError(error: ErrorProtocol)
-  func onComplete(status: StreamCompleted)
+  func onCompletion(status: StreamCompleted)
 
   func notify(result: Result<EventValue>)
 }
@@ -27,7 +27,7 @@ extension Observer
     case .value(let value):
       self.onValue(value)
     case .error(let closed as StreamCompleted):
-      self.onComplete(closed)
+      self.onCompletion(closed)
     case .error(let error):
       self.onError(error)
     }

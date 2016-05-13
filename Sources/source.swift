@@ -8,6 +8,6 @@
 
 public protocol Source: class
 {
-  func setRequested(requested: Int64) -> Int64
+  func updateRequest(requested: Int64) -> Int64
   func cancel(subscription subscription: Subscription)
 }

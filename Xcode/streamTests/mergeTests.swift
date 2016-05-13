@@ -172,7 +172,7 @@ class mergeTests: XCTestCase
 
     let f = expectationWithDescription("observation ends \(random())")
 
-    s.onComplete { _ in f.fulfill() }
+    s.onCompletion { _ in f.fulfill() }
     s.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -202,7 +202,7 @@ class mergeTests: XCTestCase
 
     let g = expectationWithDescription("observation ends \(random())")
 
-    merged.onComplete { _ in g.fulfill() }
+    merged.onCompletion { _ in g.fulfill() }
     merged.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)

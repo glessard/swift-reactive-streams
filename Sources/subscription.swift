@@ -11,9 +11,10 @@ final public class Subscription
   private weak var source: Source?
 
   public private(set) var requested: Int64
-  public private(set) var cancelled: Int32 = 0
 
-  public init(source: Source)
+  public var cancelled: Bool { return requested == Int64.min }
+
+  init(source: Source)
   {
     self.source = source
     self.requested = 0
@@ -23,83 +24,66 @@ final public class Subscription
 
   func shouldNotify() -> Bool
   {
-    if requested == Int64.max
-    {
-      return true
-    }
+    var p = requested
+    if p == Int64.max { return true }
 
-    if requested > 0
+    while p > 0
     {
-      let decremented = OSAtomicAdd64Barrier(-1, &requested)
-      if decremented >= 0
+      if OSAtomicCompareAndSwap64(p, p-1, &requested)
       {
         return true
       }
-      // prudently set it back to 0
-      while true
-      {
-        let fixit = requested
-        if fixit >= 0
-        { // another thread got it back above zero
-          return fixit != 0
-        }
-        if OSAtomicCompareAndSwap64(fixit, 0, &requested)
-        {
-          return false
-        }
-      }
+      p = requested
     }
 
     return false
   }
 
-  // called by the subscriber
+  // called by our subscriber
 
   public func requestAll()
   {
     request(Int64.max)
   }
 
-  // called by the subscriber
+  // called by our subscriber
 
   public func request(count: Int64)
   {
-    if cancelled == 0
-    {
-      let curreq = requested
-      guard curreq < Int64.max else { return }
-      guard count > 0 else { return }
+    if count < 1 { return }
 
-      if count < Int64.max && (count &+ curreq > 0)
+    var p = requested
+    precondition(p == Int64.min || p >= 0)
+    while p != Int64.min && p < Int64.max
+    {
+      let tentatively = p &+ count // could technically overflow; avoid trapping
+      let updatedRequest = tentatively > 0 ? tentatively : Int64.max
+      if OSAtomicCompareAndSwap64(p, updatedRequest, &requested)
       {
-        let newDemand = OSAtomicAdd64(count, &requested)
-        if let source = source { source.setRequested(newDemand) }
+        if let source = source { source.updateRequest(updatedRequest) }
         return
       }
-
-      // set requested to Int64.max
-      while true
-      { // an atomic store would be nice
-        let req = requested
-        if OSAtomicCompareAndSwap64(req, Int64.max, &requested)
-        {
-          if let source = source { source.setRequested(Int64.max) }
-          break
-        }
-      }
+      p = requested
     }
   }
 
+  // called by our subscriber
+
   public func cancel()
   {
-    if OSAtomicCompareAndSwap32Barrier(0, 1, &cancelled)
+    var p = requested
+    guard p != Int64.min else { return }
+
+    // an atomic store would do better here.
+    while !OSAtomicCompareAndSwap64Barrier(p, Int64.min, &requested)
     {
-      if let source = source
-      {
-        source.cancel(subscription: self)
-        self.source = nil
-      }
-      requested = 0 // atomic store might be nicer
+      p = requested
+    }
+
+    if let source = source
+    {
+      source.cancel(subscription: self)
+      self.source = nil
     }
   }
 }
