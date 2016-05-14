@@ -322,14 +322,12 @@ extension Stream
               current = try transform(current, value)
             }
             catch {
-              return Result.error(error)
+              mapped.process(current)
+              mapped.process(error)
             }
-          case .error(let error) where error is StreamCompleted:
+          case .error(let error):
             mapped.process(current)
             mapped.process(error)
-          case .error(let error):
-            mapped.process(error)
-            // return Result.error(error)
           }
           return nil
         }
@@ -358,7 +356,28 @@ extension Stream
 {
   private func countEvents(mapped: LimitedStream<Int, Value>) -> Stream<Int>
   {
-    return reduce(mapped, initial: 0, transform: { (c, _) in c+1 })
+    var total = 0
+    self.subscribe({
+        subscription in
+        mapped.setSubscription(subscription)
+        subscription.requestAll()
+      },
+      notificationHandler: {
+        result in
+        mapped.process {
+          switch result
+          {
+          case .value:
+            total += 1
+          case .error(let error):
+            mapped.process(total)
+            mapped.process(error)
+          }
+          return nil
+        }
+      }
+    )
+    return mapped
   }
 
   public func countEvents(qos qos: qos_class_t = qos_class_self()) -> Stream<Int>
@@ -389,12 +408,9 @@ extension Stream
           {
           case .value(let value):
             current.append(value)
-          case .error(let error) where error is StreamCompleted:
+          case .error(let error):
             mapped.process(current)
             mapped.process(error)
-          case .error(let error):
-            mapped.process(error)
-            // return Result.error(error)
           }
           return nil
         }
