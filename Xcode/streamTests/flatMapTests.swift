@@ -67,17 +67,11 @@ class flatMapTests: XCTestCase
       return s
     }
 
-    m.countEvents().notify {
-      result in
-      switch result
-      {
-      case .value(let count):
-        if count != reps*events { print(count) }
-        XCTAssert(count == reps*events)
-      case .error(let error):
-        if error is StreamCompleted { e.fulfill() }
-        else { print(error) }
-      }
+    m.countEvents().onValue {
+      count in
+      if count != reps*events { print(count) }
+      XCTAssert(count == reps*events)
+      e.fulfill()
     }
 
     for _ in 0..<reps { stream.process(events) }
@@ -225,7 +219,7 @@ class flatMapTests: XCTestCase
       switch result
       {
       case .value(let value):
-        XCTFail("event count of \(value) reported instead of zero")
+        XCTAssert(value == 0, "event count of \(value) reported instead of zero")
       case .error(let error as NSError):
         if error.domain == "bogus" { e.fulfill() }
         else { print(error) }
