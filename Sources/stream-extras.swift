@@ -264,7 +264,7 @@ extension Stream
 {
   private func final(mapped: LimitedStream<Value, Value>) -> Stream<Value>
   {
-    var last = Result<Value>()
+    var last: Value? = nil
     self.subscribe({
         subscription in
         subscription.requestAll()
@@ -275,13 +275,10 @@ extension Stream
         mapped.process {
           switch result
           {
-          case .value:
-            last = result
+          case .value(let value):
+            last = value
           case .error:
-            if case .value = last
-            {
-              mapped.process(last)
-            }
+            if let value = last { mapped.process(value) }
             mapped.process(result)
           }
           return nil
