@@ -116,14 +116,6 @@ public class Stream<Value>: Source
     process(Result.error(error))
   }
 
-  public func start()
-  {
-    if OSAtomicCompareAndSwap32(StreamState.waiting.rawValue, StreamState.streaming.rawValue, &currentState)
-    {
-      dispatch_resume(queue)
-    }
-  }
-
   public func close()
   {
     guard currentState < StreamState.ended.rawValue else { return }
@@ -174,16 +166,21 @@ public class Stream<Value>: Source
                                 subscriptionHandler: (Subscription) -> Void,
                                 notificationHandler: (Result<Value>) -> Void)
   {
-    if currentState == StreamState.waiting.rawValue &&
-       OSAtomicCompareAndSwap32(StreamState.waiting.rawValue, transientState, &currentState)
+    if currentState == StreamState.waiting.rawValue
     { // the queue isn't running yet, no observers
-      assert(observers.isEmpty)
-      observers[subscription] = notificationHandler
-      // this should be a simple atomic store
-      OSAtomicAdd32(StreamState.streaming.rawValue &- transientState, &currentState)
-      assert(currentState == StreamState.streaming.rawValue)
-      subscriptionHandler(subscription)
-      dispatch_resume(queue)
+      dispatch_barrier_sync(queue) {
+       assert(self.observers.isEmpty)
+       OSAtomicCompareAndSwap32(StreamState.waiting.rawValue, StreamState.streaming.rawValue, &self.currentState)
+        subscriptionHandler(subscription)
+        if self.currentState < StreamState.ended.rawValue
+        {
+          self.observers[subscription] = notificationHandler
+        }
+        else
+        { // the stream was closed between the block's dispatch and its execution
+          notificationHandler(Result.error(StreamCompleted.terminated))
+        }
+      }
       return
     }
 

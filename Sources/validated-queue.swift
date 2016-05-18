@@ -32,14 +32,12 @@ struct ValidatedQueue
     {
       let attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, qos, 0)
       let validated = dispatch_queue_create("serial-queue", attr)
-      dispatch_suspend(validated)
       self.queue = TypedQueue.serial(validated)
     }
     else
     {
       let attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_CONCURRENT, qos, 0)
       let validated = dispatch_queue_create("concurrent-queue", attr)
-      dispatch_suspend(validated)
       self.queue = TypedQueue.serial(validated)
     }
   }
@@ -50,7 +48,6 @@ struct ValidatedQueue
     { // create a new queue whose target will be the queue that's passed in
       // this is necessary since we can't know whether the parameter is a concurrent queue
       let validated = dispatch_queue_create("serial-queue", DISPATCH_QUEUE_SERIAL)
-      dispatch_suspend(validated)
       dispatch_set_target_queue(validated, queue)
       self.queue = TypedQueue.serial(validated)
     }
@@ -58,7 +55,6 @@ struct ValidatedQueue
     { // create a new queue whose target will be the queue that's passed in
       // this is necessary since barrier blocks don't work on the global concurrent queues
       let validated = dispatch_queue_create("concurrent-queue", DISPATCH_QUEUE_CONCURRENT)
-      dispatch_suspend(validated)
       dispatch_set_target_queue(validated, queue)
       self.queue = TypedQueue.concurrent(validated)
     }
