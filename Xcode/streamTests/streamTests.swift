@@ -37,7 +37,7 @@ class streamTests: XCTestCase
       case .value(let value):
         if value == events { e1.fulfill() }
       case .error(let error):
-        if error is StreamClosed { e2.fulfill() }
+        if error is StreamCompleted { e2.fulfill() }
       }
     }
 
@@ -71,10 +71,29 @@ class streamTests: XCTestCase
 
     stream.onError {
       error in
-      if error is StreamClosed { e2.fulfill() }
+      if error is StreamCompleted { e2.fulfill() }
     }
 
     stream.close()
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+  }
+
+  func testOnComplete()
+  {
+    let s1 = Stream<Int>()
+    s1.onCompletion {
+      _ in XCTFail()
+    }
+
+    s1.process(Result())
+
+    let e2 = expectationWithDescription("observation onCompletion")
+    let s2 = Stream<Int>()
+    s2.onCompletion {
+      _ in e2.fulfill()
+    }
+    s2.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
   }
@@ -87,13 +106,14 @@ class streamTests: XCTestCase
     let e2 = expectationWithDescription("observation onError")
 
     var d = Array<Double>()
-    let m = stream.map(transform: { 2.0*Double($0) }).map(transform: { d.append($0) })
+    let m = stream.map(transform: { 2.0*Double($0) }).map(transform: { d.append($0) }).final()
     m.onError {
       error in
-      guard let t = error as? StreamClosed else { return }
-      guard case .ended = t else { return }
-      XCTAssert(d.count == events)
-      e2.fulfill()
+      if let t = error as? StreamCompleted, case .terminated = t
+      {
+        XCTAssert(d.count == events)
+        e2.fulfill()
+      }
     }
 
     for i in 0..<events { stream.process(i+1) }
@@ -186,9 +206,11 @@ class streamTests: XCTestCase
       case .value(let value):
         if value == limit { e1.fulfill() }
       case .error(let error):
-        if (error is StreamClosed) { e2.fulfill() }
+        if (error is StreamCompleted) { e2.fulfill() }
       }
     }
+
+    XCTAssert(stream.requested == Int64(limit))
 
     for i in 0..<events { stream.process(i+1) }
     stream.close()
@@ -196,6 +218,43 @@ class streamTests: XCTestCase
     waitForExpectationsWithTimeout(1.0, handler: nil)
   }
 
+  func testNextTruncated()
+  {
+    let stream = Stream<Int>()
+
+    let events = 100
+    let limit = 50
+    let truncation = 5
+
+    let e1 = expectationWithDescription("observation onValue")
+    let e2 = expectationWithDescription("observation onError")
+
+    let m = stream.next(count: limit)
+    let t = m.map {
+      i throws -> Int in
+      if i <= truncation { return i }
+      throw NSError(domain: "bogus", code: -1, userInfo: nil)
+    }
+    t.notify {
+      result in
+      switch result
+      {
+      case .value(let value):
+        if value == truncation { e1.fulfill() }
+      case .error(let error):
+        let e = error as NSError
+        if (e.domain == "bogus") { e2.fulfill() }
+      }
+    }
+
+    XCTAssert(stream.requested == Int64(limit))
+
+    for i in 0..<events { stream.process(i+1) }
+    stream.close()
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+  }
+  
   func testReduce()
   {
     let stream = Stream<Int>(queue: dispatch_get_global_queue(qos_class_self(), 0))
@@ -212,7 +271,7 @@ class streamTests: XCTestCase
       case .value(let value):
         if value == (events-1)*events/2 { e1.fulfill() }
       case .error(let error):
-        if error is StreamClosed { e2.fulfill() }
+        if error is StreamCompleted { e2.fulfill() }
       }
     }
 
@@ -240,7 +299,7 @@ class streamTests: XCTestCase
         let reduced = value.reduce(0, combine: +)
         if reduced == Double((events-1)*events) { e1.fulfill() }
       case .error(let error):
-        if error is StreamClosed { e2.fulfill() }
+        if error is StreamCompleted { e2.fulfill() }
       }
     }
 
@@ -250,7 +309,7 @@ class streamTests: XCTestCase
     waitForExpectationsWithTimeout(1.0, handler: nil)
   }
 
-  func testSplit()
+  func testSplit1()
   {
     let stream = Stream<Int>()
     let events = 10
@@ -268,15 +327,11 @@ class streamTests: XCTestCase
       case .value(let value):
         a0 = value
         if value.count == events { e1.fulfill() }
+        else { print(value.count) }
       case .error(let error):
-        if error is StreamClosed { e2.fulfill() }
+        if error is StreamCompleted { e2.fulfill() }
       }
     }
-
-    for i in 0..<events { stream.process(i+1) }
-    stream.close()
-
-    waitForExpectationsWithTimeout(1.0, handler: nil)
 
     let e3 = expectationWithDescription("observation onValue")
     let e4 = expectationWithDescription("observation onError")
@@ -288,10 +343,76 @@ class streamTests: XCTestCase
       a1 = value
       if value.count == events { e3.fulfill() }
     }
-    s1.onEnd { e4.fulfill() }
+    s1.onCompletion { _ in e4.fulfill() }
+
+    for i in 0..<events { stream.process(i+1) }
+    stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
 
     XCTAssert(a0 == a1)
+  }
+
+  func testSplit2()
+  {
+    let stream = Stream<Int>()
+    let events = 10
+    let splits = 3
+
+    let e = expectationWithDescription("observation complete")
+
+    let split = stream.split(count: splits)
+
+    let merged = MergeStream<Int>()
+    split.forEach(merged.merge)
+
+    merged.countEvents().onValue {
+      count in
+      if count == splits*events { e.fulfill() }
+      else { print(count) }
+    }
+
+    for i in 0..<events { stream.process(i+1) }
+    stream.close()
+    merged.close()
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+  }
+
+  func testSplit3()
+  {
+    let stream = Stream<Int>()
+    let events = 10
+
+    let e1 = expectationWithDescription("observation onValue")
+    let e2 = expectationWithDescription("observation onError")
+
+    let split = stream.split()
+
+    split.0.countEvents().notify {
+      result in
+      switch result
+      {
+      case .value(let count):
+        if count == events { e1.fulfill() }
+        else { print(count) }
+      case .error(let error):
+        if error is StreamCompleted { e2.fulfill() }
+      }
+    }
+
+    for i in 0..<events { stream.process(i+1) }
+    stream.close()
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+
+    let e3 = expectationWithDescription("observation onValue")
+
+    split.1.countEvents().onValue {
+      count in if count > 0 { XCTFail() } // split.1 never had a non-zero request
+      e3.fulfill()
+    }
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
   }
 }

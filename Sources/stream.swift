@@ -20,19 +20,20 @@ extension StreamState: CustomStringConvertible
   }
 }
 
-public enum StreamClosed: ErrorProtocol
+public enum StreamCompleted: ErrorProtocol
 {
-  case ended
+  case terminated
   case didNotObserve
   case observerRemoved
 }
 
-public class Stream<Value>
+public class Stream<Value>: Source
 {
   let queue: dispatch_queue_t
-  private var observers = Dictionary<UnsafePointer<Void>, (Result<Value>) -> Void>()
+  private var observers = Dictionary<Subscription, (Result<Value>) -> Void>()
 
   private var currentState: Int32 = 0
+  public private(set) var requested: Int64 = 0
 
   public convenience init(qos: qos_class_t = qos_class_self())
   {
@@ -57,6 +58,8 @@ public class Stream<Value>
     return dispatch_queue_get_qos_class(self.queue, nil)
   }
 
+  /// precondition: must run on this Source's queue
+
   private func dispatch(result: Result<Value>)
   {
     let state = currentState
@@ -65,12 +68,20 @@ public class Stream<Value>
     switch result
     {
     case .value:
-      if state == StreamState.waiting.rawValue
+      if requested > 0
       {
-        // this should be an unconditional atomic store
-        OSAtomicCompareAndSwap32(StreamState.waiting.rawValue, StreamState.streaming.rawValue, &currentState)
+        if OSAtomicDecrement64(&requested) >= 0
+        {
+          for (subscription, handler) in self.observers
+          {
+            if subscription.shouldNotify() { handler(result) }
+          }
+        }
+        else
+        { // Weirdness happened
+          OSAtomicIncrement64Barrier(&requested)
+        }
       }
-      for notificationHandler in self.observers.values { notificationHandler(result) }
 
     case .error:
       // This should be an unconditional swap, with notification occuring iff the value has been changed
@@ -122,10 +133,8 @@ public class Stream<Value>
 
       if OSAtomicCompareAndSwap32(state, StreamState.ended.rawValue, &self.currentState)
       {
-        for notificationHandler in self.observers.values
-        {
-          notificationHandler(Result.error(StreamClosed.ended))
-        }
+        let result = Result<Value>.error(StreamCompleted.terminated)
+        for notificationHandler in self.observers.values { notificationHandler(result) }
         self.finalizeStream()
       }
     }
@@ -138,28 +147,42 @@ public class Stream<Value>
     self.observers.removeAll()
   }
 
+  // subscription methods
 
-  final public func addObserver<O: Observer where O.EventValue == Value>(observer: O)
+  final public func subscribe<O: Observer where O.EventValue == Value>(observer: O)
   {
-    addObserver(observer, handler: observer.notify)
+    subscribe(observer.onSubscribe, notificationHandler: observer.notify)
   }
 
-  final public func addObserver<U>(subStream subStream: SubStream<U, Value>, handler: (Result<Value>) -> Void)
+  final public func subscribe<U>(substream: SubStream<U, Value>,
+                                 notificationHandler: (Result<Value>) -> Void)
   {
-    subStream.source = self
-    addObserver(subStream, handler: handler)
+    subscribe(substream.setSubscription,
+              notificationHandler: notificationHandler)
   }
 
-  final public func addObserver(observer: AnyObject, handler: (Result<Value>) -> Void)
+  final public func subscribe(subscriptionHandler: (Subscription) -> Void,
+                              notificationHandler: (Result<Value>) -> Void)
+  {
+    let subscription = Subscription(source: self)
+    addSubscription(subscription,
+                    subscriptionHandler: subscriptionHandler,
+                    notificationHandler: notificationHandler)
+  }
+
+  internal func addSubscription(subscription: Subscription,
+                                subscriptionHandler: (Subscription) -> Void,
+                                notificationHandler: (Result<Value>) -> Void)
   {
     if currentState == StreamState.waiting.rawValue &&
        OSAtomicCompareAndSwap32(StreamState.waiting.rawValue, transientState, &currentState)
     { // the queue isn't running yet, no observers
       assert(observers.isEmpty)
-      observers[unsafeAddressOf(observer)] = handler
+      observers[subscription] = notificationHandler
       // this should be a simple atomic store
       OSAtomicAdd32(StreamState.streaming.rawValue &- transientState, &currentState)
       assert(currentState == StreamState.streaming.rawValue)
+      subscriptionHandler(subscription)
       dispatch_resume(queue)
       return
     }
@@ -167,100 +190,59 @@ public class Stream<Value>
     if currentState < StreamState.ended.rawValue
     {
       dispatch_barrier_async(queue) {
+        subscriptionHandler(subscription)
         if self.currentState < StreamState.ended.rawValue
-        { // duplicate additions of the same observer are dealt with trapping
-          if let o = self.observers.updateValue(handler, forKey: unsafeAddressOf(observer))
-          {
-            _ = o
-            fatalError("Tried to add observer which was already observing")
-          }
+        {
+          self.observers[subscription] = notificationHandler
         }
         else
-        { // the stream was closed between dispatching and execution
-          handler(Result.error(StreamClosed.didNotObserve))
+        { // the stream was closed between the block's dispatch and its execution
+          notificationHandler(Result.error(StreamCompleted.terminated))
         }
       }
       return
     }
 
     // dispatching on a queue is unnecessary in this case
-    handler(Result.error(StreamClosed.didNotObserve))
+    subscriptionHandler(subscription)
+    notificationHandler(Result.error(StreamCompleted.terminated))
   }
 
-  final public func removeObserver(observer: AnyObject)
+  // MARK: Source
+
+  public func updateRequest(requested: Int64) -> Int64
+  {
+    precondition(requested > 0)
+    guard currentState < StreamState.ended.rawValue else { return 0 }
+
+    var cur = self.requested
+    while cur < requested && cur >= 0
+    { // an atomic store wouldn't really be better
+      if OSAtomicCompareAndSwap64(cur, requested, &self.requested)
+      {
+        return (requested-cur)
+      }
+      cur = self.requested
+    }
+    return 0
+  }
+
+  final public func cancel(subscription subscription: Subscription)
   {
     if currentState < StreamState.ended.rawValue
     {
       dispatch_barrier_async(queue) {
         guard self.currentState < StreamState.ended.rawValue else { return }
-        guard let eventHandler = self.observers.removeValueForKey(unsafeAddressOf(observer))
-          else { fatalError("Tried to remove an observer which was not observing") }
+        guard let notificationHandler = self.observers.removeValueForKey(subscription)
+          else { fatalError("Tried to cancel an inactive subscription") }
 
-        eventHandler(Result.error(StreamClosed.observerRemoved))
+        notificationHandler(Result.error(StreamCompleted.observerRemoved))
       }
     }
   }
 }
 
-extension Stream: Equatable {}
-
-public func ==<Value>(lhs: Stream<Value>, rhs: Stream<Value>) -> Bool
-{
-  return lhs === rhs
-}
-
-extension Stream: Hashable
-{
-  public var hashValue: Int { return unsafeAddressOf(self).hashValue }
-}
-
 public class SerialStream<Value>: Stream<Value>
-{
-  public convenience init(qos: qos_class_t = qos_class_self())
-  {
-    self.init(validated: ValidatedQueue(qos: qos, serial: true))
-  }
-
-  public convenience init(queue: dispatch_queue_t)
-  {
-    self.init(validated: ValidatedQueue(queue: queue, serial: true))
-  }
-
-  override init(validated: ValidatedQueue)
-  {
-    switch validated.queue
-    {
-    case .serial:
-      super.init(validated: validated)
-    case .concurrent(let queue):
-      super.init(validated: ValidatedQueue(queue: queue, serial: true))
-    }
-  }
-}
-
-public class SubStream<Value, SourceValue>: Stream<Value>
-{
-  private weak var source: Stream<SourceValue>? = nil
-
-  override init(validated: ValidatedQueue)
-  {
-    super.init(validated: validated)
-  }
-
-  /// precondition: must run on a barrier block or a serial queue
-
-  override func finalizeStream()
-  {
-    if let source = source
-    {
-      source.removeObserver(self)
-      self.source = nil
-    }
-    super.finalizeStream()
-  }
-}
-
-public class SerialSubStream<Value, SourceValue>: SubStream<Value, SourceValue>
 {
   public convenience init(qos: qos_class_t = qos_class_self())
   {

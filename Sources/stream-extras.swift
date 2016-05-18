@@ -8,11 +8,105 @@
 
 import Dispatch
 
+public class SubStream<Value, SourceValue>: Stream<Value>
+{
+  private var source: Subscription? = nil
+
+  override init(validated: ValidatedQueue)
+  {
+    super.init(validated: validated)
+  }
+
+  public func setSubscription(subscription: Subscription)
+  {
+    assert(source == nil, "SubStream cannot support multiple subscriptions")
+    source = subscription
+  }
+
+  /// precondition: must run on a barrier block or a serial queue
+
+  override func finalizeStream()
+  {
+    self.source = nil
+    super.finalizeStream()
+  }
+
+  public override func updateRequest(requested: Int64) -> Int64
+  {
+    let additional = super.updateRequest(requested)
+    if additional > 0, let source = source
+    {
+      source.request(additional)
+    }
+    return additional
+  }
+
+  public override func close()
+  {
+    if let source = source { source.cancel() }
+    super.close()
+  }
+}
+
+public class SerialSubStream<Value, SourceValue>: SubStream<Value, SourceValue>
+{
+  public convenience init(qos: qos_class_t = qos_class_self())
+  {
+    self.init(validated: ValidatedQueue(qos: qos, serial: true))
+  }
+
+  public convenience init(queue: dispatch_queue_t)
+  {
+    self.init(validated: ValidatedQueue(queue: queue, serial: true))
+  }
+
+  override init(validated: ValidatedQueue)
+  {
+    switch validated.queue
+    {
+    case .serial:
+      super.init(validated: validated)
+    case .concurrent(let queue):
+      super.init(validated: ValidatedQueue(queue: queue, serial: true))
+    }
+  }
+}
+
+public class LimitedStream<Value, SourceValue>: SerialSubStream<Value, SourceValue>
+{
+  let limit: Int64
+  var count: Int64 = 0
+
+  public convenience init(qos: qos_class_t = qos_class_self(), count: Int64)
+  {
+    self.init(validated: ValidatedQueue(qos: qos, serial: true), count: max(count,0))
+  }
+
+  public convenience init(queue: dispatch_queue_t, count: Int64)
+  {
+    self.init(validated: ValidatedQueue(queue: queue, serial: true), count: max(count,0))
+  }
+
+  init(validated: ValidatedQueue, count: Int64)
+  {
+    precondition(count >= 0)
+    self.limit = count
+    super.init(validated: validated)
+  }
+
+  public override func updateRequest(requested: Int64) -> Int64
+  { // only pass on requested updates up to and including our remaining number of events
+    let remaining = (limit-count)
+    let adjusted = (remaining > 0) ? min(requested, remaining) : 0
+    return super.updateRequest(adjusted)
+  }
+}
+
 extension Stream
 {
   private func map<U>(mapped: SubStream<U, Value>, transform: (Value) throws -> U) -> Stream<U>
   {
-    self.addObserver(subStream: mapped) { result in mapped.process { result.map(transform) } }
+    self.subscribe(mapped) { result in mapped.process { result.map(transform) } }
     return mapped
   }
 
@@ -31,7 +125,7 @@ extension Stream
 {
   private func map<U>(mapped: SubStream<U, Value>, transform: (Result<Value>) -> Result<U>) -> Stream<U>
   {
-    self.addObserver(subStream: mapped) { result in mapped.process { transform(result) } }
+    self.subscribe(mapped) { result in mapped.process { transform(result) } }
     return mapped
   }
 
@@ -48,42 +142,6 @@ extension Stream
 
 extension Stream
 {
-  private func last(mapped: SerialSubStream<Value, Value>) -> Stream<Value>
-  {
-    var last = Result<Value>()
-    self.addObserver(subStream: mapped) {
-      result in
-      mapped.process {
-        switch result
-        {
-        case .value:
-          last = result
-        case .error:
-          if case .value = last
-          {
-            mapped.process(last)
-          }
-          mapped.process(result)
-        }
-        return nil
-      }
-    }
-    return mapped
-  }
-
-  public func last(qos qos: qos_class_t = qos_class_self()) -> Stream<Value>
-  {
-    return last(SerialSubStream<Value, Value>(qos: qos))
-  }
-
-  public func last(queue queue: dispatch_queue_t) -> Stream<Value>
-  {
-    return last(SerialSubStream<Value, Value>(queue: queue))
-  }
-}
-
-extension Stream
-{
   public func notify(qos qos: qos_class_t = qos_class_self(), task: (Result<Value>) -> Void)
   {
     notify(queue: dispatch_get_global_queue(qos, 0), task: task)
@@ -93,7 +151,8 @@ extension Stream
   {
     let local = dispatch_queue_create("local-notify-queue", DISPATCH_QUEUE_CONCURRENT)
     dispatch_set_target_queue(local, queue)
-    self.addObserver(local) {
+
+    self.subscribe({ $0.requestAll() }) {
       result in
       dispatch_async(local) { task(result) }
     }
@@ -111,7 +170,8 @@ extension Stream
   {
     let local = dispatch_queue_create("local-notify-queue", DISPATCH_QUEUE_CONCURRENT)
     dispatch_set_target_queue(local, queue)
-    self.addObserver(local) {
+
+    self.subscribe({ $0.requestAll() }) {
       result in
       if case .value(let value) = result
       {
@@ -132,7 +192,7 @@ extension Stream
   {
     let local = dispatch_queue_create("local-notify-queue", DISPATCH_QUEUE_CONCURRENT)
     dispatch_set_target_queue(local, queue)
-    self.addObserver(local) {
+    self.subscribe({ _ in }) {
       result in
       if case .error(let error) = result
       {
@@ -144,20 +204,20 @@ extension Stream
 
 extension Stream
 {
-  public func onEnd(qos qos: qos_class_t = qos_class_self(), task: () -> Void)
+  public func onCompletion(qos qos: qos_class_t = qos_class_self(), task: (StreamCompleted) -> Void)
   {
-    onEnd(queue: dispatch_get_global_queue(qos, 0), task: task)
+    onCompletion(queue: dispatch_get_global_queue(qos, 0), task: task)
   }
 
-  public func onEnd(queue queue: dispatch_queue_t, task: () -> Void)
+  public func onCompletion(queue queue: dispatch_queue_t, task: (StreamCompleted) -> Void)
   {
     let local = dispatch_queue_create("local-notify-queue", DISPATCH_QUEUE_CONCURRENT)
     dispatch_set_target_queue(local, queue)
-    self.addObserver(local) {
+    self.subscribe({ _ in }) {
       result in
-      if case .error(let error) = result where error is StreamClosed
+      if case .error(let status as StreamCompleted) = result
       {
-        dispatch_async(local) { task() }
+        dispatch_async(local) { task(status) }
       }
     }
   }
@@ -165,20 +225,21 @@ extension Stream
 
 extension Stream
 {
-  private func next(mapped: SerialSubStream<Value, Value>, count: Int) -> Stream<Value>
+  private func next(mapped: LimitedStream<Value, Value>) -> Stream<Value>
   {
-    var i: Int64 = 0
-    let c = Int64(count)
-    self.addObserver(subStream: mapped) {
+    let limit = mapped.limit
+    self.subscribe(mapped.setSubscription) {
       result in
       mapped.process {
-        switch OSAtomicIncrement64(&i)
+        switch mapped.count+1
         {
-        case let v where v < c:
+        case let c where c < limit:
+          mapped.count = c
           return result
-        case c:
+        case limit:
+          mapped.count = limit
           mapped.process(result)
-          mapped.close()
+          mapped.process(StreamCompleted.terminated)
           return nil
         default:
           return nil
@@ -190,138 +251,187 @@ extension Stream
 
   public func next(qos qos: qos_class_t = qos_class_self(), count: Int = 1) -> Stream<Value>
   {
-    return next(SerialSubStream<Value, Value>(qos: qos), count: count)
+    return next(LimitedStream<Value, Value>(qos: qos, count: Int64(max(count, 0))))
   }
 
   public func next(queue queue: dispatch_queue_t, count: Int = 1) -> Stream<Value>
   {
-    return next(SerialSubStream<Value, Value>(queue: queue), count: count)
+    return next(LimitedStream<Value, Value>(queue: queue, count: Int64(max(count, 0))))
   }
 }
 
 extension Stream
 {
-  private func reduce<U>(mapped: SerialSubStream<U, Value>, initial: U, transform: (U, Value) throws -> U) -> Stream<U>
+  private func final(mapped: LimitedStream<Value, Value>) -> Stream<Value>
+  {
+    var last = Result<Value>()
+    self.subscribe({
+        subscription in
+        subscription.requestAll()
+        mapped.setSubscription(subscription)
+      },
+      notificationHandler: {
+        result in
+        mapped.process {
+          switch result
+          {
+          case .value:
+            last = result
+          case .error:
+            if case .value = last
+            {
+              mapped.process(last)
+            }
+            mapped.process(result)
+          }
+          return nil
+        }
+      }
+    )
+    return mapped
+  }
+
+  public func final(qos qos: qos_class_t = qos_class_self()) -> Stream<Value>
+  {
+    return final(LimitedStream<Value, Value>(qos: qos, count: 1))
+  }
+
+  public func final(queue queue: dispatch_queue_t) -> Stream<Value>
+  {
+    return final(LimitedStream<Value, Value>(queue: queue, count: 1))
+  }
+}
+
+extension Stream
+{
+  private func reduce<U>(mapped: LimitedStream<U, Value>, initial: U, transform: (U, Value) throws -> U) -> Stream<U>
   {
     var current = initial
-    self.addObserver(subStream: mapped) {
-      result in
-      mapped.process {
-        switch result
-        {
-        case .value(let value):
-          do {
-            current = try transform(current, value)
+    self.subscribe({
+        subscription in
+        subscription.requestAll()
+        mapped.setSubscription(subscription)
+      },
+      notificationHandler: {
+        result in
+        mapped.process {
+          switch result
+          {
+          case .value(let value):
+            do {
+              current = try transform(current, value)
+            }
+            catch {
+              return Result.error(error)
+            }
+          case .error(let error) where error is StreamCompleted:
+            mapped.process(current)
+            mapped.process(error)
+          case .error(let error):
+            mapped.process(error)
+            // return Result.error(error)
           }
-          catch {
-            return Result.error(error)
-          }
-        case .error(let error) where error is StreamClosed:
-          mapped.process(current)
-          mapped.process(error)
-        case .error(let error):
-          mapped.process(error)
-          // return Result.error(error)
+          return nil
         }
-        return nil
       }
-    }
+    )
     return mapped
   }
 
   public func reduce<U>(initial: U, transform: (U, Value) throws -> U) -> Stream<U>
   {
-    return reduce(SerialSubStream<U, Value>(qos: qos_class_self()), initial: initial, transform: transform)
+    return reduce(LimitedStream<U, Value>(qos: qos_class_self(), count: 1), initial: initial, transform: transform)
   }
 
   public func reduce<U>(qos qos: qos_class_t, initial: U, transform: (U, Value) throws -> U) -> Stream<U>
   {
-    return reduce(SerialSubStream<U, Value>(qos: qos), initial: initial, transform: transform)
+    return reduce(LimitedStream<U, Value>(qos: qos, count: 1), initial: initial, transform: transform)
   }
 
   public func reduce<U>(queue queue: dispatch_queue_t, initial: U, transform: (U, Value) throws -> U) -> Stream<U>
   {
-    return reduce(SerialSubStream<U, Value>(queue: queue), initial: initial, transform: transform)
+    return reduce(LimitedStream<U, Value>(queue: queue, count: 1), initial: initial, transform: transform)
   }
 }
 
 extension Stream
 {
-  private func countEvents(mapped: SerialSubStream<Int, Value>) -> Stream<Int>
+  private func countEvents(mapped: LimitedStream<Int, Value>) -> Stream<Int>
   {
-    return reduce(mapped, initial: 0, transform: { c,_ in c+1 })
+    return reduce(mapped, initial: 0, transform: { (c, _) in c+1 })
   }
 
   public func countEvents(qos qos: qos_class_t = qos_class_self()) -> Stream<Int>
   {
-    return countEvents(SerialSubStream<Int, Value>(qos: qos))
+    return countEvents(LimitedStream<Int, Value>(qos: qos, count: 1))
   }
 
   public func countEvents(queue queue: dispatch_queue_t) -> Stream<Int>
   {
-    return countEvents(SerialSubStream<Int, Value>(queue: queue))
+    return countEvents(LimitedStream<Int, Value>(queue: queue, count: 1))
   }
 }
 
 extension Stream
 {
-  private func coalesce(mapped: SerialSubStream<[Value], Value>) -> Stream<[Value]>
+  private func coalesce(mapped: LimitedStream<[Value], Value>) -> Stream<[Value]>
   {
     var current = [Value]()
-    self.addObserver(subStream: mapped) {
-      result in
-      mapped.process {
-        switch result
-        {
-        case .value(let value):
-          current.append(value)
-        case .error(let error) where error is StreamClosed:
-          mapped.process(current)
-          mapped.process(error)
-        case .error(let error):
-          mapped.process(error)
-          // return Result.error(error)
+    self.subscribe({
+        subscription in
+        mapped.setSubscription(subscription)
+        subscription.requestAll()
+      },
+      notificationHandler: {
+        result in
+        mapped.process {
+          switch result
+          {
+          case .value(let value):
+            current.append(value)
+          case .error(let error) where error is StreamCompleted:
+            mapped.process(current)
+            mapped.process(error)
+          case .error(let error):
+            mapped.process(error)
+            // return Result.error(error)
+          }
+          return nil
         }
-        return nil
       }
-    }
+    )
     return mapped
   }
 
   public func coalesce(qos qos: qos_class_t = qos_class_self()) -> Stream<[Value]>
   {
-    return coalesce(SerialSubStream<[Value], Value>(qos: qos))
+    return coalesce(LimitedStream<[Value], Value>(qos: qos, count: 1))
   }
 
   public func coalesce(queue queue: dispatch_queue_t) -> Stream<[Value]>
   {
-    return coalesce(SerialSubStream<[Value], Value>(queue: queue))
+    return coalesce(LimitedStream<[Value], Value>(queue: queue, count: 1))
   }
 }
 
 extension Stream
 {
-  public func split(qos: qos_class_t = qos_class_self()) -> (Stream<Value>, Stream<Value>)
+  public func split(qos qos: qos_class_t = qos_class_self()) -> (Stream, Stream)
   {
-    let s1 = Stream<Value>()
-    let s2 = Stream<Value>()
-    self.addObserver(s1) {
-      result in
-      s1.process(result)
-      s2.process(result)
-    }
-    return (s1,s2)
+    let streams = self.split(qos: qos, count: 2)
+    return (streams[0], streams[1])
   }
 
-  public func split(qos: qos_class_t = qos_class_self(), count: Int) -> [Stream<Value>]
+  public func split(qos qos: qos_class_t = qos_class_self(), count: Int) -> [Stream]
   {
     precondition(count >= 0)
-    guard count > 0 else { return [Stream<Value>]() }
+    guard count > 0 else { return [Stream]() }
 
-    let streams = (0..<count).map { _ in Stream<Value>() }
-    self.addObserver(streams[0]) {
-      result in
-      streams.forEach({ $0.process(result) })
+    let streams = (0..<count).map {
+      _ -> Stream in
+      let stream = SubStream<Value, Value>(qos: qos)
+      self.subscribe(stream, notificationHandler: stream.process)
+      return stream
     }
     return streams
   }
@@ -331,14 +441,14 @@ extension Stream
 {
   private func flatMap<U>(merged: MergeStream<U>, transform: (Value) -> Stream<U>) -> Stream<U>
   {
-    self.addObserver(merged) {
+    self.subscribe(merged.setSubscription) {
       result in
       merged.process {
         switch result
         {
         case .value(let value):
           merged.merge(transform(value))
-        case .error(_ as StreamClosed):
+        case .error(_ as StreamCompleted):
           merged.close()
         case .error(let error):
           merged.process(error)

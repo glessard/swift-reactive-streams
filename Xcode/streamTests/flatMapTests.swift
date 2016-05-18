@@ -42,7 +42,7 @@ class flatMapTests: XCTestCase
       {
       case .value: XCTFail()
       case .error(let error):
-        if error is StreamClosed { e.fulfill() }
+        if error is StreamCompleted { e.fulfill() }
         else { print(error) }
       }
     }
@@ -75,7 +75,7 @@ class flatMapTests: XCTestCase
         if count != reps*events { print(count) }
         XCTAssert(count == reps*events)
       case .error(let error):
-        if error is StreamClosed { e.fulfill() }
+        if error is StreamCompleted { e.fulfill() }
         else { print(error) }
       }
     }
@@ -108,7 +108,7 @@ class flatMapTests: XCTestCase
         if value != 0 { print(value) }
         XCTAssert(value == 0)
       case .error(let error):
-        if error is StreamClosed { e.fulfill() }
+        if error is StreamCompleted { e.fulfill() }
         else { print(error) }
       }
     }
@@ -146,7 +146,7 @@ class flatMapTests: XCTestCase
         if value != events*events { print(value) }
         XCTAssert(value == events*events)
       case .error(let error):
-        if error is StreamClosed { e.fulfill() }
+        if error is StreamCompleted { e.fulfill() }
         else { print(error) }
       }
     }
