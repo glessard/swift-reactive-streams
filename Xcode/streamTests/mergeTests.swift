@@ -96,7 +96,6 @@ class mergeTests: XCTestCase
 
     let merged = MergeStream<Int>()
     merged.merge(s)
-    merged.process(Result.error(NSError(domain: "bogus", code: -1, userInfo: nil)))
 
     let e = expectationWithDescription("observation ends \(random())")
 
@@ -114,6 +113,8 @@ class mergeTests: XCTestCase
         XCTFail()
       }
     }
+
+    merged.process(Result.error(NSError(domain: "bogus", code: -1, userInfo: nil)))
 
     for i in 0..<count { s.process(i+1) }
     s.close()
@@ -162,11 +163,11 @@ class mergeTests: XCTestCase
     let e = expectationWithDescription("observation ends \(random())")
     let count = 10
 
-    for i in 0..<count { s.process(i+1) }
-
     let merged = MergeStream<Int>()
     merged.merge(s)
     merged.onValue { if $0 == count { e.fulfill() } }
+
+    for i in 0..<count { s.process(i+1) }
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
 
@@ -191,12 +192,12 @@ class mergeTests: XCTestCase
     let e = expectationWithDescription("observation ends \(random())")
     let count = 10
 
-    for i in 0..<count { s.process(i+1) }
-    s.close()
-
     let merged = MergeStream<Int>()
     merged.merge(s)
     merged.onValue { if $0 == count { e.fulfill() } }
+
+    for i in 0..<count { s.process(i+1) }
+    s.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
 
@@ -218,9 +219,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     s.forEach(merged.merge)
     merged.close()
-//
-//    merged.onValue { print($0) }
-//
+
     merged.countEvents().notify {
       result in
       switch result
@@ -247,6 +246,7 @@ class mergeTests: XCTestCase
         }))
       }
       stream.close()
+      dispatch_barrier_sync(stream.queue) {}
     }
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
