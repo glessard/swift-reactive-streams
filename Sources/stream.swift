@@ -113,11 +113,6 @@ public class Stream<Value>: Source
 
   final public func process(error: ErrorProtocol)
   {
-    process(Result.error(error))
-  }
-
-  public func close()
-  {
     guard currentState < StreamState.ended.rawValue else { return }
     dispatch_barrier_async(self.queue) {
       let state = self.currentState
@@ -125,11 +120,16 @@ public class Stream<Value>: Source
 
       if OSAtomicCompareAndSwap32(state, StreamState.ended.rawValue, &self.currentState)
       {
-        let result = Result<Value>.error(StreamCompleted.normally)
+        let result = Result<Value>.error(error)
         for notificationHandler in self.observers.values { notificationHandler(result) }
         self.finalizeStream()
       }
     }
+  }
+
+  public func close()
+  {
+    process(StreamCompleted.normally)
   }
 
   /// precondition: must run on a barrier block or a serial queue
