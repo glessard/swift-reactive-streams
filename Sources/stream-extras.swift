@@ -142,42 +142,52 @@ extension Stream
 
 extension Stream
 {
+  private func _notify(queue queue: dispatch_queue_t, task: (Result<Value>) -> Void)
+  {
+    self.subscribe({ $0.requestAll() }) {
+      result in
+      dispatch_async(queue) { task(result) }
+    }
+  }
+
   public func notify(qos qos: qos_class_t = qos_class_self(), task: (Result<Value>) -> Void)
   {
-    notify(queue: dispatch_get_global_queue(qos, 0), task: task)
+    let attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, qos, 0)
+    self._notify(queue: dispatch_queue_create("local-notify-queue", attr), task: task)
   }
 
   public func notify(queue queue: dispatch_queue_t, task: (Result<Value>) -> Void)
   {
     let local = dispatch_queue_create("local-notify-queue", DISPATCH_QUEUE_CONCURRENT)
     dispatch_set_target_queue(local, queue)
-
-    self.subscribe({ $0.requestAll() }) {
-      result in
-      dispatch_async(local) { task(result) }
-    }
+    self._notify(queue: local, task: task)
   }
 }
 
 extension Stream
 {
+  private func _onValue(queue queue: dispatch_queue_t, task: (Value) -> Void)
+  {
+    self.subscribe({ $0.requestAll() }) {
+      result in
+      if case .value(let value) = result
+      {
+        dispatch_async(queue) { task(value) }
+      }
+    }
+  }
+
   public func onValue(qos qos: qos_class_t = qos_class_self(), task: (Value) -> Void)
   {
-    onValue(queue: dispatch_get_global_queue(qos, 0), task: task)
+    let attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, qos, 0)
+    self._onValue(queue: dispatch_queue_create("local-notify-queue", attr), task: task)
   }
 
   public func onValue(queue queue: dispatch_queue_t, task: (Value) -> Void)
   {
     let local = dispatch_queue_create("local-notify-queue", DISPATCH_QUEUE_CONCURRENT)
     dispatch_set_target_queue(local, queue)
-
-    self.subscribe({ $0.requestAll() }) {
-      result in
-      if case .value(let value) = result
-      {
-        dispatch_async(local) { task(value) }
-      }
-    }
+    self._onValue(queue: local, task: task)
   }
 }
 
