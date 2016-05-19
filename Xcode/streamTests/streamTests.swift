@@ -321,8 +321,7 @@ class streamTests: XCTestCase
     let e2 = expectationWithDescription("split.0 onError")
 
     var a0 = [Int]()
-    let s0 = split.0.coalesce()
-    s0.notify {
+    split.0.coalesce().notify {
       result in
       switch result
       {
@@ -334,6 +333,9 @@ class streamTests: XCTestCase
         if error is StreamCompleted { e2.fulfill() }
       }
     }
+    XCTAssert(split.0.requested == Int64.max)
+    XCTAssert(split.1.requested == 0)
+    XCTAssert(stream.requested == Int64.max, "stream.requested should have been updated synchronously")
 
     let e3 = expectationWithDescription("split.1 onValue")
     let e4 = expectationWithDescription("split.1 onError")
@@ -347,17 +349,8 @@ class streamTests: XCTestCase
       else { print("a1 has \(a1.count) elements") }
     }
     s1.onCompletion { _ in e4.fulfill() }
-
-    // FIXME: race condition
-    // By the time stream.process() is called for the first time,
-    // stream.requested should have been updated.
-    // This test does not guarantee the update happens on time,
-    // though it usually does happen on time. Race condition.
-    XCTAssert(s0.requested == 1)
-    XCTAssert(s1.requested == 1)
-    XCTAssert(split.0.requested == Int64.max)
     XCTAssert(split.1.requested == Int64.max)
-    XCTAssert(stream.requested == Int64.max)
+    XCTAssert(s1.requested == 1)
 
     for i in 0..<events { stream.process(i+1) }
     stream.close()
@@ -387,11 +380,7 @@ class streamTests: XCTestCase
       else { print(count) }
     }
 
-    // FIXME: race condition (worked around)
-    // By the time stream.process() is called for the first time, stream.requested might not have been updated
-    dispatch_barrier_sync(merged.queue) {}
-
-    XCTAssert(stream.requested > 0)
+    XCTAssert(stream.requested == Int64.max, "stream.requested has an unexpected value; probable race condition")
     for i in 0..<events { stream.process(i+1) }
     stream.close()
     merged.close()
@@ -408,8 +397,12 @@ class streamTests: XCTestCase
 
     let split = stream.split()
 
-    split.0.countEvents().onValue {
-      count in
+    XCTAssert(split.0.requested == 0)
+    XCTAssert(stream.requested == 0)
+
+    split.0.coalesce().onValue {
+      values in
+      let count = values.count
       count == events ? e1.fulfill() : XCTFail("split.0 expected \(events) events, got \(count)")
     }
 
@@ -421,13 +414,12 @@ class streamTests: XCTestCase
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
 
-    let e3 = expectationWithDescription("split.1 onValue")
+    let e3 = expectationWithDescription("split.1 onCompletion")
 
     XCTAssert(split.1.requested == 0)
-    split.1.countEvents().onValue {
-      count in
-      count == 0 ? e3.fulfill() : XCTFail("split.1 never had a non-zero request")
-    }
+
+    split.1.onValue { _ in XCTFail("split.1 never had a non-zero request") }
+    split.1.onCompletion { _ in e3.fulfill() }
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
   }
