@@ -109,7 +109,7 @@ class streamTests: XCTestCase
     let m = stream.map(transform: { 2.0*Double($0) }).map(transform: { d.append($0) }).final()
     m.onError {
       error in
-      if let t = error as? StreamCompleted, case .terminated = t
+      if let t = error as? StreamCompleted, case .normally = t
       {
         XCTAssert(d.count == events)
         e2.fulfill()

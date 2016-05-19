@@ -76,7 +76,7 @@ public class MergeStream<Value>: SerialSubStream<Value,Value>
       self.closed = true
       if self.sources.isEmpty
       {
-        return Result.error(StreamCompleted.terminated)
+        return Result.error(StreamCompleted.normally)
       }
       return nil
     }

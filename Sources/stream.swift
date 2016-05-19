@@ -22,9 +22,9 @@ extension StreamState: CustomStringConvertible
 
 public enum StreamCompleted: ErrorProtocol
 {
-  case terminated
-  case didNotObserve
-  case observerRemoved
+  case normally              // normal completion
+  case subscriptionFailed    // attempted to subscribe to a completed stream
+  case subscriptionCancelled
 }
 
 public class Stream<Value>: Source
@@ -125,7 +125,7 @@ public class Stream<Value>: Source
 
       if OSAtomicCompareAndSwap32(state, StreamState.ended.rawValue, &self.currentState)
       {
-        let result = Result<Value>.error(StreamCompleted.terminated)
+        let result = Result<Value>.error(StreamCompleted.normally)
         for notificationHandler in self.observers.values { notificationHandler(result) }
         self.finalizeStream()
       }
@@ -178,7 +178,7 @@ public class Stream<Value>: Source
         }
         else
         { // the stream was closed between the block's dispatch and its execution
-          notificationHandler(Result.error(StreamCompleted.terminated))
+          notificationHandler(Result.error(StreamCompleted.subscriptionFailed))
         }
       }
       return
@@ -194,7 +194,7 @@ public class Stream<Value>: Source
         }
         else
         { // the stream was closed between the block's dispatch and its execution
-          notificationHandler(Result.error(StreamCompleted.terminated))
+          notificationHandler(Result.error(StreamCompleted.subscriptionFailed))
         }
       }
       return
@@ -202,7 +202,7 @@ public class Stream<Value>: Source
 
     // dispatching on a queue is unnecessary in this case
     subscriptionHandler(subscription)
-    notificationHandler(Result.error(StreamCompleted.terminated))
+    notificationHandler(Result.error(StreamCompleted.subscriptionFailed))
   }
 
   // MARK: Source
@@ -233,7 +233,7 @@ public class Stream<Value>: Source
         guard let notificationHandler = self.observers.removeValueForKey(subscription)
           else { fatalError("Tried to cancel an inactive subscription") }
 
-        notificationHandler(Result.error(StreamCompleted.observerRemoved))
+        notificationHandler(Result.error(StreamCompleted.subscriptionCancelled))
       }
     }
   }
