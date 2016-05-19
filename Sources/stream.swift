@@ -58,7 +58,7 @@ public class Stream<Value>: Source
     return dispatch_queue_get_qos_class(self.queue, nil)
   }
 
-  /// precondition: must run on this Source's queue
+  /// precondition: must run on this Stream's queue
 
   private func dispatch(result: Result<Value>)
   {
@@ -68,27 +68,43 @@ public class Stream<Value>: Source
     switch result
     {
     case .value:
-      if requested > 0
-      {
-        if OSAtomicDecrement64(&requested) >= 0
-        {
-          for (subscription, handler) in self.observers
-          {
-            if subscription.shouldNotify() { handler(result) }
-          }
-        }
-        else
-        { // Weirdness happened
-          OSAtomicIncrement64Barrier(&requested)
-        }
-      }
+      dispatchValue(result)
 
     case .error:
       // This should be an unconditional swap, with notification occuring iff the value has been changed
-      if OSAtomicCompareAndSwap32(state, StreamState.ended.rawValue, &currentState)
+      var state = self.currentState
+      while state != StreamState.ended.rawValue
       {
-        for notificationHandler in self.observers.values { notificationHandler(result) }
-        dispatch_barrier_async(self.queue) { self.finalizeStream() }
+        if OSAtomicCompareAndSwap32(state, StreamState.ended.rawValue, &self.currentState)
+        {
+          for notificationHandler in self.observers.values { notificationHandler(result) }
+          dispatch_barrier_async(self.queue) { self.finalizeStream() }
+          break
+        }
+        state = self.currentState
+      }
+    }
+  }
+
+  /// precondition: must run on this Stream's queue
+
+  final func dispatchValue(value: Result<Value>)
+  {
+    assert(value.isValue)
+
+    let req = requested
+    if req > 0
+    { // decrement iff req is not Int64.max
+      if req == Int64.max || OSAtomicDecrement64(&requested) >= 0
+      {
+        for (subscription, notificationHandler) in self.observers
+        {
+          if subscription.shouldNotify() { notificationHandler(value) }
+        }
+      }
+      else
+      { // Weirdness happened
+        OSAtomicIncrement64Barrier(&requested)
       }
     }
   }
@@ -108,21 +124,28 @@ public class Stream<Value>: Source
 
   final public func process(value: Value)
   {
-    process(Result.value(value))
+    guard currentState < StreamState.ended.rawValue else { return }
+    dispatch_async(self.queue) {
+      guard self.currentState < StreamState.ended.rawValue else { return }
+      self.dispatchValue(Result.value(value))
+    }
   }
 
   final public func process(error: ErrorProtocol)
   {
     guard currentState < StreamState.ended.rawValue else { return }
     dispatch_barrier_async(self.queue) {
-      let state = self.currentState
-      guard state < StreamState.ended.rawValue else { return }
-
-      if OSAtomicCompareAndSwap32(state, StreamState.ended.rawValue, &self.currentState)
+      var state = self.currentState
+      while state != StreamState.ended.rawValue
       {
-        let result = Result<Value>.error(error)
-        for notificationHandler in self.observers.values { notificationHandler(result) }
-        self.finalizeStream()
+        if OSAtomicCompareAndSwap32(state, StreamState.ended.rawValue, &self.currentState)
+        {
+          let result = Result<Value>.error(error)
+          for notificationHandler in self.observers.values { notificationHandler(result) }
+          self.finalizeStream()
+          return
+        }
+        state = self.currentState
       }
     }
   }
