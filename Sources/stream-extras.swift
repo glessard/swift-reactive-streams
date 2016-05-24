@@ -239,7 +239,7 @@ extension Stream
         case limit:
           mapped.count = limit
           mapped.process(result)
-          mapped.process(StreamCompleted.terminated)
+          mapped.close()
           return nil
         default:
           return nil
