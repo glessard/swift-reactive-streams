@@ -262,12 +262,20 @@ public class Stream<Value>: Source
     {
       dispatch_barrier_async(queue) {
         guard self.requested != Int64.min else { return }
-        guard let notificationHandler = self.observers.removeValueForKey(subscription)
-          else { fatalError("Tried to cancel an inactive subscription") }
-
-        notificationHandler(Result.error(StreamCompleted.subscriptionCancelled))
+        self.performCancellation(subscription)
       }
     }
+  }
+
+  /// precondition: must run on a barrier block or a serial queue
+
+  func performCancellation(subscription: Subscription) -> Bool
+  {
+    guard let notificationHandler = observers.removeValueForKey(subscription)
+      else { fatalError("Tried to cancel an inactive subscription") }
+
+    notificationHandler(Result.error(StreamCompleted.subscriptionCancelled))
+    return observers.isEmpty
   }
 }
 
