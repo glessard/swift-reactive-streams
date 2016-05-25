@@ -171,29 +171,27 @@ public class Stream<Value>: Source
 
   final public func subscribe<O: Observer where O.EventValue == Value>(observer: O)
   {
-    subscribe(observer.onSubscribe, notificationHandler: observer.notify)
+    addSubscription(observer.onSubscribe, notificationHandler: observer.notify)
   }
 
   final public func subscribe<U>(substream: SubStream<U, Value>,
                                  notificationHandler: (Result<Value>) -> Void)
   {
-    subscribe(substream.setSubscription,
-              notificationHandler: notificationHandler)
+    addSubscription(substream.setSubscription,
+                    notificationHandler: notificationHandler)
   }
 
   final public func subscribe(subscriptionHandler: (Subscription) -> Void,
                               notificationHandler: (Result<Value>) -> Void)
   {
-    let subscription = Subscription(source: self)
-    addSubscription(subscription,
-                    subscriptionHandler: subscriptionHandler,
+    addSubscription(subscriptionHandler,
                     notificationHandler: notificationHandler)
   }
 
-  internal func addSubscription(subscription: Subscription,
-                                subscriptionHandler: (Subscription) -> Void,
-                                notificationHandler: (Result<Value>) -> Void)
+  private func addSubscription(subscriptionHandler: (Subscription) -> Void,
+                               notificationHandler: (Result<Value>) -> Void)
   {
+    let subscription = Subscription(source: self)
     if started == 0 && OSAtomicCompareAndSwap32Barrier(0, 1, &started)
     { // the queue isn't running yet, no observers
       dispatch_barrier_sync(queue) {
