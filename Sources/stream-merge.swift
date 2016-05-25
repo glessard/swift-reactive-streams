@@ -25,14 +25,13 @@ public class MergeStream<Value>: SerialSubStream<Value,Value>
     dispatch_barrier_async(self.queue) {
       guard !self.closed else { return }
 
-      let subscription = Subscription(source: source)
+      var subscription: Subscription?
 
-      source.addSubscription(
-        subscription,
-        subscriptionHandler: {
-          subscription in
-          self.sources.insert(subscription)
-          subscription.request(self.requested)
+      source.subscribe({
+          sub in
+          subscription = sub
+          self.sources.insert(sub)
+          sub.request(self.requested)
         },
         notificationHandler: {
           result in
@@ -42,13 +41,13 @@ public class MergeStream<Value>: SerialSubStream<Value,Value>
             case .value:
               return result
             case .error(_ as StreamCompleted):
-              self.sources.remove(subscription)
+              self.sources.remove(subscription!)
               if self.closed && self.sources.isEmpty
               { return result }
               else
               { return nil }
             case .error:
-              self.sources.remove(subscription)
+              self.sources.remove(subscription!)
               return result
             }
           }

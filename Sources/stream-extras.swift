@@ -311,7 +311,7 @@ extension Stream
 
 extension Stream
 {
-  private func reduce<U>(mapped: LimitedStream<U, Value>, initial: U, transform: (U, Value) throws -> U) -> Stream<U>
+  private func reduce<U>(mapped: LimitedStream<U, Value>, initial: U, combine: (U, Value) throws -> U) -> Stream<U>
   {
     var current = initial
     self.subscribe({
@@ -326,7 +326,7 @@ extension Stream
           {
           case .value(let value):
             do {
-              current = try transform(current, value)
+              current = try combine(current, value)
             }
             catch {
               mapped.process(current)
@@ -343,19 +343,19 @@ extension Stream
     return mapped
   }
 
-  public func reduce<U>(initial: U, transform: (U, Value) throws -> U) -> Stream<U>
+  public func reduce<U>(initial: U, combine: (U, Value) throws -> U) -> Stream<U>
   {
-    return reduce(LimitedStream<U, Value>(qos: qos_class_self(), count: 1), initial: initial, transform: transform)
+    return reduce(LimitedStream<U, Value>(qos: qos_class_self(), count: 1), initial: initial, combine: combine)
   }
 
-  public func reduce<U>(qos qos: qos_class_t, initial: U, transform: (U, Value) throws -> U) -> Stream<U>
+  public func reduce<U>(qos qos: qos_class_t, initial: U, combine: (U, Value) throws -> U) -> Stream<U>
   {
-    return reduce(LimitedStream<U, Value>(qos: qos, count: 1), initial: initial, transform: transform)
+    return reduce(LimitedStream<U, Value>(qos: qos, count: 1), initial: initial, combine: combine)
   }
 
-  public func reduce<U>(queue queue: dispatch_queue_t, initial: U, transform: (U, Value) throws -> U) -> Stream<U>
+  public func reduce<U>(queue queue: dispatch_queue_t, initial: U, combine: (U, Value) throws -> U) -> Stream<U>
   {
-    return reduce(LimitedStream<U, Value>(queue: queue, count: 1), initial: initial, transform: transform)
+    return reduce(LimitedStream<U, Value>(queue: queue, count: 1), initial: initial, combine: combine)
   }
 }
 
