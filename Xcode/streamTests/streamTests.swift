@@ -23,6 +23,52 @@ class streamTests: XCTestCase
       super.tearDown()
   }
 
+  func testLifetime1()
+  {
+    class SpyStream: Stream<Int>
+    {
+      let e: XCTestExpectation
+
+      init(_ expectation: XCTestExpectation)
+      {
+        e = expectation
+        super.init(validated: ValidatedQueue(qos: qos_class_self(), serial: true))
+      }
+
+      deinit
+      {
+        e.fulfill()
+      }
+    }
+
+    let s = SpyStream(expectationWithDescription("deletion")).final()
+    s.close()
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+  }
+
+  func testLifetime2()
+  {
+    // is there less messay way to do this test?
+
+    class SpyStream: Stream<Int>
+    {
+      override init(validated queue: ValidatedQueue)
+      {
+        super.init(validated: queue)
+      }
+
+      deinit
+      {
+        XCTFail("this stream should leak")
+      }
+    }
+
+    let p = UnsafeMutablePointer<Stream<Int>>.alloc(1)
+    p.initialize({ SpyStream().final() }())
+    // the SpyStream should leak because one of its observers is kept alive by the pointer
+  }
+
   func testNotify()
   {
     let events = 10
