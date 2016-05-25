@@ -254,6 +254,78 @@ class streamTests: XCTestCase
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
   }
+
+  func testFinal1()
+  {
+    let stream = Stream<Int>()
+    let events = 10
+
+    let e = expectationWithDescription("observation onValue")
+
+    let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
+
+    let f = stream.final()
+    f.onValue {
+      value in
+      if value == d.last { e.fulfill() }
+    }
+
+    d.forEach { stream.process($0) }
+    stream.close()
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+  }
+
+  func testFinal2()
+  {
+    let stream = Stream<Int>()
+    let events = 10
+
+    let e = expectationWithDescription("observation onValue")
+
+    let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
+
+    let f = stream.final()
+    f.notify {
+      result in
+      switch result
+      {
+      case .value: XCTFail("not expected to get a value when \"final\" stream is closed")
+      case .error: e.fulfill()
+      }
+    }
+
+    stream.process(d[0])
+    f.close()
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+    stream.close()
+  }
+  
+  func testFinal3()
+  {
+    let stream = Stream<Int>()
+    let events = 10
+
+    let e = expectationWithDescription("observation onValue")
+
+    let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
+
+    let f = stream.final()
+    f.notify {
+      result in
+      switch result
+      {
+      case .value(let value): XCTAssert(value == d.first)
+      case .error:            e.fulfill()
+      }
+    }
+
+    stream.process(d[0])
+    stream.process(NSError(domain: "bogus", code: -1, userInfo: nil))
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+  }
   
   func testReduce()
   {
