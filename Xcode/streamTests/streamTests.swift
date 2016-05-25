@@ -255,12 +255,9 @@ class streamTests: XCTestCase
     let e2 = expectationWithDescription("observation onError")
 
     let m = stream.map {
-      r -> Result<Int> in
-      r.flatMap {
-        i in
-        if i < limit { return Result.value(i+1) }
-        return Result.error(NSError(domain: "bogus", code: -1, userInfo: nil))
-      }
+      i -> Result<Int> in
+      if i < limit { return Result.value(i+1) }
+      return Result.error(NSError(domain: "bogus", code: -1, userInfo: nil))
     }
     m.onValue {
       v in

@@ -8,7 +8,7 @@
 
 import Dispatch
 
-public class MergeStream<Value>: SerialSubStream<Value,Value>
+public class MergeStream<Value>: SerialSubStream<Value, Value>
 {
   private var sources = Set<Subscription>()
   private var closed = false
@@ -23,37 +23,46 @@ public class MergeStream<Value>: SerialSubStream<Value,Value>
     if self.closed { return }
 
     dispatch_barrier_async(self.queue) {
-      guard !self.closed else { return }
+      self.performMerge(source)
+    }
+  }
 
-      var subscription: Subscription?
+  /// precondition: must run on a barrier block or a serial queue
 
-      source.subscribe({
-          sub in
-          subscription = sub
-          self.sources.insert(sub)
-          sub.request(self.requested)
-        },
-        notificationHandler: {
-          result in
-          self.process {
-            switch result
+  func performMerge(source: Stream<Value>)
+  {
+    guard !self.closed else { return }
+
+    var subscription: Subscription! = nil
+
+    source.subscribe(
+      subscriber: self,
+      subscriptionHandler: {
+        sub in
+        subscription = sub
+        self.sources.insert(sub)
+        sub.request(self.requested)
+      },
+      notificationHandler: {
+        merged, result in
+        dispatch_async(merged.queue) {
+          switch result
+          {
+          case .value:
+            merged.dispatchValue(result)
+          case .error(_ as StreamCompleted):
+            merged.sources.remove(subscription)
+            if merged.closed && merged.sources.isEmpty
             {
-            case .value:
-              return result
-            case .error(_ as StreamCompleted):
-              self.sources.remove(subscription!)
-              if self.closed && self.sources.isEmpty
-              { return result }
-              else
-              { return nil }
-            case .error:
-              self.sources.remove(subscription!)
-              return result
+              merged.dispatchError(result)
             }
+          case .error:
+            merged.sources.remove(subscription)
+            merged.dispatchError(result)
           }
         }
-      )
-    }
+      }
+    )
   }
 
   /// precondition: must run on a barrier block or a serial queue
@@ -71,13 +80,12 @@ public class MergeStream<Value>: SerialSubStream<Value,Value>
 
   public override func close()
   {
-    process {
+    dispatch_barrier_async(queue) {
       self.closed = true
       if self.sources.isEmpty
       {
-        return Result.error(StreamCompleted.normally)
+        self.dispatchError(Result.error(StreamCompleted.normally))
       }
-      return nil
     }
   }
 

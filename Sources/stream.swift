@@ -65,7 +65,7 @@ public class Stream<Value>: Source
 
   /// precondition: must run on this Stream's queue
 
-  private func dispatch(result: Result<Value>)
+  func dispatch(result: Result<Value>)
   {
     guard requested != Int64.min else { return }
 
@@ -113,6 +113,25 @@ public class Stream<Value>: Source
     }
   }
 
+  /// precondition: must run on a barrier block or a serial queue
+
+  final func dispatchError(error: Result<Value>)
+  {
+    assert(error.isError)
+
+    var req = requested
+    while req != Int64.min
+    {
+      // This should be an unconditional swap, with notification occuring iff the value has been changed
+      if OSAtomicCompareAndSwap64(req, Int64.min, &requested)
+      {
+        for notificationHandler in self.observers.values { notificationHandler(error) }
+        self.finalizeStream()
+        break
+      }
+      req = requested
+    }
+  }
 
   final func process(transformed: () -> Result<Value>?)
   {
@@ -139,19 +158,7 @@ public class Stream<Value>: Source
   {
     guard requested != Int64.min else { return }
     dispatch_barrier_async(self.queue) {
-      var req = self.requested
-      while req != Int64.min
-      {
-        // This should be an unconditional swap, with notification occuring iff the value has been changed
-        if OSAtomicCompareAndSwap64(req, Int64.min, &self.requested)
-        {
-          let result = Result<Value>.error(error)
-          for notificationHandler in self.observers.values { notificationHandler(result) }
-          self.finalizeStream()
-          break
-        }
-        req = self.requested
-      }
+      self.dispatchError(Result.error(error))
     }
   }
 
@@ -171,29 +178,23 @@ public class Stream<Value>: Source
 
   final public func subscribe<O: Observer where O.EventValue == Value>(observer: O)
   {
-    addSubscription(observer.onSubscribe, notificationHandler: observer.notify)
+    addSubscription(observer.onSubscribe,
+                    notificationHandler: Notifier(target: observer, handler: { target, result in target.notify(result) }))
   }
 
-  final public func subscribe<U>(substream: SubStream<U, Value>,
-                                 notificationHandler: (Result<Value>) -> Void)
+  final public func subscribe<U>(substream substream: SubStream<Value, U>,
+                                 notificationHandler: (SubStream<Value, U>, Result<Value>) -> Void)
   {
     addSubscription(substream.setSubscription,
-                    notificationHandler: notificationHandler)
-  }
-
-  final public func subscribe<U>(substream: SubStream<U, Value>,
-                                 subscriptionHandler: (Subscription) -> Void,
-                                 notificationHandler: (SubStream<U, Value>, Result<Value>) -> Void)
-  {
-    addSubscription(subscriptionHandler,
                     notificationHandler: Notifier(target: substream, handler: notificationHandler))
   }
 
-  final public func subscribe(subscriptionHandler: (Subscription) -> Void,
-                              notificationHandler: (Result<Value>) -> Void)
+  final public func subscribe<T: AnyObject>(subscriber subscriber: T,
+                                            subscriptionHandler: (Subscription) -> Void,
+                                            notificationHandler: (T, Result<Value>) -> Void)
   {
     addSubscription(subscriptionHandler,
-                    notificationHandler: notificationHandler)
+                    notificationHandler: Notifier(target: subscriber, handler: notificationHandler))
   }
 
   private func addSubscription<T: AnyObject>(subscriptionHandler: (Subscription) -> Void,
@@ -237,48 +238,6 @@ public class Stream<Value>: Source
     // dispatching on a queue is unnecessary in this case
     subscriptionHandler(subscription)
     notificationHandler.notify(Result.error(StreamCompleted.subscriptionFailed))
-  }
-
-  private func addSubscription(subscriptionHandler: (Subscription) -> Void,
-                               notificationHandler: (Result<Value>) -> Void)
-  {
-    let subscription = Subscription(source: self)
-    if started == 0 && OSAtomicCompareAndSwap32Barrier(0, 1, &started)
-    { // the queue isn't running yet, no observers
-      dispatch_barrier_sync(queue) {
-        assert(self.observers.isEmpty)
-        subscriptionHandler(subscription)
-        if self.requested != Int64.min
-        {
-          self.observers[subscription] = notificationHandler
-        }
-        else
-        { // the stream was closed between the block's dispatch and its execution
-          notificationHandler(Result.error(StreamCompleted.subscriptionFailed))
-        }
-      }
-      return
-    }
-
-    if self.requested != Int64.min
-    {
-      dispatch_barrier_async(queue) {
-        subscriptionHandler(subscription)
-        if self.requested != Int64.min
-        {
-          self.observers[subscription] = notificationHandler
-        }
-        else
-        { // the stream was closed between the block's dispatch and its execution
-          notificationHandler(Result.error(StreamCompleted.subscriptionFailed))
-        }
-      }
-      return
-    }
-
-    // dispatching on a queue is unnecessary in this case
-    subscriptionHandler(subscription)
-    notificationHandler(Result.error(StreamCompleted.subscriptionFailed))
   }
 
   // MARK: Source
@@ -335,6 +294,19 @@ public class SerialStream<Value>: Stream<Value>
       super.init(validated: validated)
     case .concurrent(let queue):
       super.init(validated: ValidatedQueue(queue: queue, serial: true))
+    }
+  }
+
+  /// precondition: must run on this stream's serial queue
+
+  override func dispatch(result: Result<Value>)
+  {
+    guard requested != Int64.min else { return }
+
+    switch result
+    {
+    case .value: dispatchValue(result)
+    case .error: dispatchError(result)
     }
   }
 }
