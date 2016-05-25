@@ -55,7 +55,8 @@ public class Stream<Value>: Source
     {
     case Int64.min:         return .ended
     case let n where n > 0: return .streaming
-    default:                return .waiting // what else would it be?
+    case 0:                 return .waiting
+    default: /* n < 0 */    fatalError()
     }
   }
 
@@ -96,20 +97,18 @@ public class Stream<Value>: Source
   {
     assert(value.isValue)
 
-    let req = requested
-    if req > 0
+    var req = requested
+    while req > 0
     { // decrement iff req is not Int64.max
-      if req == Int64.max || OSAtomicDecrement64(&requested) >= 0
+      if req == Int64.max || OSAtomicCompareAndSwap64(req, req-1, &requested)
       {
         for (subscription, notificationHandler) in self.observers
         {
           if subscription.shouldNotify() { notificationHandler(value) }
         }
+        break
       }
-      else
-      { // Weirdness happened
-        OSAtomicIncrement64Barrier(&requested)
-      }
+      req = requested
     }
   }
 
