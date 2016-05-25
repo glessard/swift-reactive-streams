@@ -181,11 +181,62 @@ public class Stream<Value>: Source
                     notificationHandler: notificationHandler)
   }
 
+  final public func subscribe<U>(substream: SubStream<U, Value>,
+                                 subscriptionHandler: (Subscription) -> Void,
+                                 notificationHandler: (SubStream<U, Value>, Result<Value>) -> Void)
+  {
+    addSubscription(subscriptionHandler,
+                    notificationHandler: Notifier(target: substream, handler: notificationHandler))
+  }
+
   final public func subscribe(subscriptionHandler: (Subscription) -> Void,
                               notificationHandler: (Result<Value>) -> Void)
   {
     addSubscription(subscriptionHandler,
                     notificationHandler: notificationHandler)
+  }
+
+  private func addSubscription<T: AnyObject>(subscriptionHandler: (Subscription) -> Void,
+                                             notificationHandler: Notifier<T, Value>)
+  {
+    let subscription = Subscription(source: self)
+
+    if started == 0 && OSAtomicCompareAndSwap32Barrier(0, 1, &started)
+    { // the queue isn't running yet, no observers
+      dispatch_barrier_sync(queue) {
+        assert(self.observers.isEmpty)
+        subscriptionHandler(subscription)
+        if self.requested != Int64.min
+        {
+          self.observers[subscription] = notificationHandler.notify
+        }
+        else
+        { // the stream was closed between the block's dispatch and its execution
+          notificationHandler.notify(Result.error(StreamCompleted.subscriptionFailed))
+        }
+      }
+      return
+    }
+
+    if self.requested != Int64.min
+    {
+      dispatch_barrier_async(queue) {
+        subscriptionHandler(subscription)
+        if self.requested != Int64.min
+        {
+          self.observers[subscription] = notificationHandler.notify
+        }
+        else
+        { // the stream was closed between the block's dispatch and its execution
+          notificationHandler.notify(Result.error(StreamCompleted.subscriptionFailed))
+        }
+      }
+      return
+    }
+
+    // dispatching on a queue is unnecessary in this case
+    subscriptionHandler(subscription)
+    notificationHandler.notify(Result.error(StreamCompleted.subscriptionFailed))
   }
 
   private func addSubscription(subscriptionHandler: (Subscription) -> Void,

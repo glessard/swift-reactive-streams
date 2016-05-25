@@ -10,40 +10,49 @@ import Dispatch
 
 public class SubStream<Value, SourceValue>: Stream<Value>
 {
-  private var source: Subscription? = nil
+  private var subscription: Subscription? = nil
 
   override init(validated: ValidatedQueue)
   {
     super.init(validated: validated)
   }
 
+  deinit
+  {
+    if let subscription = subscription { subscription.cancel() }
+  }
+
   public func setSubscription(subscription: Subscription)
   {
-    assert(source == nil, "SubStream cannot support multiple subscriptions")
-    source = subscription
+    assert(self.subscription == nil, "SubStream cannot support multiple subscriptions")
+    self.subscription = subscription
   }
 
   /// precondition: must run on a barrier block or a serial queue
 
   override func finalizeStream()
   {
-    self.source = nil
+    self.subscription = nil
     super.finalizeStream()
   }
 
   public override func updateRequest(requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
-    if additional > 0, let source = source
+    if additional > 0, let subscription = subscription
     {
-      source.request(additional)
+      subscription.request(additional)
     }
     return additional
   }
 
   public override func close()
   {
-    if let source = source { source.cancel() }
+    if let subscription = subscription
+    {
+      subscription.cancel()
+      self.subscription = nil
+    }
     super.close()
   }
 }
@@ -275,13 +284,14 @@ extension Stream
   private func final(mapped: LimitedStream<Value, Value>) -> Stream<Value>
   {
     var last: Value? = nil
-    self.subscribe({
+    self.subscribe(mapped,
+      subscriptionHandler: {
         subscription in
         subscription.requestAll()
         mapped.setSubscription(subscription)
       },
       notificationHandler: {
-        result in
+        mapped, result in
         mapped.process {
           switch result
           {
