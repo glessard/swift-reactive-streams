@@ -416,7 +416,7 @@ class streamTests: XCTestCase
 
     let e3 = expectationWithDescription("split.1 onCompletion")
 
-    XCTAssert(split.1.requested == 0)
+    XCTAssert(split.1.requested == Int64.min)
 
     split.1.onValue { _ in XCTFail("split.1 never had a non-zero request") }
     split.1.onCompletion { _ in e3.fulfill() }
