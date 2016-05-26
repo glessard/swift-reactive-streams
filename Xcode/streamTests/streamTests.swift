@@ -23,6 +23,96 @@ class streamTests: XCTestCase
       super.tearDown()
   }
 
+  func testLifetime1()
+  {
+    class SpyStream: Stream<Int>
+    {
+      let e: XCTestExpectation
+
+      init(_ expectation: XCTestExpectation)
+      {
+        e = expectation
+        super.init(validated: ValidatedQueue(qos: qos_class_self(), serial: true))
+      }
+
+      deinit
+      {
+        e.fulfill()
+      }
+    }
+
+    let s = SpyStream(expectationWithDescription("deletion")).final()
+    s.close()
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+  }
+
+  func testLifetime2()
+  {
+    class SpyStream: Stream<Int>
+    {
+      let e: XCTestExpectation
+
+      init(_ expectation: XCTestExpectation)
+      {
+        e = expectation
+        super.init(validated: ValidatedQueue(qos: qos_class_self(), serial: true))
+      }
+
+      deinit
+      {
+        e.fulfill()
+      }
+    }
+
+    let p = UnsafeMutablePointer<Stream<Int>>.alloc(1)
+    p.initialize(SpyStream(expectationWithDescription("deletion")).final())
+    p.destroy()
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+    p.dealloc(1)
+  }
+
+  func testLifetime3()
+  {
+    // is there less messay way to do this test?
+
+    class SpyStream: Stream<Int>
+    {
+      override init(validated queue: ValidatedQueue)
+      {
+        super.init(validated: queue)
+      }
+
+      deinit
+      {
+        XCTFail("this stream should leak")
+      }
+    }
+
+    let p = UnsafeMutablePointer<Stream<Int>>.alloc(1)
+    p.initialize(SpyStream().final())
+    // the SpyStream should leak because one of its observers is kept alive by the pointer
+  }
+
+  func testLifetime4()
+  {
+    let stream = Stream<Int>()
+
+    var f = stream.final()
+
+    stream.process(1)
+
+    let e = expectationWithDescription("completion")
+    f = stream.map { i throws in i }
+    f.onCompletion { _ in e.fulfill() }
+
+    stream.process(2)
+    stream.close()
+
+    waitForExpectationsWithTimeout(1.0, handler: nil)
+  }
+
   func testNotify()
   {
     let events = 10
@@ -165,12 +255,9 @@ class streamTests: XCTestCase
     let e2 = expectationWithDescription("observation onError")
 
     let m = stream.map {
-      r -> Result<Int> in
-      r.flatMap {
-        i in
-        if i < limit { return Result.value(i+1) }
-        return Result.error(NSError(domain: "bogus", code: -1, userInfo: nil))
-      }
+      i -> Result<Int> in
+      if i < limit { return Result.value(i+1) }
+      return Result.error(NSError(domain: "bogus", code: -1, userInfo: nil))
     }
     m.onValue {
       v in

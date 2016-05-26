@@ -8,7 +8,7 @@
 
 final public class Subscription
 {
-  private weak var source: Source?
+  private var source: Source?
 
   public private(set) var requested: Int64
 
