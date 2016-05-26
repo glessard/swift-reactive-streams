@@ -59,13 +59,7 @@ class flatMapTests: XCTestCase
 
     let e = expectationWithDescription("observation ends \(random())")
 
-    let m = stream.flatMap {
-      count -> Stream<Double> in
-      let s = Stream<Double>()
-      for _ in 0..<count { s.process(0.0) }
-      s.close()
-      return s
-    }
+    let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
     m.countEvents().onValue {
       count in
@@ -120,17 +114,7 @@ class flatMapTests: XCTestCase
 
     let e = expectationWithDescription("observation ends \(random())")
 
-    let m = stream.flatMap {
-      count -> Stream<Double> in
-      let s = Stream<Double>()
-      let q = dispatch_get_global_queue(qos_class_self(), 0)
-      let t = dispatch_time(DISPATCH_TIME_NOW, 100_000)
-      dispatch_after(t, q) {
-        for _ in 0..<count { s.process(0.0) }
-        s.close()
-      }
-      return s
-    }
+    let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
     m.countEvents().notify {
       result in
@@ -161,16 +145,10 @@ class flatMapTests: XCTestCase
 
     let m = stream.flatMap {
       count -> Stream<Double> in
-      let s = Stream<Double>()
-      let q = dispatch_get_global_queue(qos_class_self(), 0)
-      let t = dispatch_time(DISPATCH_TIME_NOW, 100_000)
-      dispatch_after(t, q) {
-        for i in 0..<count
-        {
-          if i < limit { s.process(0.0) }
-          else         { s.process(NSError(domain: "bogus", code: i*count, userInfo: nil)) }
-        }
-        s.close()
+      let s = OnRequestStream().next(count: events).map {
+        i throws -> Double in
+        if i < limit { return Double(i) }
+        else { throw NSError(domain: "bogus", code: i*count, userInfo: nil) }
       }
       return s
     }
@@ -202,17 +180,7 @@ class flatMapTests: XCTestCase
 
     let e = expectationWithDescription("observation ends \(random())")
 
-    let m = stream.flatMap {
-      count -> Stream<Double> in
-      let s = Stream<Double>()
-      let q = dispatch_get_global_queue(qos_class_self(), 0)
-      let t = dispatch_time(DISPATCH_TIME_NOW, 100_000)
-      dispatch_after(t, q) {
-        for _ in 0..<count { s.process(0.0) }
-        s.close()
-      }
-      return s
-    }
+    let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
     m.countEvents().notify {
       result in
