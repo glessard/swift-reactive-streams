@@ -36,6 +36,22 @@ public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
     super.finalizeStream()
   }
 
+  /// precondition: must run on a barrier block or a serial queue
+
+  override func performCancellation(subscription: Subscription) -> Bool
+  {
+    if super.performCancellation(subscription)
+    {
+      if let sub = self.subscription
+      { // we have no observers anymore: cancel subscription.
+        sub.cancel()
+        self.subscription = nil
+      }
+      return true
+    }
+    return false
+  }
+
   public override func updateRequest(requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
@@ -54,11 +70,6 @@ public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
       self.subscription = nil
     }
     super.close()
-  }
-
-  override func dispatch(result: Result<OutputValue>)
-  {
-    super.dispatch(result)
   }
 }
 
