@@ -234,10 +234,8 @@ public class Stream<Value>: Source
   public func updateRequest(requested: Int64) -> Int64
   {
     precondition(requested > 0)
-    guard requested != Int64.min else { return 0 }
-
     var cur = self.requested
-    while cur < requested && cur >= 0
+    while cur < requested && cur != Int64.min
     { // an atomic store wouldn't really be better
       if OSAtomicCompareAndSwap64(cur, requested, &self.requested)
       {
