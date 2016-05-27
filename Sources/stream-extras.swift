@@ -308,11 +308,11 @@ extension Stream
           {
           case let c where c < limit:
             mapped.count = c
-            mapped.dispatchValue(result)
+            mapped.dispatch(result)
           case limit:
             mapped.count = limit
-            mapped.dispatchValue(result)
-            mapped.close()
+            mapped.dispatch(result)
+            if case .value = result { mapped.close() }
           default:
             break
           }
