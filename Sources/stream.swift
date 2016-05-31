@@ -12,7 +12,7 @@ extension StreamState: CustomStringConvertible
   public var description: String {
     switch self
     {
-    case .waiting:   return "Stream Waiting to begin processing events"
+    case .waiting:   return "Stream waiting to begin processing events"
     case .streaming: return "Stream active"
     case .ended:     return "Stream has completed"
     }
