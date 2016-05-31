@@ -25,7 +25,7 @@ class mergeTests: XCTestCase
 
   func testMerge1()
   {
-    let s = Stream<Int>()
+    let s = PostBox<Int>()
 
     let count = 10
 
@@ -46,7 +46,7 @@ class mergeTests: XCTestCase
       }
     }
 
-    for i in 0..<count { s.process(i+1) }
+    for i in 0..<count { s.post(i+1) }
     s.close()
 
     merged.close()
@@ -56,7 +56,7 @@ class mergeTests: XCTestCase
 
   func testMerge2()
   {
-    let s = Stream<Int>()
+    let s = PostBox<Int>()
 
     let count = 10
 
@@ -82,7 +82,7 @@ class mergeTests: XCTestCase
 
     merged.close()
 
-    for i in 0..<count { s.process(i+1) }
+    for i in 0..<count { s.post(i+1) }
     s.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -90,7 +90,7 @@ class mergeTests: XCTestCase
 
   func testMerge3()
   {
-    let s = Stream<Int>()
+    let s = PostBox<Int>()
 
     let count = 0
 
@@ -114,9 +114,12 @@ class mergeTests: XCTestCase
       }
     }
 
-    merged.process(Result.error(NSError(domain: "bogus", code: -1, userInfo: nil)))
+    // merged.post(Result.error(NSError(domain: "bogus", code: -1, userInfo: nil)))
+    dispatch_async(merged.queue) {
+      merged.dispatchError(Result.error(NSError(domain: "bogus", code: -1, userInfo: nil)))
+    }
 
-    for i in 0..<count { s.process(i+1) }
+    for i in 0..<count { s.post(i+1) }
     s.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -124,7 +127,7 @@ class mergeTests: XCTestCase
 
   func testMerge4()
   {
-    let s = [Stream<Int>(), Stream<Int>()]
+    let s = [PostBox<Int>(), PostBox<Int>()]
     let e = expectationWithDescription("observation ends \(random())")
 
     let count = 10
@@ -149,7 +152,7 @@ class mergeTests: XCTestCase
     for stream in s
     {
       dispatch_async(q) {
-        for i in 0..<count { stream.process(i+1) }
+        for i in 0..<count { stream.post(i+1) }
         stream.close()
       }
     }
@@ -159,7 +162,7 @@ class mergeTests: XCTestCase
 
   func testMerge5()
   {
-    let s = Stream<Int>()
+    let s = PostBox<Int>()
     let e = expectationWithDescription("observation ends \(random())")
     let count = 10
 
@@ -167,7 +170,7 @@ class mergeTests: XCTestCase
     merged.merge(s)
     merged.onValue { if $0 == count { e.fulfill() } }
 
-    for i in 0..<count { s.process(i+1) }
+    for i in 0..<count { s.post(i+1) }
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
 
@@ -188,7 +191,7 @@ class mergeTests: XCTestCase
 
   func testMerge6()
   {
-    let s = Stream<Int>()
+    let s = PostBox<Int>()
     let e = expectationWithDescription("observation ends \(random())")
     let count = 10
 
@@ -196,7 +199,7 @@ class mergeTests: XCTestCase
     merged.merge(s)
     merged.onValue { if $0 == count { e.fulfill() } }
 
-    for i in 0..<count { s.process(i+1) }
+    for i in 0..<count { s.post(i+1) }
     s.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -211,7 +214,7 @@ class mergeTests: XCTestCase
 
   func testMerge7()
   {
-    let s = [Stream<Int>(), Stream<Int>()]
+    let s = [PostBox<Int>(), PostBox<Int>()]
     let e = expectationWithDescription("observation ends \(random())")
 
     let count = 10
@@ -239,7 +242,7 @@ class mergeTests: XCTestCase
     {
       for i in 0..<count
       {
-        stream.process(Result.value((n+1)*i).map({
+        stream.post(Result.value((n+1)*i).map({
           v throws -> Int in
           if v < count { return v }
           throw NSError(domain: "bogus", code: -1, userInfo: nil)

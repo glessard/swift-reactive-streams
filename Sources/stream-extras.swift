@@ -144,7 +144,10 @@ extension Stream
 {
   private func map<U>(stream: SubStream<Value, U>, transform: (Value) throws -> U) -> Stream<U>
   {
-    self.subscribe(substream: stream) { mapped, result in mapped.process(result.map(transform)) }
+    self.subscribe(substream: stream) {
+      mapped, result in
+      dispatch_async(mapped.queue) { mapped.dispatch(result.map(transform)) }
+    }
     return stream
   }
 
@@ -163,7 +166,10 @@ extension Stream
 {
   private func map<U>(stream: SubStream<Value, U>, transform: (Value) -> Result<U>) -> Stream<U>
   {
-    self.subscribe(substream: stream) { mapped, result in mapped.process(result.flatMap(transform)) }
+    self.subscribe(substream: stream) {
+      mapped, result in
+      dispatch_async(mapped.queue) { mapped.dispatch(result.flatMap(transform)) }
+    }
     return stream
   }
 
@@ -520,7 +526,10 @@ extension Stream
     let streams = (0..<count).map {
       _ -> Stream in
       let stream = SubStream<Value, Value>(qos: qos)
-      self.subscribe(substream: stream) { mapped, result in mapped.process(result) }
+      self.subscribe(substream: stream) {
+        mapped, result in
+        dispatch_async(mapped.queue) { mapped.dispatch(result) }
+      }
       return stream
     }
     return streams

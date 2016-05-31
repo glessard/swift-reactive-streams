@@ -132,38 +132,12 @@ public class Stream<Value>: Source
     }
   }
 
-  final func process(transformed: () -> Result<Value>?)
-  {
-    guard requested != Int64.min else { return }
-    dispatch_async(queue) { if let result = transformed() { self.dispatch(result) } }
-  }
-
-  final public func process(result: Result<Value>)
-  {
-    guard requested != Int64.min else { return }
-    dispatch_async(queue) { self.dispatch(result) }
-  }
-
-  final public func process(value: Value)
-  {
-    guard requested != Int64.min else { return }
-    dispatch_async(self.queue) {
-      guard self.requested != Int64.min else { return }
-      self.dispatchValue(Result.value(value))
-    }
-  }
-
-  final public func process(error: ErrorProtocol)
+  public func close()
   {
     guard requested != Int64.min else { return }
     dispatch_barrier_async(self.queue) {
-      self.dispatchError(Result.error(error))
+      self.dispatchError(Result.error(StreamCompleted.normally))
     }
-  }
-
-  public func close()
-  {
-    process(StreamCompleted.normally)
   }
 
   /// precondition: must run on a barrier block or a serial queue
