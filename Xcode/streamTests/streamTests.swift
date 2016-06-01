@@ -75,7 +75,7 @@ class streamTests: XCTestCase
 
   func testLifetime3()
   {
-    // is there less messay way to do this test?
+    // is there less messy way to do this test?
 
     class SpyStream: Stream<Int>
     {
@@ -97,17 +97,17 @@ class streamTests: XCTestCase
 
   func testLifetime4()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
 
     var f = stream.final()
 
-    stream.process(1)
+    stream.post(1)
 
     let e = expectationWithDescription("completion")
     f = stream.map { i throws in i }
     f.onCompletion { _ in e.fulfill() }
 
-    stream.process(2)
+    stream.post(2)
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -118,7 +118,7 @@ class streamTests: XCTestCase
     let events = 10
     let e1 = expectationWithDescription("observation onValue")
     let e2 = expectationWithDescription("observation onError")
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
 
     stream.notify {
       result in
@@ -131,7 +131,7 @@ class streamTests: XCTestCase
       }
     }
 
-    for i in 0..<events { stream.process(i+1) }
+    for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -141,14 +141,14 @@ class streamTests: XCTestCase
   {
     let events = 10
     let e1 = expectationWithDescription("observation onValue")
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
 
     stream.onValue {
       v in
       if v == events { e1.fulfill() }
     }
 
-    for i in 0..<events { stream.process(i+1) }
+    for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -171,12 +171,12 @@ class streamTests: XCTestCase
 
   func testOnComplete()
   {
-    let s1 = Stream<Int>()
+    let s1 = PostBox<Int>()
     s1.onCompletion {
       _ in XCTFail()
     }
 
-    s1.process(Result())
+    s1.post(Result())
 
     let e2 = expectationWithDescription("observation onCompletion")
     let s2 = Stream<Int>()
@@ -191,7 +191,7 @@ class streamTests: XCTestCase
   func testMap1()
   {
     let events = 10
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
 
     let e2 = expectationWithDescription("observation onError")
 
@@ -206,7 +206,7 @@ class streamTests: XCTestCase
       }
     }
 
-    for i in 0..<events { stream.process(i+1) }
+    for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -215,7 +215,7 @@ class streamTests: XCTestCase
 
   func testMap2()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
 
     let events = 10
     let limit = 5
@@ -238,7 +238,7 @@ class streamTests: XCTestCase
       if error.domain == "bogus" { e2.fulfill() }
     }
 
-    for i in 0..<events { stream.process(i+1) }
+    for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -246,7 +246,7 @@ class streamTests: XCTestCase
 
   func testMap3()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
 
     let events = 10
     let limit = 5
@@ -269,7 +269,7 @@ class streamTests: XCTestCase
       if error.domain == "bogus" { e2.fulfill() }
     }
 
-    for i in 0..<events { stream.process(i+1) }
+    for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -277,7 +277,7 @@ class streamTests: XCTestCase
 
   func testNextN()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
 
     let events = 100
     let limit = 5
@@ -299,7 +299,7 @@ class streamTests: XCTestCase
 
     XCTAssert(stream.requested == Int64(limit))
 
-    for i in 0..<events { stream.process(i+1) }
+    for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -307,7 +307,7 @@ class streamTests: XCTestCase
 
   func testNextTruncated()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
 
     let events = 100
     let limit = 50
@@ -336,7 +336,7 @@ class streamTests: XCTestCase
 
     XCTAssert(stream.requested == Int64(limit))
 
-    for i in 0..<events { stream.process(i+1) }
+    for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -344,7 +344,7 @@ class streamTests: XCTestCase
 
   func testFinal1()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
 
     let e = expectationWithDescription("observation onValue")
@@ -357,7 +357,7 @@ class streamTests: XCTestCase
       if value == d.last { e.fulfill() }
     }
 
-    d.forEach { stream.process($0) }
+    d.forEach { stream.post($0) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -365,7 +365,7 @@ class streamTests: XCTestCase
 
   func testFinal2()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
 
     let e = expectationWithDescription("observation onValue")
@@ -382,7 +382,7 @@ class streamTests: XCTestCase
       }
     }
 
-    stream.process(d[0])
+    stream.post(d[0])
     f.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -391,7 +391,7 @@ class streamTests: XCTestCase
   
   func testFinal3()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
 
     let e = expectationWithDescription("observation onValue")
@@ -408,15 +408,15 @@ class streamTests: XCTestCase
       }
     }
 
-    stream.process(d[0])
-    stream.process(NSError(domain: "bogus", code: -1, userInfo: nil))
+    stream.post(d[0])
+    stream.post(NSError(domain: "bogus", code: -1, userInfo: nil))
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
   }
   
   func testReduce()
   {
-    let stream = Stream<Int>(queue: dispatch_get_global_queue(qos_class_self(), 0))
+    let stream = PostBox<Int>(queue: dispatch_get_global_queue(qos_class_self(), 0))
     let events = 11
 
     let e1 = expectationWithDescription("observation onValue")
@@ -434,7 +434,7 @@ class streamTests: XCTestCase
       }
     }
 
-    for i in 0..<events { stream.process(i) }
+    for i in 0..<events { stream.post(i) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -442,7 +442,7 @@ class streamTests: XCTestCase
 
   func testCoalesce()
   {
-    let stream = Stream<Int>(queue: dispatch_get_global_queue(qos_class_self(), 0))
+    let stream = PostBox<Int>(queue: dispatch_get_global_queue(qos_class_self(), 0))
     let events = 10
 
     let e1 = expectationWithDescription("observation onValue")
@@ -462,7 +462,7 @@ class streamTests: XCTestCase
       }
     }
 
-    for i in 0..<events { stream.process(i) }
+    for i in 0..<events { stream.post(i) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -470,7 +470,7 @@ class streamTests: XCTestCase
 
   func testSplit1()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
 
     let split = stream.split()
@@ -511,7 +511,7 @@ class streamTests: XCTestCase
     XCTAssert(split.1.requested == Int64.max)
     XCTAssert(s1.requested == 1)
 
-    for i in 0..<events { stream.process(i+1) }
+    for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectationsWithTimeout(0.1, handler: nil)
@@ -521,7 +521,7 @@ class streamTests: XCTestCase
 
   func testSplit2()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
     let splits = 3
 
@@ -540,7 +540,7 @@ class streamTests: XCTestCase
     }
 
     XCTAssert(stream.requested == Int64.max, "stream.requested has an unexpected value; probable race condition")
-    for i in 0..<events { stream.process(i+1) }
+    for i in 0..<events { stream.post(i+1) }
     stream.close()
     merged.close()
 
@@ -549,7 +549,7 @@ class streamTests: XCTestCase
 
   func testSplit3()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
 
     let e1 = expectationWithDescription("split.0 onValue")
@@ -568,7 +568,7 @@ class streamTests: XCTestCase
     XCTAssert(split.0.requested == Int64.max)
     XCTAssert(stream.requested == Int64.max)
 
-    for i in 0..<events { stream.process(i+1) }
+    for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)

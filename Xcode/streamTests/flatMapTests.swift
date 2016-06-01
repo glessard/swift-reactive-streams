@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import stream
+import stream
 
 class flatMapTests: XCTestCase
 {
@@ -53,7 +53,7 @@ class flatMapTests: XCTestCase
 
   func testFlatMap2()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
     let reps = 5
 
@@ -68,7 +68,7 @@ class flatMapTests: XCTestCase
       e.fulfill()
     }
 
-    for _ in 0..<reps { stream.process(events) }
+    for _ in 0..<reps { stream.post(events) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -76,7 +76,7 @@ class flatMapTests: XCTestCase
 
   func testFlatMap3()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
 
     let e = expectationWithDescription("observation ends \(random())")
@@ -101,7 +101,7 @@ class flatMapTests: XCTestCase
       }
     }
 
-    stream.process(events)
+    stream.post(events)
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -109,7 +109,7 @@ class flatMapTests: XCTestCase
 
   func testFlatMap4()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
 
     let e = expectationWithDescription("observation ends \(random())")
@@ -129,7 +129,7 @@ class flatMapTests: XCTestCase
       }
     }
 
-    for _ in (0..<events) { stream.process(events) }
+    for _ in (0..<events) { stream.post(events) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -137,7 +137,7 @@ class flatMapTests: XCTestCase
 
   func testFlatMap5()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
     let limit = 5
 
@@ -166,7 +166,7 @@ class flatMapTests: XCTestCase
       }
     }
 
-    for i in (1...events) { stream.process(i) }
+    for i in (1...events) { stream.post(i) }
     stream.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
@@ -174,7 +174,7 @@ class flatMapTests: XCTestCase
 
   func testFlatMap6()
   {
-    let stream = Stream<Int>()
+    let stream = PostBox<Int>()
     let events = 10
     let limit = 5
 
@@ -197,8 +197,8 @@ class flatMapTests: XCTestCase
 
     for i in (1...events)
     {
-      if i < limit { stream.process(i) }
-      else         { stream.process(NSError(domain: "bogus", code: i, userInfo: nil)) }
+      if i < limit { stream.post(i) }
+      else         { stream.post(NSError(domain: "bogus", code: i, userInfo: nil)) }
     }
     stream.close()
 

@@ -6,8 +6,6 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-import Dispatch
-
 public class MergeStream<Value>: SerialSubStream<Value, Value>
 {
   private var sources = Set<Subscription>()
