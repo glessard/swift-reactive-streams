@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import stream
+import stream
 
 class flatMapTests: XCTestCase
 {

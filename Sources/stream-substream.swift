@@ -6,8 +6,6 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-import Dispatch
-
 public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
 {
   private var subscription: Subscription? = nil

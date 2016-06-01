@@ -6,8 +6,6 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-import Dispatch
-
 public class OnRequestStream: Stream<Int>
 {
   private let source: dispatch_source_t

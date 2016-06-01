@@ -1,3 +1,11 @@
+//
+//  stream.swift
+//  stream
+//
+//  Created by Guillaume Lessard on 11/05/2016.
+//  Copyright © 2016 Guillaume Lessard. All rights reserved.
+//
+
 import Dispatch
 
 #if swift(>=3.0)
