@@ -8,8 +8,7 @@
 
 import Dispatch
 
-#if swift(>=3.0)
-#else
+#if !swift(>=3.0)
 public typealias ErrorProtocol = ErrorType
 #endif
 
