@@ -17,7 +17,7 @@ public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
 
   deinit
   {
-    if let subscription = subscription { subscription.cancel() }
+    subscription?.cancel()
   }
 
   public func setSubscription(subscription: Subscription)
@@ -39,12 +39,9 @@ public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
   override func performCancellation(subscription: Subscription) -> Bool
   {
     if super.performCancellation(subscription)
-    {
-      if let sub = self.subscription
-      { // we have no observers anymore: cancel subscription.
-        sub.cancel()
-        self.subscription = nil
-      }
+    { // we have no observers anymore: cancel subscription.
+      self.subscription?.cancel()
+      self.subscription = nil
       return true
     }
     return false
@@ -53,20 +50,17 @@ public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
   public override func updateRequest(requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
-    if additional > 0, let subscription = subscription
+    if additional > 0
     {
-      subscription.request(additional)
+      subscription?.request(additional)
     }
     return additional
   }
 
   public override func close()
   {
-    if let subscription = subscription
-    {
-      subscription.cancel()
-      self.subscription = nil
-    }
+    subscription?.cancel()
+    subscription = nil
     super.close()
   }
 }

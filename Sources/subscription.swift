@@ -60,7 +60,7 @@ final public class Subscription
       let updatedRequest = tentatively > 0 ? tentatively : Int64.max
       if OSAtomicCompareAndSwap64(p, updatedRequest, &requested)
       {
-        if let source = source { source.updateRequest(updatedRequest) }
+        source?.updateRequest(updatedRequest)
         return
       }
       p = requested
@@ -80,11 +80,8 @@ final public class Subscription
       p = requested
     }
 
-    if let source = source
-    {
-      source.cancel(subscription: self)
-      self.source = nil
-    }
+    source?.cancel(subscription: self)
+    source = nil
   }
 }
 
