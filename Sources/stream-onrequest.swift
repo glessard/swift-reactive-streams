@@ -32,7 +32,7 @@ public class OnRequestStream: Stream<Int>
       self.dispatchValue(Result.value(counter))
       counter += 1
 
-      let updated = OSAtomicAdd64Barrier(-1, &self.additional)
+      let updated = OSAtomicAdd64(-1, &self.additional)
       if updated > 0
       {
         // TODO: ensure 32-bit sanity
@@ -49,7 +49,7 @@ public class OnRequestStream: Stream<Int>
 
   public func start()
   {
-    if started == 0 && OSAtomicIncrement32Barrier(&started) == 1
+    if started == 0 && OSAtomicIncrement32(&started) == 1
     {
       dispatch_resume(source)
     }
@@ -60,7 +60,7 @@ public class OnRequestStream: Stream<Int>
     let additional = super.updateRequest(requested)
     if additional > 0
     {
-      let updated = OSAtomicAdd64Barrier(additional, &self.additional)
+      let updated = OSAtomicAdd64(additional, &self.additional)
       if updated == additional
       {
         // TODO: ensure 32-bit sanity

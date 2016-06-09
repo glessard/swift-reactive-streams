@@ -182,7 +182,7 @@ public class Stream<Value>: Source
   {
     let subscription = Subscription(source: self)
 
-    if started == 0 && OSAtomicCompareAndSwap32Barrier(0, 1, &started)
+    if started == 0 && OSAtomicCompareAndSwap32(0, 1, &started)
     { // the queue isn't running yet, no observers
       dispatch_barrier_sync(queue) {
         assert(self.observers.isEmpty)

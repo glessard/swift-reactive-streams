@@ -75,7 +75,7 @@ final public class Subscription
     guard p != Int64.min else { return }
 
     // an atomic store would do better here.
-    while !OSAtomicCompareAndSwap64Barrier(p, Int64.min, &requested)
+    while !OSAtomicCompareAndSwap64(p, Int64.min, &requested)
     {
       p = requested
     }
