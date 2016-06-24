@@ -26,7 +26,7 @@ class flatMapTests: XCTestCase
   func testFlatMap1()
   {
     let stream = Stream<Int>()
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     let m = stream.flatMap {
       count -> Stream<Double> in
@@ -57,7 +57,7 @@ class flatMapTests: XCTestCase
     let events = 10
     let reps = 5
 
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
@@ -79,7 +79,7 @@ class flatMapTests: XCTestCase
     let stream = PostBox<Int>()
     let events = 10
 
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     let m = stream.flatMap {
       count -> Stream<Double> in
@@ -112,7 +112,7 @@ class flatMapTests: XCTestCase
     let stream = PostBox<Int>()
     let events = 10
 
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
@@ -141,7 +141,7 @@ class flatMapTests: XCTestCase
     let events = 10
     let limit = 5
 
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     let m = stream.flatMap {
       count -> Stream<Double> in
@@ -178,7 +178,7 @@ class flatMapTests: XCTestCase
     let events = 10
     let limit = 5
 
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 

@@ -32,7 +32,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     merged.countEvents().notify {
       result in
@@ -64,7 +64,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     merged.countEvents().notify {
       result in
@@ -97,7 +97,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     merged.countEvents().notify {
       result in
@@ -128,7 +128,7 @@ class mergeTests: XCTestCase
   func testMerge4()
   {
     let s = [PostBox<Int>(), PostBox<Int>()]
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     let count = 10
 
@@ -163,7 +163,7 @@ class mergeTests: XCTestCase
   func testMerge5()
   {
     let s = PostBox<Int>()
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
     let count = 10
 
     let merged = MergeStream<Int>()
@@ -174,14 +174,14 @@ class mergeTests: XCTestCase
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
 
-    let f = expectationWithDescription("observation ends \(random())")
+    let f = expectationWithDescription("observation ends \(arc4random())")
 
     s.onCompletion { _ in f.fulfill() }
     s.close()
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
 
-    let g = expectationWithDescription("observation ends \(random())")
+    let g = expectationWithDescription("observation ends \(arc4random())")
 
     merged.onError { _ in g.fulfill() }
     merged.close()
@@ -192,7 +192,7 @@ class mergeTests: XCTestCase
   func testMerge6()
   {
     let s = PostBox<Int>()
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
     let count = 10
 
     let merged = MergeStream<Int>()
@@ -204,7 +204,7 @@ class mergeTests: XCTestCase
 
     waitForExpectationsWithTimeout(1.0, handler: nil)
 
-    let g = expectationWithDescription("observation ends \(random())")
+    let g = expectationWithDescription("observation ends \(arc4random())")
 
     merged.onCompletion { _ in g.fulfill() }
     merged.close()
@@ -215,7 +215,7 @@ class mergeTests: XCTestCase
   func testMerge7()
   {
     let s = [PostBox<Int>(), PostBox<Int>()]
-    let e = expectationWithDescription("observation ends \(random())")
+    let e = expectationWithDescription("observation ends \(arc4random())")
 
     let count = 10
 
