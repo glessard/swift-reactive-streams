@@ -94,5 +94,5 @@ public func == (lhs: Subscription, rhs: Subscription) -> Bool
 
 extension Subscription: Hashable
 {
-  public var hashValue: Int { return unsafeAddressOf(self).hashValue }
+  public var hashValue: Int { return ObjectIdentifier(self).hashValue }
 }
