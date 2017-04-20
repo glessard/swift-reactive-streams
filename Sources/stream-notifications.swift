@@ -28,8 +28,7 @@ extension Stream
 
   public func notify(queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
   {
-    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent)
-    local.setTarget(queue: queue)
+    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
     performNotify(queue: local, task: task)
   }
 }
@@ -59,8 +58,7 @@ extension Stream
 
   public func onValue(queue: DispatchQueue, task: @escaping (Value) -> Void)
   {
-    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent)
-    local.setTarget(queue: queue)
+    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
     performOnValue(queue: local, task: task)
   }
 }
@@ -74,8 +72,7 @@ extension Stream
 
   public func onError(queue: DispatchQueue, task: @escaping (Swift.Error) -> Void)
   {
-    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent)
-    local.setTarget(queue: queue)
+    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
 
     self.subscribe(
       subscriber: queue,
@@ -101,8 +98,7 @@ extension Stream
 
   public func onCompletion(queue: DispatchQueue, task: @escaping (StreamCompleted) -> Void)
   {
-    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent)
-    local.setTarget(queue: queue)
+    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
 
     self.subscribe(
       subscriber: queue,

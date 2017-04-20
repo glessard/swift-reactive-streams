@@ -45,15 +45,13 @@ struct ValidatedQueue
     if serial
     { // create a new queue whose target will be the queue that's passed in
       // this is necessary since we can't know whether the parameter is a concurrent queue
-      let validated = DispatchQueue(label: "serial-queue", attributes: [])
-      validated.setTarget(queue: queue)
+      let validated = DispatchQueue(label: "serial-queue", target: queue)
       self.queue = TypedQueue.serial(validated)
     }
     else
     { // create a new queue whose target will be the queue that's passed in
       // this is necessary since barrier blocks don't work on the global concurrent queues
-      let validated = DispatchQueue(label: "concurrent-queue", attributes: DispatchQueue.Attributes.concurrent)
-      validated.setTarget(queue: queue)
+      let validated = DispatchQueue(label: "concurrent-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
       self.queue = TypedQueue.concurrent(validated)
     }
   }
