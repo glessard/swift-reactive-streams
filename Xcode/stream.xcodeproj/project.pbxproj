@@ -29,6 +29,7 @@
 		03F6666A1CE0145100F4B44B /* observer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FC31CD4702400F4B44B /* observer.swift */; };
 		03F6666C1CE054FA00F4B44B /* flatMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F6666B1CE054FA00F4B44B /* flatMapTests.swift */; };
 		03FCE9D21CD8F93D00F4B44B /* stream-map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FCE9D11CD8F93D00F4B44B /* stream-map.swift */; };
+		03FE12DD1EA8802800F4B44B /* dispatch-utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,7 @@
 		03E1929C1CE4474500F4B44B /* source.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = source.swift; sourceTree = "<group>"; };
 		03F6666B1CE054FA00F4B44B /* flatMapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = flatMapTests.swift; sourceTree = "<group>"; };
 		03FCE9D11CD8F93D00F4B44B /* stream-map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-map.swift"; sourceTree = "<group>"; };
+		03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "dispatch-utilities.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,6 +157,7 @@
 				031C425D1CF5907000F4B44B /* notifier.swift */,
 				03D89FC31CD4702400F4B44B /* observer.swift */,
 				038EB3A61CDD361A00F4B44B /* validated-queue.swift */,
+				03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -222,11 +225,11 @@
 				TargetAttributes = {
 					038527D11CD46A1500F4B44B = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0830;
 					};
 					038527DB1CD46A1500F4B44B = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0830;
 					};
 				};
 			};
@@ -278,6 +281,7 @@
 				03D89FC01CD46C0700F4B44B /* result.swift in Sources */,
 				031C426E1CFE660900F4B44B /* stream-next.swift in Sources */,
 				031C426C1CFE65C900F4B44B /* stream-reduce.swift in Sources */,
+				03FE12DD1EA8802800F4B44B /* dispatch-utilities.swift in Sources */,
 				03D89FBE1CD46B4300F4B44B /* stream.swift in Sources */,
 				031C42651CFE4B9B00F4B44B /* stream-post.swift in Sources */,
 				038EB3A51CDD35EC00F4B44B /* stream-merge.swift in Sources */,
@@ -418,7 +422,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tffenterprises.stream;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 2.3;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -438,7 +442,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 2.3;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -450,7 +454,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tffenterprises.streamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 2.3;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -463,7 +467,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tffenterprises.streamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 2.3;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

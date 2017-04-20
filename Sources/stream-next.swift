@@ -8,7 +8,7 @@
 
 extension Stream
 {
-  private func next(stream: LimitedStream<Value, Value>) -> Stream<Value>
+  fileprivate func next(_ stream: LimitedStream<Value, Value>) -> Stream<Value>
   {
     let limit = stream.limit
     self.subscribe(
@@ -16,7 +16,7 @@ extension Stream
       subscriptionHandler: stream.setSubscription,
       notificationHandler: {
         mapped, result in
-        dispatch_async(mapped.queue) {
+        mapped.queue.async {
           switch mapped.count+1
           {
           case let c where c < limit:
@@ -36,12 +36,12 @@ extension Stream
     return stream
   }
 
-  public func next(qos qos: qos_class_t = qos_class_self(), count: Int = 1) -> Stream<Value>
+  public func next(qos: DispatchQoS = DispatchQoS.current(), count: Int = 1) -> Stream<Value>
   {
     return next(LimitedStream<Value, Value>(qos: qos, count: Int64(max(count, 0))))
   }
 
-  public func next(queue queue: dispatch_queue_t, count: Int = 1) -> Stream<Value>
+  public func next(queue: DispatchQueue, count: Int = 1) -> Stream<Value>
   {
     return next(LimitedStream<Value, Value>(queue: queue, count: Int64(max(count, 0))))
   }
@@ -49,7 +49,7 @@ extension Stream
 
 extension Stream
 {
-  private func final(stream: LimitedStream<Value, Value>) -> Stream<Value>
+  fileprivate func final(_ stream: LimitedStream<Value, Value>) -> Stream<Value>
   {
     var last: Value? = nil
     self.subscribe(
@@ -61,7 +61,7 @@ extension Stream
       },
       notificationHandler: {
         mapped, result in
-        dispatch_async(mapped.queue) {
+        mapped.queue.async {
           switch result
           {
           case .value(let value):
@@ -76,12 +76,12 @@ extension Stream
     return stream
   }
 
-  public func final(qos qos: qos_class_t = qos_class_self()) -> Stream<Value>
+  public func final(qos: DispatchQoS = DispatchQoS.current()) -> Stream<Value>
   {
     return final(LimitedStream<Value, Value>(qos: qos, count: 1))
   }
 
-  public func final(queue queue: dispatch_queue_t) -> Stream<Value>
+  public func final(queue: DispatchQueue) -> Stream<Value>
   {
     return final(LimitedStream<Value, Value>(queue: queue, count: 1))
   }

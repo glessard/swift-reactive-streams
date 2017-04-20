@@ -9,7 +9,7 @@
 import Dispatch
 
 #if !swift(>=3.0)
-public typealias ErrorProtocol = ErrorType
+public typealias ErrorProtocol = Swift.ErrorProtocol
 #endif
 
 public enum StreamState { case waiting, streaming, ended }
@@ -26,27 +26,27 @@ extension StreamState: CustomStringConvertible
   }
 }
 
-public enum StreamCompleted: ErrorProtocol
+public enum StreamCompleted: Error
 {
   case normally              // normal completion
   case subscriptionFailed    // attempted to subscribe to a completed stream
   case subscriptionCancelled
 }
 
-public class Stream<Value>: Source
+open class Stream<Value>: Source
 {
-  let queue: dispatch_queue_t
-  private var observers = Dictionary<Subscription, (Result<Value>) -> Void>()
+  let queue: DispatchQueue
+  fileprivate var observers = Dictionary<Subscription, (Result<Value>) -> Void>()
 
-  private var started: Int32 = 0
-  public private(set) var requested: Int64 = 0
+  fileprivate var started: Int32 = 0
+  open fileprivate(set) var requested: Int64 = 0
 
-  public convenience init(qos: qos_class_t = qos_class_self())
+  public convenience init(qos: DispatchQoS = DispatchQoS.current())
   {
     self.init(validated: ValidatedQueue(qos: qos, serial: true))
   }
 
-  public convenience init(queue: dispatch_queue_t)
+  public convenience init(queue: DispatchQueue)
   {
     self.init(validated: ValidatedQueue(queue: queue, serial: false))
   }
@@ -56,7 +56,7 @@ public class Stream<Value>: Source
     self.queue = queue.queue.queue
   }
 
-  public var state: StreamState {
+  open var state: StreamState {
     if started == 0 { return .waiting }
     switch requested
     {
@@ -67,13 +67,13 @@ public class Stream<Value>: Source
     }
   }
 
-  public var qos: qos_class_t {
-    return dispatch_queue_get_qos_class(self.queue, nil)
+  open var qos: DispatchQoS {
+    return self.queue.qos
   }
 
   /// precondition: must run on this Stream's queue
 
-  func dispatch(result: Result<Value>)
+  func dispatch(_ result: Result<Value>)
   {
     guard requested != Int64.min else { return }
 
@@ -90,7 +90,7 @@ public class Stream<Value>: Source
         if OSAtomicCompareAndSwap64(req, Int64.min, &requested)
         {
           for notificationHandler in self.observers.values { notificationHandler(result) }
-          dispatch_barrier_async(self.queue) { self.finalizeStream() }
+          self.queue.async(flags: .barrier, execute: { self.finalizeStream() }) 
           break
         }
         req = requested
@@ -100,7 +100,7 @@ public class Stream<Value>: Source
 
   /// precondition: must run on this Stream's queue
 
-  final func dispatchValue(value: Result<Value>)
+  final func dispatchValue(_ value: Result<Value>)
   {
     assert(value.isValue)
 
@@ -121,7 +121,7 @@ public class Stream<Value>: Source
 
   /// precondition: must run on a barrier block or a serial queue
 
-  final func dispatchError(error: Result<Value>)
+  final func dispatchError(_ error: Result<Value>)
   {
     assert(error.isError)
 
@@ -139,12 +139,12 @@ public class Stream<Value>: Source
     }
   }
 
-  public func close()
+  open func close()
   {
     guard requested != Int64.min else { return }
-    dispatch_barrier_async(self.queue) {
+    self.queue.async(flags: .barrier, execute: {
       self.dispatchError(Result.error(StreamCompleted.normally))
-    }
+    }) 
   }
 
   /// precondition: must run on a barrier block or a serial queue
@@ -156,35 +156,36 @@ public class Stream<Value>: Source
 
   // subscription methods
 
-  final public func subscribe<O: Observer where O.EventValue == Value>(observer: O)
+  final public func subscribe<O: Observer>(_ observer: O)
+    where O.EventValue == Value
   {
     addSubscription(observer.onSubscribe,
                     notificationHandler: Notifier(target: observer, handler: { target, result in target.notify(result) }))
   }
 
-  final public func subscribe<U>(substream substream: SubStream<Value, U>,
-                                 notificationHandler: (SubStream<Value, U>, Result<Value>) -> Void)
+  final public func subscribe<U>(substream: SubStream<Value, U>,
+                                 notificationHandler: @escaping (SubStream<Value, U>, Result<Value>) -> Void)
   {
     addSubscription(substream.setSubscription,
                     notificationHandler: Notifier(target: substream, handler: notificationHandler))
   }
 
-  final public func subscribe<T: AnyObject>(subscriber subscriber: T,
-                                            subscriptionHandler: (Subscription) -> Void,
-                                            notificationHandler: (T, Result<Value>) -> Void)
+  final public func subscribe<T: AnyObject>(subscriber: T,
+                                            subscriptionHandler: @escaping (Subscription) -> Void,
+                                            notificationHandler: @escaping (T, Result<Value>) -> Void)
   {
     addSubscription(subscriptionHandler,
                     notificationHandler: Notifier(target: subscriber, handler: notificationHandler))
   }
 
-  private func addSubscription<T: AnyObject>(subscriptionHandler: (Subscription) -> Void,
-                                             notificationHandler: Notifier<T, Value>)
+  fileprivate func addSubscription<T: AnyObject>(_ subscriptionHandler: @escaping (Subscription) -> Void,
+                                                 notificationHandler: Notifier<T, Value>)
   {
     let subscription = Subscription(source: self)
 
     if started == 0 && OSAtomicCompareAndSwap32(0, 1, &started)
     { // the queue isn't running yet, no observers
-      dispatch_barrier_sync(queue) {
+      queue.sync(flags: .barrier, execute: {
         assert(self.observers.isEmpty)
         subscriptionHandler(subscription)
         if self.requested != Int64.min
@@ -195,13 +196,13 @@ public class Stream<Value>: Source
         { // the stream was closed between the block's dispatch and its execution
           notificationHandler.notify(Result.error(StreamCompleted.subscriptionFailed))
         }
-      }
+      }) 
       return
     }
 
     if self.requested != Int64.min
     {
-      dispatch_barrier_async(queue) {
+      queue.async(flags: .barrier, execute: {
         subscriptionHandler(subscription)
         if self.requested != Int64.min
         {
@@ -211,7 +212,7 @@ public class Stream<Value>: Source
         { // the stream was closed between the block's dispatch and its execution
           notificationHandler.notify(Result.error(StreamCompleted.subscriptionFailed))
         }
-      }
+      }) 
       return
     }
 
@@ -222,7 +223,8 @@ public class Stream<Value>: Source
 
   // MARK: Source
 
-  public func updateRequest(requested: Int64) -> Int64
+  @discardableResult
+  open func updateRequest(_ requested: Int64) -> Int64
   {
     precondition(requested > 0)
     var cur = self.requested
@@ -237,22 +239,23 @@ public class Stream<Value>: Source
     return 0
   }
 
-  final public func cancel(subscription subscription: Subscription)
+  final public func cancel(subscription: Subscription)
   {
     if requested != Int64.min
     {
-      dispatch_barrier_async(queue) {
+      queue.async(flags: .barrier, execute: {
         guard self.requested != Int64.min else { return }
         self.performCancellation(subscription)
-      }
+      }) 
     }
   }
 
   /// precondition: must run on a barrier block or a serial queue
 
-  func performCancellation(subscription: Subscription) -> Bool
+  @discardableResult
+  func performCancellation(_ subscription: Subscription) -> Bool
   {
-    guard let notificationHandler = observers.removeValueForKey(subscription)
+    guard let notificationHandler = observers.removeValue(forKey: subscription)
       else { fatalError("Tried to cancel an inactive subscription") }
 
     notificationHandler(Result.error(StreamCompleted.subscriptionCancelled))
@@ -260,14 +263,14 @@ public class Stream<Value>: Source
   }
 }
 
-public class SerialStream<Value>: Stream<Value>
+open class SerialStream<Value>: Stream<Value>
 {
-  public convenience init(qos: qos_class_t = qos_class_self())
+  public convenience init(qos: DispatchQoS = DispatchQoS.current())
   {
     self.init(validated: ValidatedQueue(qos: qos, serial: true))
   }
 
-  public convenience init(queue: dispatch_queue_t)
+  public convenience init(queue: DispatchQueue)
   {
     self.init(validated: ValidatedQueue(queue: queue, serial: true))
   }
@@ -285,7 +288,7 @@ public class SerialStream<Value>: Stream<Value>
 
   /// precondition: must run on this stream's serial queue
 
-  override func dispatch(result: Result<Value>)
+  override func dispatch(_ result: Result<Value>)
   {
     guard requested != Int64.min else { return }
 

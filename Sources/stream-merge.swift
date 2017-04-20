@@ -6,28 +6,28 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-public class MergeStream<Value>: SerialSubStream<Value, Value>
+open class MergeStream<Value>: SerialSubStream<Value, Value>
 {
-  private var sources = Set<Subscription>()
-  private var closed = false
+  fileprivate var sources = Set<Subscription>()
+  fileprivate var closed = false
 
   override init(validated: ValidatedQueue)
   {
     super.init(validated: validated)
   }
 
-  public func merge(source: Stream<Value>)
+  open func merge(_ source: Stream<Value>)
   {
     if self.closed { return }
 
-    dispatch_barrier_async(self.queue) {
+    self.queue.async(flags: .barrier, execute: {
       self.performMerge(source)
-    }
+    }) 
   }
 
   /// precondition: must run on a barrier block or a serial queue
 
-  func performMerge(source: Stream<Value>)
+  func performMerge(_ source: Stream<Value>)
   {
     guard !self.closed else { return }
 
@@ -43,7 +43,7 @@ public class MergeStream<Value>: SerialSubStream<Value, Value>
       },
       notificationHandler: {
         merged, result in
-        dispatch_async(merged.queue) {
+        merged.queue.async {
           switch result
           {
           case .value:
@@ -65,7 +65,7 @@ public class MergeStream<Value>: SerialSubStream<Value, Value>
 
   /// precondition: must run on a barrier block or a serial queue
 
-  public override func finalizeStream()
+  open override func finalizeStream()
   {
     closed = true
     for source in sources
@@ -76,18 +76,18 @@ public class MergeStream<Value>: SerialSubStream<Value, Value>
     super.finalizeStream()
   }
 
-  public override func close()
+  open override func close()
   {
-    dispatch_barrier_async(queue) {
+    queue.async(flags: .barrier, execute: {
       self.closed = true
       if self.sources.isEmpty
       {
         self.dispatchError(Result.error(StreamCompleted.normally))
       }
-    }
+    }) 
   }
 
-  public override func updateRequest(requested: Int64) -> Int64
+  open override func updateRequest(_ requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
     // copy sources so that a modification in the main queue doesn't interfere.

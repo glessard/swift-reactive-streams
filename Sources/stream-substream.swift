@@ -6,9 +6,9 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
+open class SubStream<InputValue, OutputValue>: Stream<OutputValue>
 {
-  private var subscription: Subscription? = nil
+  fileprivate var subscription: Subscription? = nil
 
   override init(validated: ValidatedQueue)
   {
@@ -20,7 +20,7 @@ public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
     subscription?.cancel()
   }
 
-  public func setSubscription(subscription: Subscription)
+  open func setSubscription(_ subscription: Subscription)
   {
     assert(self.subscription == nil, "SubStream cannot support multiple subscriptions")
     self.subscription = subscription
@@ -36,7 +36,7 @@ public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
 
   /// precondition: must run on a barrier block or a serial queue
 
-  override func performCancellation(subscription: Subscription) -> Bool
+  override func performCancellation(_ subscription: Subscription) -> Bool
   {
     if super.performCancellation(subscription)
     { // we have no observers anymore: cancel subscription.
@@ -47,7 +47,7 @@ public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
     return false
   }
 
-  public override func updateRequest(requested: Int64) -> Int64
+  open override func updateRequest(_ requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
     if additional > 0
@@ -57,7 +57,7 @@ public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
     return additional
   }
 
-  public override func close()
+  open override func close()
   {
     subscription?.cancel()
     subscription = nil
@@ -65,14 +65,14 @@ public class SubStream<InputValue, OutputValue>: Stream<OutputValue>
   }
 }
 
-public class SerialSubStream<InputValue, OutputValue>: SubStream<InputValue, OutputValue>
+open class SerialSubStream<InputValue, OutputValue>: SubStream<InputValue, OutputValue>
 {
-  public convenience init(qos: qos_class_t = qos_class_self())
+  public convenience init(qos: DispatchQoS = DispatchQoS.current())
   {
     self.init(validated: ValidatedQueue(qos: qos, serial: true))
   }
 
-  public convenience init(queue: dispatch_queue_t)
+  public convenience init(queue: DispatchQueue)
   {
     self.init(validated: ValidatedQueue(queue: queue, serial: true))
   }
@@ -90,7 +90,7 @@ public class SerialSubStream<InputValue, OutputValue>: SubStream<InputValue, Out
 
   /// precondition: must run on this stream's serial queue
 
-  override func dispatch(result: Result<OutputValue>)
+  override func dispatch(_ result: Result<OutputValue>)
   {
     guard requested != Int64.min else { return }
 
@@ -102,17 +102,17 @@ public class SerialSubStream<InputValue, OutputValue>: SubStream<InputValue, Out
   }
 }
 
-public class LimitedStream<InputValue, OutputValue>: SerialSubStream<InputValue, OutputValue>
+open class LimitedStream<InputValue, OutputValue>: SerialSubStream<InputValue, OutputValue>
 {
   let limit: Int64
   var count: Int64 = 0
 
-  public convenience init(qos: qos_class_t = qos_class_self(), count: Int64)
+  public convenience init(qos: DispatchQoS = DispatchQoS.current(), count: Int64)
   {
     self.init(validated: ValidatedQueue(qos: qos, serial: true), count: max(count,0))
   }
 
-  public convenience init(queue: dispatch_queue_t, count: Int64)
+  public convenience init(queue: DispatchQueue, count: Int64)
   {
     self.init(validated: ValidatedQueue(queue: queue, serial: true), count: max(count,0))
   }
@@ -124,7 +124,7 @@ public class LimitedStream<InputValue, OutputValue>: SerialSubStream<InputValue,
     super.init(validated: validated)
   }
 
-  public override func updateRequest(requested: Int64) -> Int64
+  open override func updateRequest(_ requested: Int64) -> Int64
   { // only pass on requested updates up to and including our remaining number of events
     let remaining = (limit-count)
     let adjusted = (remaining > 0) ? min(requested, remaining) : 0

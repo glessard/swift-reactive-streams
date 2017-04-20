@@ -6,29 +6,29 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-public class OnRequestStream: Stream<Int>
+open class OnRequestStream: Stream<Int>
 {
-  private let source: dispatch_source_t
-  private var additional: Int64 = 0
-  private var started: Int32 = 0
+  fileprivate let source: DispatchSourceUserDataAdd
+  fileprivate var additional: Int64 = 0
+  fileprivate var started: Int32 = 0
 
-  public convenience init(qos: qos_class_t = qos_class_self(), autostart: Bool = true)
+  public convenience init(qos: DispatchQoS = DispatchQoS.current(), autostart: Bool = true)
   {
     self.init(validated: ValidatedQueue(qos: qos, serial: true), autostart: autostart)
   }
 
-  public convenience init(queue: dispatch_queue_t, autostart: Bool = true)
+  public convenience init(queue: DispatchQueue, autostart: Bool = true)
   {
     self.init(validated: ValidatedQueue(queue: queue, serial: false), autostart: autostart)
   }
 
   init(validated queue: ValidatedQueue, autostart: Bool = true)
   {
-    source = dispatch_source_create(DISPATCH_SOURCE_TYPE_DATA_ADD, 0, 0, queue.queue.queue)
+    source = DispatchSource.makeUserDataAddSource(queue: queue.queue.queue)
     super.init(validated: queue)
 
     var counter = 0
-    dispatch_source_set_event_handler(source) {
+    source.setEventHandler {
       self.dispatchValue(Result.value(counter))
       counter += 1
 
@@ -36,26 +36,26 @@ public class OnRequestStream: Stream<Int>
       if updated > 0
       {
         // TODO: ensure 32-bit sanity
-        dispatch_source_merge_data(self.source, UInt(truncatingBitPattern: updated))
+        self.source.add(data: UInt(truncatingBitPattern: updated))
       }
     }
 
     if autostart
     {
-      dispatch_resume(source)
+      source.resume()
       started = 1
     }
   }
 
-  public func start()
+  open func start()
   {
     if started == 0 && OSAtomicIncrement32(&started) == 1
     {
-      dispatch_resume(source)
+      source.resume()
     }
   }
 
-  override public func updateRequest(requested: Int64) -> Int64
+  override open func updateRequest(_ requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
     if additional > 0
@@ -64,7 +64,7 @@ public class OnRequestStream: Stream<Int>
       if updated == additional
       {
         // TODO: ensure 32-bit sanity
-        dispatch_source_merge_data(self.source, UInt(truncatingBitPattern: updated))
+        self.source.add(data: UInt(truncatingBitPattern: updated))
       }
     }
     return additional
@@ -72,12 +72,12 @@ public class OnRequestStream: Stream<Int>
 
   /// precondition: must run on a barrier block or a serial queue
 
-  override func performCancellation(subscription: Subscription) -> Bool
+  override func performCancellation(_ subscription: Subscription) -> Bool
   {
     let unobserved = super.performCancellation(subscription)
     if unobserved
     { // the event handler holds a strong reference to self; cancel it.
-      dispatch_source_set_event_handler(source) {}
+      source.setEventHandler {}
     }
     return unobserved
   }

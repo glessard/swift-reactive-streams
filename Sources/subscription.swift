@@ -8,9 +8,9 @@
 
 final public class Subscription
 {
-  private var source: Source?
+  fileprivate var source: Source?
 
-  public private(set) var requested: Int64
+  public fileprivate(set) var requested: Int64
 
   public var cancelled: Bool { return requested == Int64.min }
 
@@ -48,7 +48,7 @@ final public class Subscription
 
   // called by our subscriber
 
-  public func request(count: Int64)
+  public func request(_ count: Int64)
   {
     if count < 1 { return }
 
