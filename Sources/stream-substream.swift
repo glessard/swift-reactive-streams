@@ -8,7 +8,7 @@
 
 open class SubStream<InputValue, OutputValue>: Stream<OutputValue>
 {
-  fileprivate var subscription: Subscription? = nil
+  private var subscription: Subscription? = nil
 
   override init(validated: ValidatedQueue)
   {

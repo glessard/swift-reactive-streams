@@ -8,9 +8,9 @@
 
 final public class Subscription
 {
-  fileprivate var source: Source?
+  private var source: Source?
 
-  public fileprivate(set) var requested: Int64
+  public private(set) var requested: Int64
 
   public var cancelled: Bool { return requested == Int64.min }
 

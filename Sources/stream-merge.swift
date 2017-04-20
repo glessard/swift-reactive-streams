@@ -8,8 +8,8 @@
 
 open class MergeStream<Value>: SerialSubStream<Value, Value>
 {
-  fileprivate var sources = Set<Subscription>()
-  fileprivate var closed = false
+  private var sources = Set<Subscription>()
+  private var closed = false
 
   override init(validated: ValidatedQueue)
   {

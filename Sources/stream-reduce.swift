@@ -8,7 +8,7 @@
 
 extension Stream
 {
-  fileprivate func reduce<U>(_ stream: LimitedStream<Value, U>, initial: U, combine: @escaping (U, Value) throws -> U) -> Stream<U>
+  private func reduce<U>(_ stream: LimitedStream<Value, U>, initial: U, combine: @escaping (U, Value) throws -> U) -> Stream<U>
   {
     var current = initial
     self.subscribe(
@@ -59,7 +59,7 @@ extension Stream
 
 extension Stream
 {
-  fileprivate func countEvents(_ stream: LimitedStream<Value, Int>) -> Stream<Int>
+  private func countEvents(_ stream: LimitedStream<Value, Int>) -> Stream<Int>
   {
     var total = 0
     self.subscribe(subscriber: stream,
@@ -98,7 +98,7 @@ extension Stream
 
 extension Stream
 {
-  fileprivate func coalesce(_ stream: LimitedStream<Value, [Value]>) -> Stream<[Value]>
+  private func coalesce(_ stream: LimitedStream<Value, [Value]>) -> Stream<[Value]>
   {
     var current = [Value]()
     self.subscribe(

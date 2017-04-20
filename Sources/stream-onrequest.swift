@@ -8,9 +8,9 @@
 
 open class OnRequestStream: Stream<Int>
 {
-  fileprivate let source: DispatchSourceUserDataAdd
-  fileprivate var additional: Int64 = 0
-  fileprivate var started: Int32 = 0
+  private let source: DispatchSourceUserDataAdd
+  private var additional: Int64 = 0
+  private var started: Int32 = 0
 
   public convenience init(qos: DispatchQoS = DispatchQoS.current(), autostart: Bool = true)
   {

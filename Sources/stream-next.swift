@@ -8,7 +8,7 @@
 
 extension Stream
 {
-  fileprivate func next(_ stream: LimitedStream<Value, Value>) -> Stream<Value>
+  private func next(_ stream: LimitedStream<Value, Value>) -> Stream<Value>
   {
     let limit = stream.limit
     self.subscribe(
@@ -49,7 +49,7 @@ extension Stream
 
 extension Stream
 {
-  fileprivate func final(_ stream: LimitedStream<Value, Value>) -> Stream<Value>
+  private func final(_ stream: LimitedStream<Value, Value>) -> Stream<Value>
   {
     var last: Value? = nil
     self.subscribe(

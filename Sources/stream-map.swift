@@ -8,7 +8,7 @@
 
 extension Stream
 {
-  fileprivate func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) throws -> U) -> Stream<U>
+  private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) throws -> U) -> Stream<U>
   {
     self.subscribe(substream: stream) {
       mapped, result in
@@ -30,7 +30,7 @@ extension Stream
 
 extension Stream
 {
-  fileprivate func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) -> Result<U>) -> Stream<U>
+  private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) -> Result<U>) -> Stream<U>
   {
     self.subscribe(substream: stream) {
       mapped, result in
@@ -52,7 +52,7 @@ extension Stream
 
 extension Stream
 {
-  fileprivate func flatMap<U>(_ stream: MergeStream<U>, transform: @escaping (Value) -> Stream<U>) -> Stream<U>
+  private func flatMap<U>(_ stream: MergeStream<U>, transform: @escaping (Value) -> Stream<U>) -> Stream<U>
   {
     self.subscribe(
       subscriber: stream,

@@ -32,10 +32,10 @@ public enum StreamCompleted: Error
 open class Stream<Value>: Source
 {
   let queue: DispatchQueue
-  fileprivate var observers = Dictionary<Subscription, (Result<Value>) -> Void>()
+  private var observers = Dictionary<Subscription, (Result<Value>) -> Void>()
 
-  fileprivate var started: Int32 = 0
-  open fileprivate(set) var requested: Int64 = 0
+  private var started: Int32 = 0
+  public private(set) var requested: Int64 = 0
 
   public convenience init(qos: DispatchQoS = DispatchQoS.current())
   {
@@ -174,8 +174,8 @@ open class Stream<Value>: Source
                     notificationHandler: Notifier(target: subscriber, handler: notificationHandler))
   }
 
-  fileprivate func addSubscription<T: AnyObject>(_ subscriptionHandler: @escaping (Subscription) -> Void,
-                                                 notificationHandler: Notifier<T, Value>)
+  private func addSubscription<T: AnyObject>(_ subscriptionHandler: @escaping (Subscription) -> Void,
+                                             notificationHandler: Notifier<T, Value>)
   {
     let subscription = Subscription(source: self)
 

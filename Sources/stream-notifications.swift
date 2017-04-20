@@ -8,7 +8,7 @@
 
 extension Stream
 {
-  fileprivate func performNotify(queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
+  private func performNotify(queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
   {
     self.subscribe(
       subscriber: queue,
@@ -35,7 +35,7 @@ extension Stream
 
 extension Stream
 {
-  fileprivate func performOnValue(queue: DispatchQueue, task: @escaping (Value) -> Void)
+  private func performOnValue(queue: DispatchQueue, task: @escaping (Value) -> Void)
   {
     self.subscribe(
       subscriber: queue,

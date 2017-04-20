@@ -8,8 +8,8 @@
 
 open class Notifier<Target: AnyObject, Value>
 {
-  fileprivate weak var target: Target?
-  fileprivate let notificationHandler: (Target, Result<Value>) -> Void
+  private weak var target: Target?
+  private let notificationHandler: (Target, Result<Value>) -> Void
 
   public init(target: Target, handler: @escaping (Target, Result<Value>) -> Void)
   {
