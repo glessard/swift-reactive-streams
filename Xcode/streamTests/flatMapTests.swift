@@ -25,12 +25,12 @@ class flatMapTests: XCTestCase
 
   func testFlatMap1()
   {
-    let stream = Stream<Int>()
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let s = stream.Stream<Int>()
+    let e = expectation(description: "observation ends \(arc4random())")
 
-    let m = stream.flatMap {
-      count -> Stream<Double> in
-      let s = Stream<Double>()
+    let m = s.flatMap {
+      count -> stream.Stream<Double> in
+      let s = stream.Stream<Double>()
       XCTFail()
       s.close()
       return s
@@ -47,8 +47,8 @@ class flatMapTests: XCTestCase
       }
     }
 
-    stream.close()
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    s.close()
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testFlatMap2()
@@ -57,7 +57,7 @@ class flatMapTests: XCTestCase
     let events = 10
     let reps = 5
 
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
@@ -71,19 +71,19 @@ class flatMapTests: XCTestCase
     for _ in 0..<reps { stream.post(events) }
     stream.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testFlatMap3()
   {
-    let stream = PostBox<Int>()
+    let s = PostBox<Int>()
     let events = 10
 
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
 
-    let m = stream.flatMap {
-      count -> Stream<Double> in
-      let s = Stream<Double>()
+    let m = s.flatMap {
+      count -> stream.Stream<Double> in
+      let s = stream.Stream<Double>()
       s.close()
       return s
     }
@@ -101,10 +101,10 @@ class flatMapTests: XCTestCase
       }
     }
 
-    stream.post(events)
-    stream.close()
+    s.post(events)
+    s.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testFlatMap4()
@@ -112,7 +112,7 @@ class flatMapTests: XCTestCase
     let stream = PostBox<Int>()
     let events = 10
 
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
@@ -132,19 +132,19 @@ class flatMapTests: XCTestCase
     for _ in (0..<events) { stream.post(events) }
     stream.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testFlatMap5()
   {
-    let stream = PostBox<Int>()
+    let s = PostBox<Int>()
     let events = 10
     let limit = 5
 
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
 
-    let m = stream.flatMap {
-      count -> Stream<Double> in
+    let m = s.flatMap {
+      count -> stream.Stream<Double> in
       let s = OnRequestStream().next(count: events).map {
         i throws -> Double in
         if i < limit { return Double(i) }
@@ -166,10 +166,10 @@ class flatMapTests: XCTestCase
       }
     }
 
-    for i in (1...events) { stream.post(i) }
-    stream.close()
+    for i in (1...events) { s.post(i) }
+    s.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testFlatMap6()
@@ -178,7 +178,7 @@ class flatMapTests: XCTestCase
     let events = 10
     let limit = 5
 
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
@@ -202,6 +202,6 @@ class flatMapTests: XCTestCase
     }
     stream.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 }
