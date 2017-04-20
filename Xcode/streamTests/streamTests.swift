@@ -176,7 +176,7 @@ class streamTests: XCTestCase
       _ in XCTFail()
     }
 
-    s1.post(Result())
+    s1.post(Result.error(NSError(domain: "error", code: -1, userInfo: nil)))
 
     let e2 = expectation(description: "observation onCompletion")
     let s2 = stream.Stream<Int>()
