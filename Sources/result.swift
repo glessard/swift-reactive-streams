@@ -8,7 +8,7 @@
 
 import Foundation.NSError
 
-public struct NoResult: Swift.Error, CustomStringConvertible
+public struct NoResult: Error, CustomStringConvertible
 {
   fileprivate init() {}
   public var description = "No result"
@@ -22,7 +22,7 @@ public struct NoResult: Swift.Error, CustomStringConvertible
 public enum Result<Value>: CustomStringConvertible
 {
   case value(Value)
-  case error(Swift.Error)
+  case error(Error)
 
   public init()
   {
@@ -57,7 +57,7 @@ public enum Result<Value>: CustomStringConvertible
     }
   }
 
-  public func asError() -> Swift.Error?
+  public func asError() -> Error?
   {
     switch self
     {
@@ -141,7 +141,7 @@ public enum Result<Value>: CustomStringConvertible
     }
   }
 
-  public func recover(_ transform: (Swift.Error) -> Result<Value>) -> Result<Value>
+  public func recover(_ transform: (Error) -> Result<Value>) -> Result<Value>
   {
     switch self
     {

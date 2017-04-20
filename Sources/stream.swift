@@ -8,10 +8,6 @@
 
 import Dispatch
 
-#if !swift(>=3.0)
-public typealias ErrorProtocol = Swift.ErrorProtocol
-#endif
-
 public enum StreamState { case waiting, streaming, ended }
 
 extension StreamState: CustomStringConvertible

@@ -65,12 +65,12 @@ extension Stream
 
 extension Stream
 {
-  public func onError(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Swift.Error) -> Void)
+  public func onError(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Error) -> Void)
   {
     onError(queue: DispatchQueue.global(qos: qos.qosClass), task: task)
   }
 
-  public func onError(queue: DispatchQueue, task: @escaping (Swift.Error) -> Void)
+  public func onError(queue: DispatchQueue, task: @escaping (Error) -> Void)
   {
     let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
 
