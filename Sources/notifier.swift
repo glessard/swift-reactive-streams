@@ -6,18 +6,18 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-public class Notifier<Target: AnyObject, Value>
+open class Notifier<Target: AnyObject, Value>
 {
-  private weak var target: Target?
-  private let notificationHandler: (Target, Result<Value>) -> Void
+  fileprivate weak var target: Target?
+  fileprivate let notificationHandler: (Target, Result<Value>) -> Void
 
-  public init(target: Target, handler: (Target, Result<Value>) -> Void)
+  public init(target: Target, handler: @escaping (Target, Result<Value>) -> Void)
   {
     self.target = target
     notificationHandler = handler
   }
 
-  public func notify(event: Result<Value>)
+  open func notify(_ event: Result<Value>)
   {
     if let target = target
     {

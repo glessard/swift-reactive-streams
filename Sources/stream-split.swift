@@ -8,13 +8,13 @@
 
 extension Stream
 {
-  public func split(qos qos: qos_class_t = qos_class_self()) -> (Stream, Stream)
+  public func split(qos: DispatchQoS = DispatchQoS.current()) -> (Stream, Stream)
   {
     let streams = self.split(qos: qos, count: 2)
     return (streams[0], streams[1])
   }
 
-  public func split(qos qos: qos_class_t = qos_class_self(), count: Int) -> [Stream]
+  public func split(qos: DispatchQoS = DispatchQoS.current(), count: Int) -> [Stream]
   {
     precondition(count >= 0)
     guard count > 0 else { return [Stream]() }
@@ -24,7 +24,7 @@ extension Stream
       let stream = SubStream<Value, Value>(qos: qos)
       self.subscribe(substream: stream) {
         mapped, result in
-        dispatch_async(mapped.queue) { mapped.dispatch(result) }
+        mapped.queue.async { mapped.dispatch(result) }
       }
       return stream
     }

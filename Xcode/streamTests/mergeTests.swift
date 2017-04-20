@@ -32,7 +32,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
 
     merged.countEvents().notify {
       result in
@@ -51,7 +51,7 @@ class mergeTests: XCTestCase
 
     merged.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testMerge2()
@@ -64,7 +64,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
 
     merged.countEvents().notify {
       result in
@@ -85,7 +85,7 @@ class mergeTests: XCTestCase
     for i in 0..<count { s.post(i+1) }
     s.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testMerge3()
@@ -97,7 +97,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
 
     merged.countEvents().notify {
       result in
@@ -115,20 +115,20 @@ class mergeTests: XCTestCase
     }
 
     // merged.post(Result.error(NSError(domain: "bogus", code: -1, userInfo: nil)))
-    dispatch_async(merged.queue) {
+    merged.queue.async {
       merged.dispatchError(Result.error(NSError(domain: "bogus", code: -1, userInfo: nil)))
     }
 
     for i in 0..<count { s.post(i+1) }
     s.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testMerge4()
   {
     let s = [PostBox<Int>(), PostBox<Int>()]
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
 
     let count = 10
 
@@ -148,22 +148,22 @@ class mergeTests: XCTestCase
     }
     merged.close()
 
-    let q = dispatch_get_global_queue(qos_class_self(), 0)
+    let q = DispatchQueue.global(qos: DispatchQoS.current().qosClass)
     for stream in s
     {
-      dispatch_async(q) {
+      q.async {
         for i in 0..<count { stream.post(i+1) }
         stream.close()
       }
     }
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testMerge5()
   {
     let s = PostBox<Int>()
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
     let count = 10
 
     let merged = MergeStream<Int>()
@@ -172,27 +172,27 @@ class mergeTests: XCTestCase
 
     for i in 0..<count { s.post(i+1) }
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
 
-    let f = expectationWithDescription("observation ends \(arc4random())")
+    let f = expectation(description: "observation ends \(arc4random())")
 
     s.onCompletion { _ in f.fulfill() }
     s.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
 
-    let g = expectationWithDescription("observation ends \(arc4random())")
+    let g = expectation(description: "observation ends \(arc4random())")
 
     merged.onError { _ in g.fulfill() }
     merged.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testMerge6()
   {
     let s = PostBox<Int>()
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
     let count = 10
 
     let merged = MergeStream<Int>()
@@ -202,20 +202,20 @@ class mergeTests: XCTestCase
     for i in 0..<count { s.post(i+1) }
     s.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
 
-    let g = expectationWithDescription("observation ends \(arc4random())")
+    let g = expectation(description: "observation ends \(arc4random())")
 
     merged.onCompletion { _ in g.fulfill() }
     merged.close()
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testMerge7()
   {
     let s = [PostBox<Int>(), PostBox<Int>()]
-    let e = expectationWithDescription("observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(arc4random())")
 
     let count = 10
 
@@ -238,7 +238,7 @@ class mergeTests: XCTestCase
       }
     }
 
-    for (n,stream) in s.enumerate()
+    for (n,stream) in s.enumerated()
     {
       for i in 0..<count
       {
@@ -249,9 +249,9 @@ class mergeTests: XCTestCase
         }))
       }
       stream.close()
-      dispatch_barrier_sync(stream.queue) {}
+      stream.queue.sync(flags: .barrier, execute: {}) 
     }
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 }

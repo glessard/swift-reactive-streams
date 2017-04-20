@@ -25,16 +25,16 @@ class onRequestTests: XCTestCase
 
   func testOnRequest1()
   {
-    let e = expectationWithDescription("on-request")
+    let e = expectation(description: "on-request")
 
     OnRequestStream().next(count: 10).reduce(0, combine: +).onValue { $0 == 45 ? e.fulfill() : XCTFail() }
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testOnRequest2()
   {
-    let e = expectationWithDescription("deinit")
+    let e = expectation(description: "deinit")
 
     class Test: OnRequestStream
     {
@@ -43,7 +43,7 @@ class onRequestTests: XCTestCase
       init(expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(qos: qos_class_self(), serial: true))
+        super.init(validated: ValidatedQueue(qos: DispatchQoS.current(), serial: true))
       }
 
       deinit
@@ -54,30 +54,30 @@ class onRequestTests: XCTestCase
 
     let s = { Test(expectation: e).next(count: 5).countEvents() }()
 
-    let f = expectationWithDescription("completion")
+    let f = expectation(description: "completion")
     s.onCompletion { _ in f.fulfill() }
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testOnRequest3()
   {
     let s = OnRequestStream().split()
 
-    let e1 = expectationWithDescription("first")
+    let e1 = expectation(description: "first")
     s.0.next(count: 10).reduce(0, combine: +).onValue {
       total in
       total == 45 ? e1.fulfill() : XCTFail()
     }
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
 
-    let e2 = expectationWithDescription("second")
+    let e2 = expectation(description: "second")
     s.1.next(count: 10).reduce(0, combine: +).onValue {
       total in
       total == 145 ? e2.fulfill() : XCTFail()
     }
 
-    waitForExpectationsWithTimeout(1.0, handler: nil)
+    waitForExpectations(timeout: 1.0, handler: nil)
   }
 }

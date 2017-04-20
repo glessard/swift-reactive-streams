@@ -8,7 +8,7 @@
 
 extension Stream
 {
-  private func reduce<U>(stream: LimitedStream<Value, U>, initial: U, combine: (U, Value) throws -> U) -> Stream<U>
+  fileprivate func reduce<U>(_ stream: LimitedStream<Value, U>, initial: U, combine: @escaping (U, Value) throws -> U) -> Stream<U>
   {
     var current = initial
     self.subscribe(
@@ -20,7 +20,7 @@ extension Stream
       },
       notificationHandler: {
         mapped, result in
-        dispatch_async(mapped.queue) {
+        mapped.queue.async {
           switch result
           {
           case .value(let value):
@@ -41,17 +41,17 @@ extension Stream
     return stream
   }
 
-  public func reduce<U>(initial: U, combine: (U, Value) throws -> U) -> Stream<U>
+  public func reduce<U>(_ initial: U, combine: @escaping (U, Value) throws -> U) -> Stream<U>
   {
-    return reduce(LimitedStream<Value, U>(qos: qos_class_self(), count: 1), initial: initial, combine: combine)
+    return reduce(LimitedStream<Value, U>(qos: DispatchQoS.current(), count: 1), initial: initial, combine: combine)
   }
 
-  public func reduce<U>(qos qos: qos_class_t, initial: U, combine: (U, Value) throws -> U) -> Stream<U>
+  public func reduce<U>(qos: DispatchQoS, initial: U, combine: @escaping (U, Value) throws -> U) -> Stream<U>
   {
     return reduce(LimitedStream<Value, U>(qos: qos, count: 1), initial: initial, combine: combine)
   }
 
-  public func reduce<U>(queue queue: dispatch_queue_t, initial: U, combine: (U, Value) throws -> U) -> Stream<U>
+  public func reduce<U>(queue: DispatchQueue, initial: U, combine: @escaping (U, Value) throws -> U) -> Stream<U>
   {
     return reduce(LimitedStream<Value, U>(queue: queue, count: 1), initial: initial, combine: combine)
   }
@@ -59,7 +59,7 @@ extension Stream
 
 extension Stream
 {
-  private func countEvents(stream: LimitedStream<Value, Int>) -> Stream<Int>
+  fileprivate func countEvents(_ stream: LimitedStream<Value, Int>) -> Stream<Int>
   {
     var total = 0
     self.subscribe(subscriber: stream,
@@ -70,7 +70,7 @@ extension Stream
       },
                    notificationHandler: {
                     mapped, result in
-                    dispatch_async(mapped.queue) {
+                    mapped.queue.async {
                       switch result
                       {
                       case .value:
@@ -85,12 +85,12 @@ extension Stream
     return stream
   }
 
-  public func countEvents(qos qos: qos_class_t = qos_class_self()) -> Stream<Int>
+  public func countEvents(qos: DispatchQoS = DispatchQoS.current()) -> Stream<Int>
   {
     return countEvents(LimitedStream<Value, Int>(qos: qos, count: 1))
   }
 
-  public func countEvents(queue queue: dispatch_queue_t) -> Stream<Int>
+  public func countEvents(queue: DispatchQueue) -> Stream<Int>
   {
     return countEvents(LimitedStream<Value, Int>(queue: queue, count: 1))
   }
@@ -98,7 +98,7 @@ extension Stream
 
 extension Stream
 {
-  private func coalesce(stream: LimitedStream<Value, [Value]>) -> Stream<[Value]>
+  fileprivate func coalesce(_ stream: LimitedStream<Value, [Value]>) -> Stream<[Value]>
   {
     var current = [Value]()
     self.subscribe(
@@ -110,7 +110,7 @@ extension Stream
       },
       notificationHandler: {
         mapped, result in
-        dispatch_async(mapped.queue) {
+        mapped.queue.async {
           switch result
           {
           case .value(let value):
@@ -125,12 +125,12 @@ extension Stream
     return stream
   }
 
-  public func coalesce(qos qos: qos_class_t = qos_class_self()) -> Stream<[Value]>
+  public func coalesce(qos: DispatchQoS = DispatchQoS.current()) -> Stream<[Value]>
   {
     return coalesce(LimitedStream<Value, [Value]>(qos: qos, count: 1))
   }
   
-  public func coalesce(queue queue: dispatch_queue_t) -> Stream<[Value]>
+  public func coalesce(queue: DispatchQueue) -> Stream<[Value]>
   {
     return coalesce(LimitedStream<Value, [Value]>(queue: queue, count: 1))
   }

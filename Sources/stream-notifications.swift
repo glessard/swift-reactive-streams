@@ -8,7 +8,7 @@
 
 extension Stream
 {
-  private func performNotify(queue queue: dispatch_queue_t, task: (Result<Value>) -> Void)
+  fileprivate func performNotify(queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
   {
     self.subscribe(
       subscriber: queue,
@@ -16,28 +16,26 @@ extension Stream
       notificationHandler: {
         q, result in
         assert(q === queue)
-        dispatch_async(queue) { task(result) }
+        queue.async { task(result) }
       }
     )
   }
 
-  public func notify(qos qos: qos_class_t = qos_class_self(), task: (Result<Value>) -> Void)
+  public func notify(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Result<Value>) -> Void)
   {
-    let attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, qos, 0)
-    performNotify(queue: dispatch_queue_create("local-notify-queue", attr), task: task)
+    performNotify(queue: DispatchQueue(label: "local-notify-queue", qos: qos), task: task)
   }
 
-  public func notify(queue queue: dispatch_queue_t, task: (Result<Value>) -> Void)
+  public func notify(queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
   {
-    let local = dispatch_queue_create("local-notify-queue", DISPATCH_QUEUE_CONCURRENT)
-    dispatch_set_target_queue(local, queue)
+    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
     performNotify(queue: local, task: task)
   }
 }
 
 extension Stream
 {
-  private func performOnValue(queue queue: dispatch_queue_t, task: (Value) -> Void)
+  fileprivate func performOnValue(queue: DispatchQueue, task: @escaping (Value) -> Void)
   {
     self.subscribe(
       subscriber: queue,
@@ -47,37 +45,34 @@ extension Stream
         assert(q === queue)
         if case .value(let value) = result
         {
-          dispatch_async(queue) { task(value) }
+          queue.async { task(value) }
         }
       }
     )
   }
 
-  public func onValue(qos qos: qos_class_t = qos_class_self(), task: (Value) -> Void)
+  public func onValue(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Value) -> Void)
   {
-    let attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, qos, 0)
-    performOnValue(queue: dispatch_queue_create("local-notify-queue", attr), task: task)
+    performOnValue(queue: DispatchQueue(label: "local-notify-queue", qos: qos), task: task)
   }
 
-  public func onValue(queue queue: dispatch_queue_t, task: (Value) -> Void)
+  public func onValue(queue: DispatchQueue, task: @escaping (Value) -> Void)
   {
-    let local = dispatch_queue_create("local-notify-queue", DISPATCH_QUEUE_CONCURRENT)
-    dispatch_set_target_queue(local, queue)
+    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
     performOnValue(queue: local, task: task)
   }
 }
 
 extension Stream
 {
-  public func onError(qos qos: qos_class_t = qos_class_self(), task: (ErrorType) -> Void)
+  public func onError(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Swift.Error) -> Void)
   {
-    onError(queue: dispatch_get_global_queue(qos, 0), task: task)
+    onError(queue: DispatchQueue.global(qos: qos.qosClass), task: task)
   }
 
-  public func onError(queue queue: dispatch_queue_t, task: (ErrorType) -> Void)
+  public func onError(queue: DispatchQueue, task: @escaping (Swift.Error) -> Void)
   {
-    let local = dispatch_queue_create("local-notify-queue", DISPATCH_QUEUE_CONCURRENT)
-    dispatch_set_target_queue(local, queue)
+    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
 
     self.subscribe(
       subscriber: queue,
@@ -87,7 +82,7 @@ extension Stream
         assert(q === queue)
         if case .error(let error) = result
         {
-          dispatch_async(local) { task(error) }
+          local.async { task(error) }
         }
       }
     )
@@ -96,15 +91,14 @@ extension Stream
 
 extension Stream
 {
-  public func onCompletion(qos qos: qos_class_t = qos_class_self(), task: (StreamCompleted) -> Void)
+  public func onCompletion(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (StreamCompleted) -> Void)
   {
-    onCompletion(queue: dispatch_get_global_queue(qos, 0), task: task)
+    onCompletion(queue: DispatchQueue.global(qos: qos.qosClass), task: task)
   }
 
-  public func onCompletion(queue queue: dispatch_queue_t, task: (StreamCompleted) -> Void)
+  public func onCompletion(queue: DispatchQueue, task: @escaping (StreamCompleted) -> Void)
   {
-    let local = dispatch_queue_create("local-notify-queue", DISPATCH_QUEUE_CONCURRENT)
-    dispatch_set_target_queue(local, queue)
+    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
 
     self.subscribe(
       subscriber: queue,
@@ -114,7 +108,7 @@ extension Stream
         assert(q === queue)
         if case .error(let status as StreamCompleted) = result
         {
-          dispatch_async(local) { task(status) }
+          local.async { task(status) }
         }
       }
     )
