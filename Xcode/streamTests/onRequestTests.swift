@@ -27,7 +27,15 @@ class onRequestTests: XCTestCase
   {
     let e = expectation(description: "on-request")
 
-    OnRequestStream().next(count: 10).reduce(0, combine: +).onValue { $0 == 45 ? e.fulfill() : XCTFail() }
+    OnRequestStream().next(count: 10).reduce(0, combine: +).notify {
+      result in
+      switch result
+      {
+      case .value(let value) where value == 45: e.fulfill()
+      case .error(_ as StreamCompleted):        break
+      default:                                  XCTFail()
+      }
+    }
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
@@ -65,17 +73,27 @@ class onRequestTests: XCTestCase
     let s = OnRequestStream().split()
 
     let e1 = expectation(description: "first")
-    s.0.next(count: 10).reduce(0, combine: +).onValue {
-      total in
-      total == 45 ? e1.fulfill() : XCTFail()
+    s.0.next(count: 10).reduce(0, combine: +).notify {
+      result in
+      switch result
+      {
+      case .value(let value) where value == 45: e1.fulfill()
+      case .error(_ as StreamCompleted):        break
+      default:                                  XCTFail()
+      }
     }
 
     waitForExpectations(timeout: 1.0, handler: nil)
 
     let e2 = expectation(description: "second")
-    s.1.next(count: 10).reduce(0, combine: +).onValue {
-      total in
-      total == 145 ? e2.fulfill() : XCTFail()
+    s.1.next(count: 10).reduce(0, combine: +).notify {
+      result in
+      switch result
+      {
+      case .value(let value) where value == 145: e2.fulfill()
+      case .error(_ as StreamCompleted):         break
+      default:                                   XCTFail()
+      }
     }
 
     waitForExpectations(timeout: 1.0, handler: nil)
