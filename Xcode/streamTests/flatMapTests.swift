@@ -187,7 +187,7 @@ class flatMapTests: XCTestCase
       switch result
       {
       case .value(let value):
-        XCTAssert(value == 0, "event count of \(value) reported instead of zero")
+        XCTAssert(value == 0, "counted \(value) events instead of zero")
       case .error(let error as NSError):
         if error.domain == "bogus" { e.fulfill() }
         else { print(error) }
