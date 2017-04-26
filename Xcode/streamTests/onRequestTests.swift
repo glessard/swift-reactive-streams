@@ -27,7 +27,7 @@ class onRequestTests: XCTestCase
   {
     let e = expectation(description: "on-request")
 
-    OnRequestStream().next(count: 10).reduce(0, combine: +).notify {
+    OnRequestStream().next(count: 10).reduce(0, +).notify {
       result in
       switch result
       {
@@ -73,7 +73,7 @@ class onRequestTests: XCTestCase
     let s = OnRequestStream().split()
 
     let e1 = expectation(description: "first")
-    s.0.next(count: 10).reduce(0, combine: +).notify {
+    s.0.next(count: 10).reduce(0, +).notify {
       result in
       switch result
       {
@@ -86,7 +86,7 @@ class onRequestTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
 
     let e2 = expectation(description: "second")
-    s.1.next(count: 10).reduce(0, combine: +).notify {
+    s.1.next(count: 10).reduce(0, +).notify {
       result in
       switch result
       {

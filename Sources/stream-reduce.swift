@@ -10,6 +10,11 @@ extension Stream
 {
   private func reduce<U>(_ stream: LimitedStream<Value, U>, initial: U, combine: @escaping (U, Value) throws -> U) -> Stream<U>
   {
+    return reduce(stream, initial: initial) { $0 = try combine($0, $1) }
+  }
+
+  private func reduce<U>(_ stream: LimitedStream<Value, U>, initial: U, combine: @escaping (inout U, Value) throws -> Void) -> Stream<U>
+  {
     var current = initial
     self.subscribe(
       subscriber: stream,
@@ -25,7 +30,7 @@ extension Stream
           {
           case .value(let value):
             do {
-              current = try combine(current, value)
+              try combine(&current, value)
             }
             catch {
               mapped.dispatchValue(Result.value(current))
@@ -41,17 +46,32 @@ extension Stream
     return stream
   }
 
-  public func reduce<U>(_ initial: U, combine: @escaping (U, Value) throws -> U) -> Stream<U>
+  public func reduce<U>(_ initial: U, _ combining: @escaping (U, Value) throws -> U) -> Stream<U>
+  {
+    return reduce(LimitedStream<Value, U>(qos: DispatchQoS.current(), count: 1), initial: initial, combine: combining)
+  }
+
+  public func reduce<U>(qos: DispatchQoS, initial: U, _ combining: @escaping (U, Value) throws -> U) -> Stream<U>
+  {
+    return reduce(LimitedStream<Value, U>(qos: qos, count: 1), initial: initial, combine: combining)
+  }
+
+  public func reduce<U>(queue: DispatchQueue, initial: U, _ combining: @escaping (U, Value) throws -> U) -> Stream<U>
+  {
+    return reduce(LimitedStream<Value, U>(queue: queue, count: 1), initial: initial, combine: combining)
+  }
+
+  public func reduce<U>(_ initial: U, combine: @escaping (inout U, Value) throws -> Void) -> Stream<U>
   {
     return reduce(LimitedStream<Value, U>(qos: DispatchQoS.current(), count: 1), initial: initial, combine: combine)
   }
 
-  public func reduce<U>(qos: DispatchQoS, initial: U, combine: @escaping (U, Value) throws -> U) -> Stream<U>
+  public func reduce<U>(qos: DispatchQoS, initial: U, combine: @escaping (inout U, Value) throws -> Void) -> Stream<U>
   {
     return reduce(LimitedStream<Value, U>(qos: qos, count: 1), initial: initial, combine: combine)
   }
 
-  public func reduce<U>(queue: DispatchQueue, initial: U, combine: @escaping (U, Value) throws -> U) -> Stream<U>
+  public func reduce<U>(queue: DispatchQueue, initial: U, combine: @escaping (inout U, Value) throws -> Void) -> Stream<U>
   {
     return reduce(LimitedStream<Value, U>(queue: queue, count: 1), initial: initial, combine: combine)
   }
@@ -59,79 +79,27 @@ extension Stream
 
 extension Stream
 {
-  private func countEvents(_ stream: LimitedStream<Value, Int>) -> Stream<Int>
-  {
-    var total = 0
-    self.subscribe(subscriber: stream,
-                   subscriptionHandler: {
-                    subscription in
-                    stream.setSubscription(subscription)
-                    subscription.requestAll()
-      },
-                   notificationHandler: {
-                    mapped, result in
-                    mapped.queue.async {
-                      switch result
-                      {
-                      case .value:
-                        total += 1
-                      case .error(let error):
-                        mapped.dispatchValue(Result.value(total))
-                        mapped.dispatchError(Result.error(error))
-                      }
-                    }
-      }
-    )
-    return stream
-  }
-
   public func countEvents(qos: DispatchQoS = DispatchQoS.current()) -> Stream<Int>
   {
-    return countEvents(LimitedStream<Value, Int>(qos: qos, count: 1))
+    return self.reduce(qos: qos, initial: 0) { (count: inout Int, _) in count += 1 }
   }
 
   public func countEvents(queue: DispatchQueue) -> Stream<Int>
   {
-    return countEvents(LimitedStream<Value, Int>(queue: queue, count: 1))
+    return self.reduce(queue: queue, initial: 0) { (count: inout Int, _) in count += 1 }
   }
 }
 
 extension Stream
 {
-  private func coalesce(_ stream: LimitedStream<Value, [Value]>) -> Stream<[Value]>
-  {
-    var current = [Value]()
-    self.subscribe(
-      subscriber: stream,
-      subscriptionHandler: {
-        subscription in
-        stream.setSubscription(subscription)
-        subscription.requestAll()
-      },
-      notificationHandler: {
-        mapped, result in
-        mapped.queue.async {
-          switch result
-          {
-          case .value(let value):
-            current.append(value)
-          case .error(let error):
-            mapped.dispatchValue(Result.value(current))
-            mapped.dispatchError(Result.error(error))
-          }
-        }
-      }
-    )
-    return stream
-  }
 
   public func coalesce(qos: DispatchQoS = DispatchQoS.current()) -> Stream<[Value]>
   {
-    return coalesce(LimitedStream<Value, [Value]>(qos: qos, count: 1))
+    return self.reduce(qos: qos, initial: [], combine: { $0.append($1) })
   }
   
   public func coalesce(queue: DispatchQueue) -> Stream<[Value]>
   {
-    return coalesce(LimitedStream<Value, [Value]>(queue: queue, count: 1))
+    return self.reduce(queue: queue, initial: [], combine: { $0.append($1) })
   }
 }
