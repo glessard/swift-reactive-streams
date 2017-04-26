@@ -24,7 +24,7 @@ open class OnRequestStream: Stream<Int>
 
   init(validated queue: ValidatedQueue, autostart: Bool = true)
   {
-    source = DispatchSource.makeUserDataAddSource(queue: queue.queue.queue)
+    source = DispatchSource.makeUserDataAddSource(queue: queue.queue)
     super.init(validated: queue)
 
     var counter = 0

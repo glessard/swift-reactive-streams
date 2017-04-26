@@ -17,7 +17,10 @@ open class PostBox<Value>: Stream<Value>
   {
     guard requested != Int64.min else { return }
     self.queue.async {
-      self.dispatch(result)
+      switch result {
+      case .value: self.dispatchValue(result)
+      case .error: self.dispatchError(result)
+      }
     }
   }
 
@@ -32,8 +35,8 @@ open class PostBox<Value>: Stream<Value>
   final public func post(_ error: Error)
   {
     guard requested != Int64.min else { return }
-    self.queue.async(flags: .barrier, execute: {
+    self.queue.async {
       self.dispatchError(Result.error(error))
-    }) 
+    }
   }
 }

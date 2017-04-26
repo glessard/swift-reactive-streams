@@ -53,7 +53,7 @@ open class Stream<Value>: Source
 
   init(validated queue: ValidatedQueue)
   {
-    self.queue = queue.queue.queue
+    self.queue = queue.queue
   }
 
   public var state: StreamState {
@@ -71,7 +71,7 @@ open class Stream<Value>: Source
     return self.queue.qos
   }
 
-  /// precondition: must run on this Stream's queue
+  /// precondition: must run on this stream's serial queue
 
   open func dispatch(_ result: Result<Value>)
   {
@@ -79,26 +79,12 @@ open class Stream<Value>: Source
 
     switch result
     {
-    case .value:
-      dispatchValue(result)
-
-    case .error:
-      var req = requested
-      while req != Int64.min
-      {
-        // This should be an unconditional swap, with notification occuring iff the value has been changed
-        if OSAtomicCompareAndSwap64(req, Int64.min, &requested)
-        {
-          for notificationHandler in self.observers.values { notificationHandler(result) }
-          self.queue.async(flags: .barrier, execute: { self.finalizeStream() }) 
-          break
-        }
-        req = requested
-      }
+    case .value: dispatchValue(result)
+    case .error: dispatchError(result)
     }
   }
 
-  /// precondition: must run on this Stream's queue
+  /// precondition: must run on this Stream's serial queue
 
   final func dispatchValue(_ value: Result<Value>)
   {
@@ -260,42 +246,5 @@ open class Stream<Value>: Source
 
     notificationHandler(Result.error(StreamCompleted.subscriptionCancelled))
     return observers.isEmpty
-  }
-}
-
-open class SerialStream<Value>: Stream<Value>
-{
-  public convenience init(qos: DispatchQoS = DispatchQoS.current())
-  {
-    self.init(validated: ValidatedQueue(qos: qos))
-  }
-
-  public convenience init(queue: DispatchQueue)
-  {
-    self.init(validated: ValidatedQueue(queue))
-  }
-
-  override init(validated: ValidatedQueue)
-  {
-    switch validated.queue
-    {
-    case .serial:
-      super.init(validated: validated)
-    case .concurrent(let queue):
-      super.init(validated: ValidatedQueue(queue))
-    }
-  }
-
-  /// precondition: must run on this stream's serial queue
-
-  open override func dispatch(_ result: Result<Value>)
-  {
-    guard requested != Int64.min else { return }
-
-    switch result
-    {
-    case .value: dispatchValue(result)
-    case .error: dispatchError(result)
-    }
   }
 }
