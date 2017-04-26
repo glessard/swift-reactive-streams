@@ -15,7 +15,9 @@ class onRequestTests: XCTestCase
   {
     let e = expectation(description: "on-request")
 
-    OnRequestStream().next(count: 10).reduce(0, +).notify {
+    let o = OnRequestStream(autostart: false)
+
+    o.next(count: 10).reduce(0, +).notify {
       result in
       switch result
       {
@@ -25,12 +27,16 @@ class onRequestTests: XCTestCase
       }
     }
 
+    o.start()
+
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testOnRequest2()
   {
     let e = expectation(description: "deinit")
+    let f = expectation(description: "completion")
+    let g = expectation(description: "data")
 
     class Test: OnRequestStream
     {
@@ -48,10 +54,12 @@ class onRequestTests: XCTestCase
       }
     }
 
-    let s = { Test(expectation: e).next(count: 5).countEvents() }()
-
-    let f = expectation(description: "completion")
+    let t = Test(expectation: e).paused()
+    let s = t.next(count: 5).countEvents()
+    s.onValue { if $0 == 5 { g.fulfill() } }
     s.onCompletion { _ in f.fulfill() }
+    s.onError { _ in XCTFail() }
+    t.start()
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
@@ -60,29 +68,36 @@ class onRequestTests: XCTestCase
   {
     let s = OnRequestStream().split()
 
-    let e1 = expectation(description: "first")
-    s.0.next(count: 10).reduce(0, +).notify {
+    let e0 = expectation(description: "first")
+    let p0 = s.0.paused()
+    p0.next(count: 10).reduce(0, +).notify {
       result in
       switch result
       {
-      case .value(let value) where value == 45: e1.fulfill()
+      case .value(let value) where value == 45: e0.fulfill()
       case .error(_ as StreamCompleted):        break
       default:                                  XCTFail()
       }
     }
+    p0.start()
 
     waitForExpectations(timeout: 1.0, handler: nil)
 
-    let e2 = expectation(description: "second")
-    s.1.next(count: 10).reduce(0, +).notify {
+    XCTAssert(s.0.state == .ended)
+    XCTAssert(s.1.state == .waiting)
+
+    let e1 = expectation(description: "second")
+    let p1 = s.1.paused()
+    p1.next(count: 10).reduce(0, +).notify {
       result in
       switch result
       {
-      case .value(let value) where value == 145: e2.fulfill()
+      case .value(let value) where value == 145: e1.fulfill()
       case .error(_ as StreamCompleted):         break
       default:                                   XCTFail()
       }
     }
+    p1.start()
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
