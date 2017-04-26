@@ -195,7 +195,7 @@ class flatMapTests: XCTestCase
       }
     }
 
-    for i in (1...events)
+    for i in (1...events).reversed()
     {
       if i < limit { stream.post(i) }
       else         { stream.post(NSError(domain: "bogus", code: i, userInfo: nil)) }
