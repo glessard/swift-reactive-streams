@@ -6,7 +6,7 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-open class MergeStream<Value>: SerialSubStream<Value, Value>
+public class MergeStream<Value>: SubStream<Value, Value>
 {
   private var sources = Set<Subscription>()
   private var closed = false
@@ -16,7 +16,7 @@ open class MergeStream<Value>: SerialSubStream<Value, Value>
     super.init(validated: validated)
   }
 
-  open func merge(_ source: Stream<Value>)
+  public func merge(_ source: Stream<Value>)
   {
     if self.closed { return }
 
@@ -65,7 +65,7 @@ open class MergeStream<Value>: SerialSubStream<Value, Value>
 
   /// precondition: must run on a barrier block or a serial queue
 
-  open override func finalizeStream()
+  public override func finalizeStream()
   {
     closed = true
     for source in sources
@@ -76,7 +76,7 @@ open class MergeStream<Value>: SerialSubStream<Value, Value>
     super.finalizeStream()
   }
 
-  open override func close()
+  public override func close()
   {
     queue.async(flags: .barrier, execute: {
       self.closed = true
@@ -87,7 +87,7 @@ open class MergeStream<Value>: SerialSubStream<Value, Value>
     }) 
   }
 
-  open override func updateRequest(_ requested: Int64) -> Int64
+  public override func updateRequest(_ requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
     // copy sources so that a modification in the main queue doesn't interfere.

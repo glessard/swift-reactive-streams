@@ -52,7 +52,7 @@ open class Stream<Value>: Source
     self.queue = queue.queue.queue
   }
 
-  open var state: StreamState {
+  public var state: StreamState {
     if started == 0 { return .waiting }
     switch requested
     {
@@ -63,13 +63,13 @@ open class Stream<Value>: Source
     }
   }
 
-  open var qos: DispatchQoS {
+  public var qos: DispatchQoS {
     return self.queue.qos
   }
 
   /// precondition: must run on this Stream's queue
 
-  func dispatch(_ result: Result<Value>)
+  open func dispatch(_ result: Result<Value>)
   {
     guard requested != Int64.min else { return }
 
@@ -155,14 +155,14 @@ open class Stream<Value>: Source
   final public func subscribe<O: Observer>(_ observer: O)
     where O.EventValue == Value
   {
-    addSubscription(observer.onSubscribe,
+    addSubscription(subscriptionHandler: observer.onSubscribe,
                     notificationHandler: Notifier(target: observer, handler: { target, result in target.notify(result) }))
   }
 
   final public func subscribe<U>(substream: SubStream<Value, U>,
                                  notificationHandler: @escaping (SubStream<Value, U>, Result<Value>) -> Void)
   {
-    addSubscription(substream.setSubscription,
+    addSubscription(subscriptionHandler: substream.setSubscription,
                     notificationHandler: Notifier(target: substream, handler: notificationHandler))
   }
 
@@ -170,11 +170,11 @@ open class Stream<Value>: Source
                                             subscriptionHandler: @escaping (Subscription) -> Void,
                                             notificationHandler: @escaping (T, Result<Value>) -> Void)
   {
-    addSubscription(subscriptionHandler,
+    addSubscription(subscriptionHandler: subscriptionHandler,
                     notificationHandler: Notifier(target: subscriber, handler: notificationHandler))
   }
 
-  private func addSubscription<T: AnyObject>(_ subscriptionHandler: @escaping (Subscription) -> Void,
+  private func addSubscription<T: AnyObject>(subscriptionHandler: @escaping (Subscription) -> Void,
                                              notificationHandler: Notifier<T, Value>)
   {
     let subscription = Subscription(source: self)
@@ -284,7 +284,7 @@ open class SerialStream<Value>: Stream<Value>
 
   /// precondition: must run on this stream's serial queue
 
-  override func dispatch(_ result: Result<Value>)
+  open override func dispatch(_ result: Result<Value>)
   {
     guard requested != Int64.min else { return }
 

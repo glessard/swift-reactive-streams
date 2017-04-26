@@ -90,7 +90,7 @@ open class SerialSubStream<InputValue, OutputValue>: SubStream<InputValue, Outpu
 
   /// precondition: must run on this stream's serial queue
 
-  override func dispatch(_ result: Result<OutputValue>)
+  open override func dispatch(_ result: Result<OutputValue>)
   {
     guard requested != Int64.min else { return }
 
