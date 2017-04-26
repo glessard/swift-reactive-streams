@@ -382,8 +382,8 @@ class streamTests: XCTestCase
       }
     }
 
-    stream.post(d[0])
     f.close()
+    d.forEach { stream.post($0) }
 
     waitForExpectations(timeout: 1.0, handler: nil)
     stream.close()
