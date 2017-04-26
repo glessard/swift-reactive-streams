@@ -28,8 +28,7 @@ extension Stream
 
   public func notify(queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
   {
-    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
-    performNotify(queue: local, task: task)
+    performNotify(queue: DispatchQueue(label: "local-notify-queue", target: queue), task: task)
   }
 }
 
@@ -58,8 +57,7 @@ extension Stream
 
   public func onValue(queue: DispatchQueue, task: @escaping (Value) -> Void)
   {
-    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
-    performOnValue(queue: local, task: task)
+    performOnValue(queue: DispatchQueue(label: "local-notify-queue", target: queue), task: task)
   }
 }
 
