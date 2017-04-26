@@ -36,7 +36,7 @@ struct ValidatedQueue
     else
     {
       let validated = DispatchQueue(label: "concurrent-queue", qos: qos, attributes: DispatchQueue.Attributes.concurrent)
-      self.queue = TypedQueue.serial(validated)
+      self.queue = TypedQueue.concurrent(validated)
     }
   }
 
