@@ -1,0 +1,57 @@
+//
+//  stream-paused.swift
+//  stream
+//
+//  Created by Guillaume Lessard on 4/26/17.
+//  Copyright © 2017 Guillaume Lessard. All rights reserved.
+//
+
+open class Paused<Value>: SubStream<Value, Value>
+{
+  private var torequest = Int64(0)
+  private var started = false
+
+  public init(_ stream: Stream<Value>)
+  {
+    super.init(validated: ValidatedQueue(stream.queue))
+
+    stream.subscribe(
+      substream: self,
+      notificationHandler: {
+        substream, result in
+        substream.queue.async {
+          substream.dispatch(result)
+        }
+      }
+    )
+  }
+
+  open override func updateRequest(_ requested: Int64) -> Int64
+  {
+    if started
+    {
+      return super.updateRequest(requested)
+    }
+
+    torequest += requested
+    return torequest
+  }
+
+  open func start()
+  {
+    if (!started)
+    {
+      _ = super.updateRequest(torequest)
+      torequest = 0
+      started = true
+    }
+  }
+}
+
+extension Stream
+{
+  public func paused() -> Paused<Value>
+  {
+    return Paused(self)
+  }
+}
