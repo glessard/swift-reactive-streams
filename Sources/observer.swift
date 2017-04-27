@@ -8,19 +8,19 @@
 
 public protocol Observer: class
 {
-  associatedtype EventValue
+  associatedtype Value
 
   func onSubscribe(_ subscription: Subscription)
-  func onValue(_ value: EventValue)
+  func onValue(_ value: Value)
   func onError(_ error: Error)
   func onCompletion(_ status: StreamCompleted)
 
-  func notify(_ result: Result<EventValue>)
+  func notify(_ result: Result<Value>)
 }
 
 extension Observer
 {
-  func notify(_ result: Result<EventValue>)
+  func notify(_ result: Result<Value>)
   {
     switch result
     {

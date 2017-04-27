@@ -153,7 +153,7 @@ open class Stream<Value>: Source
   // subscription methods
 
   final public func subscribe<O: Observer>(_ observer: O)
-    where O.EventValue == Value
+    where O.Value == Value
   {
     addSubscription(subscriptionHandler: observer.onSubscribe,
                     notificationHandler: Notifier(target: observer, handler: { target, result in target.notify(result) }))
