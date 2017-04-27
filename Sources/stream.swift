@@ -39,12 +39,12 @@ open class Stream<Value>: Source
 
   public convenience init(qos: DispatchQoS = DispatchQoS.current())
   {
-    self.init(validated: ValidatedQueue(qos: qos, serial: true))
+    self.init(validated: ValidatedQueue(qos: qos))
   }
 
   public convenience init(queue: DispatchQueue)
   {
-    self.init(validated: ValidatedQueue(queue: queue, serial: false))
+    self.init(validated: ValidatedQueue(queue))
   }
 
   init(validated queue: ValidatedQueue)
@@ -263,12 +263,12 @@ open class SerialStream<Value>: Stream<Value>
 {
   public convenience init(qos: DispatchQoS = DispatchQoS.current())
   {
-    self.init(validated: ValidatedQueue(qos: qos, serial: true))
+    self.init(validated: ValidatedQueue(qos: qos))
   }
 
   public convenience init(queue: DispatchQueue)
   {
-    self.init(validated: ValidatedQueue(queue: queue, serial: true))
+    self.init(validated: ValidatedQueue(queue))
   }
 
   override init(validated: ValidatedQueue)
@@ -278,7 +278,7 @@ open class SerialStream<Value>: Stream<Value>
     case .serial:
       super.init(validated: validated)
     case .concurrent(let queue):
-      super.init(validated: ValidatedQueue(queue: queue, serial: true))
+      super.init(validated: ValidatedQueue(queue))
     }
   }
 

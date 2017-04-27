@@ -51,7 +51,7 @@ class onRequestTests: XCTestCase
       init(expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(qos: DispatchQoS.current(), serial: true))
+        super.init(validated: ValidatedQueue(qos: DispatchQoS.current()))
       }
 
       deinit

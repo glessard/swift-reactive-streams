@@ -69,12 +69,12 @@ open class SerialSubStream<InputValue, OutputValue>: SubStream<InputValue, Outpu
 {
   public convenience init(qos: DispatchQoS = DispatchQoS.current())
   {
-    self.init(validated: ValidatedQueue(qos: qos, serial: true))
+    self.init(validated: ValidatedQueue(qos: qos))
   }
 
   public convenience init(queue: DispatchQueue)
   {
-    self.init(validated: ValidatedQueue(queue: queue, serial: true))
+    self.init(validated: ValidatedQueue(queue))
   }
 
   override init(validated: ValidatedQueue)
@@ -84,7 +84,7 @@ open class SerialSubStream<InputValue, OutputValue>: SubStream<InputValue, Outpu
     case .serial:
       super.init(validated: validated)
     case .concurrent(let queue):
-      super.init(validated: ValidatedQueue(queue: queue, serial: true))
+      super.init(validated: ValidatedQueue(queue))
     }
   }
 
@@ -109,12 +109,12 @@ open class LimitedStream<InputValue, OutputValue>: SerialSubStream<InputValue, O
 
   public convenience init(qos: DispatchQoS = DispatchQoS.current(), count: Int64)
   {
-    self.init(validated: ValidatedQueue(qos: qos, serial: true), count: max(count,0))
+    self.init(validated: ValidatedQueue(qos: qos), count: max(count,0))
   }
 
   public convenience init(queue: DispatchQueue, count: Int64)
   {
-    self.init(validated: ValidatedQueue(queue: queue, serial: true), count: max(count,0))
+    self.init(validated: ValidatedQueue(queue), count: max(count,0))
   }
 
   init(validated: ValidatedQueue, count: Int64)

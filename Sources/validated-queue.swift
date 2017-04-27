@@ -26,7 +26,7 @@ struct ValidatedQueue
 {
   var queue: TypedQueue
 
-  init(qos: DispatchQoS = DispatchQoS.current(), serial: Bool)
+  init(qos: DispatchQoS = DispatchQoS.current(), serial: Bool = true)
   {
     if serial
     {
@@ -40,7 +40,7 @@ struct ValidatedQueue
     }
   }
 
-  init(queue: DispatchQueue, serial: Bool)
+  init(_ queue: DispatchQueue, serial: Bool = true)
   {
     if serial
     { // create a new queue whose target will be the queue that's passed in
