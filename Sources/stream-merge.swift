@@ -29,7 +29,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
 
   func performMerge(_ source: Stream<Value>)
   {
-    guard !self.closed else { return }
+    if self.closed { return }
 
     var subscription: Subscription! = nil
 
