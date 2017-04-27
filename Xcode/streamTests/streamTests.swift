@@ -458,6 +458,14 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
+  func testSplit0()
+  {
+    let stream = PostBox<Int>()
+    let split = stream.split(count: 0)
+    XCTAssert(split.isEmpty)
+    stream.close()
+  }
+
   func testSplit1()
   {
     let stream = PostBox<Int>()
