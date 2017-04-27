@@ -157,14 +157,16 @@ class streamTests: XCTestCase
   func testOnError()
   {
     let e2 = expectation(description: "observation onError")
-    let s = stream.Stream<Int>()
+    let s = PostBox<Int>()
 
     s.onError {
       error in
-      if error is StreamCompleted { e2.fulfill() }
+      if error is StreamCompleted { XCTFail() }
+      else { e2.fulfill() }
     }
 
-    s.close()
+    s.post(1)
+    s.post(StreamError.subscriptionFailed)
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
@@ -197,9 +199,9 @@ class streamTests: XCTestCase
 
     var d = Array<Double>()
     let m = stream.map(transform: { 2.0*Double($0) }).map(transform: { d.append($0) }).final()
-    m.onError {
-      error in
-      if let t = error as? StreamCompleted, case .normally = t
+    m.onCompletion {
+      completed in
+      if case .normally = completed
       {
         XCTAssert(d.count == events)
         e2.fulfill()
@@ -575,10 +577,14 @@ class streamTests: XCTestCase
 
     let e3 = expectation(description: "split.1 onCompletion")
 
+    XCTAssert(split.1.state == .waiting)
     XCTAssert(split.1.requested == Int64.min)
+    // any subscription attempt will fail
 
     split.1.onValue { _ in XCTFail("split.1 never had a non-zero request") }
-    split.1.onCompletion { _ in e3.fulfill() }
+    split.1.onError { _ in e3.fulfill() }
+
+    XCTAssert(split.1.state == .ended)
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }

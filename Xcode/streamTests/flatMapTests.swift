@@ -79,12 +79,13 @@ class flatMapTests: XCTestCase
     let s = PostBox<Int>()
     let events = 10
 
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     let m = s.flatMap {
       count -> stream.Stream<Double> in
       let s = stream.Stream<Double>()
       s.close()
+      // The new stream is already closed on return, therefore subscriptions will fail
       return s
     }
 
@@ -95,9 +96,12 @@ class flatMapTests: XCTestCase
       case .value(let value):
         if value != 0 { print(value) }
         XCTAssert(value == 0)
+      case .error(let error as StreamError):
+        if case .subscriptionFailed = error { e.fulfill() }
+        else { XCTFail() }
       case .error(let error):
-        if error is StreamCompleted { e.fulfill() }
-        else { print(error) }
+        print(error)
+        XCTFail()
       }
     }
 

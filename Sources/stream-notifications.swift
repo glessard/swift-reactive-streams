@@ -78,8 +78,13 @@ extension Stream
       notificationHandler: {
         q, result in
         assert(q === queue)
-        if case .error(let error) = result
+        switch result
         {
+        case .value:
+          break
+        case .error(_ as StreamCompleted):
+          break
+        case .error(let error):
           local.async { task(error) }
         }
       }

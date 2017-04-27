@@ -25,8 +25,12 @@ extension StreamState: CustomStringConvertible
 public enum StreamCompleted: Error
 {
   case normally              // normal completion
-  case subscriptionFailed    // attempted to subscribe to a completed stream
   case subscriptionCancelled
+}
+
+public enum StreamError: Error
+{
+  case subscriptionFailed    // attempted to subscribe to a completed stream
 }
 
 open class Stream<Value>: Source
@@ -190,7 +194,7 @@ open class Stream<Value>: Source
         }
         else
         { // the stream was closed between the block's dispatch and its execution
-          notificationHandler.notify(Result.error(StreamCompleted.subscriptionFailed))
+          notificationHandler.notify(Result.error(StreamError.subscriptionFailed))
         }
       }) 
       return
@@ -206,7 +210,7 @@ open class Stream<Value>: Source
         }
         else
         { // the stream was closed between the block's dispatch and its execution
-          notificationHandler.notify(Result.error(StreamCompleted.subscriptionFailed))
+          notificationHandler.notify(Result.error(StreamError.subscriptionFailed))
         }
       }) 
       return
@@ -214,7 +218,7 @@ open class Stream<Value>: Source
 
     // dispatching on a queue is unnecessary in this case
     subscriptionHandler(subscription)
-    notificationHandler.notify(Result.error(StreamCompleted.subscriptionFailed))
+    notificationHandler.notify(Result.error(StreamError.subscriptionFailed))
   }
 
   // MARK: Source
