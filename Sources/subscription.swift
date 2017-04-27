@@ -53,7 +53,7 @@ final public class Subscription
     if count < 1 { return }
 
     var p = requested
-    precondition(p == Int64.min || p >= 0)
+    assert(p == Int64.min || p >= 0)
     while p != Int64.min && p < Int64.max
     {
       let tentatively = p &+ count // could technically overflow; avoid trapping
