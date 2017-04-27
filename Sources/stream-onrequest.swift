@@ -55,6 +55,7 @@ open class OnRequestStream: Stream<Int>
     }
   }
 
+  @discardableResult
   override open func updateRequest(_ requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)

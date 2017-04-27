@@ -47,6 +47,7 @@ open class SubStream<InputValue, OutputValue>: Stream<OutputValue>
     return false
   }
 
+  @discardableResult
   open override func updateRequest(_ requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
@@ -124,6 +125,7 @@ open class LimitedStream<InputValue, OutputValue>: SerialSubStream<InputValue, O
     super.init(validated: validated)
   }
 
+  @discardableResult
   open override func updateRequest(_ requested: Int64) -> Int64
   { // only pass on requested updates up to and including our remaining number of events
     let remaining = (limit-count)

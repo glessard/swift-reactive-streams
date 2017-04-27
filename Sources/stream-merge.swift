@@ -87,6 +87,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
     }) 
   }
 
+  @discardableResult
   public override func updateRequest(_ requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)

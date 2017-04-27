@@ -26,6 +26,7 @@ open class Paused<Value>: SubStream<Value, Value>
     )
   }
 
+  @discardableResult
   open override func updateRequest(_ requested: Int64) -> Int64
   {
     if started
@@ -41,7 +42,7 @@ open class Paused<Value>: SubStream<Value, Value>
   {
     if (!started)
     {
-      _ = super.updateRequest(torequest)
+      super.updateRequest(torequest)
       torequest = 0
       started = true
     }
