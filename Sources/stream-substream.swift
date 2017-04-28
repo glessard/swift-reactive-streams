@@ -88,8 +88,14 @@ open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputV
   @discardableResult
   open override func updateRequest(_ requested: Int64) -> Int64
   { // only pass on requested updates up to and including our remaining number of events
+    precondition(requested > 0)
+
     let remaining = (limit-count)
-    let adjusted = (remaining > 0) ? min(requested, remaining) : 0
-    return super.updateRequest(adjusted)
+    let adjusted = min(requested, remaining)
+    if adjusted > 0
+    {
+      return super.updateRequest(adjusted)
+    }
+    return 0
   }
 }
