@@ -14,7 +14,7 @@ extension Stream
       subscriber: queue,
       subscriptionHandler: { $0.requestAll() },
       notificationHandler: {
-        q, result in
+        _, result in
         queue.async { task(result) }
       }
     )
@@ -39,10 +39,13 @@ extension Stream
       subscriber: queue,
       subscriptionHandler: { $0.requestAll() },
       notificationHandler: {
-        q, result in
-        if case .value(let value) = result
+        _, result in
+        switch result
         {
+        case .value(let value):
           queue.async { task(value) }
+        default:
+          break
         }
       }
     )
@@ -74,15 +77,13 @@ extension Stream
       subscriber: queue,
       subscriptionHandler: { _ in },
       notificationHandler: {
-        q, result in
+        _, result in
         switch result
         {
-        case .value:
-          break
-        case .error(_ as StreamCompleted):
+        case .value, .error(_ as StreamCompleted):
           break
         case .error(let error):
-          local.async { task(error) }
+          queue.async { task(error) }
         }
       }
     )
@@ -104,10 +105,13 @@ extension Stream
       subscriber: queue,
       subscriptionHandler: { _ in },
       notificationHandler: {
-        q, result in
-        if case .error(let status as StreamCompleted) = result
+        _, result in
+        switch result
         {
-          local.async { task(status) }
+        case .error(let completion as StreamCompleted):
+          queue.async { task(completion) }
+        default:
+          break
         }
       }
     )
