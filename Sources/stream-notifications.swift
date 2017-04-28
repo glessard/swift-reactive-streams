@@ -15,7 +15,6 @@ extension Stream
       subscriptionHandler: { $0.requestAll() },
       notificationHandler: {
         q, result in
-        assert(q === queue)
         queue.async { task(result) }
       }
     )
@@ -41,7 +40,6 @@ extension Stream
       subscriptionHandler: { $0.requestAll() },
       notificationHandler: {
         q, result in
-        assert(q === queue)
         if case .value(let value) = result
         {
           queue.async { task(value) }
@@ -77,7 +75,6 @@ extension Stream
       subscriptionHandler: { _ in },
       notificationHandler: {
         q, result in
-        assert(q === queue)
         switch result
         {
         case .value:
@@ -108,7 +105,6 @@ extension Stream
       subscriptionHandler: { _ in },
       notificationHandler: {
         q, result in
-        assert(q === queue)
         if case .error(let status as StreamCompleted) = result
         {
           local.async { task(status) }
