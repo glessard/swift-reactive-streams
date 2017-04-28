@@ -14,8 +14,7 @@ extension Stream
       subscriber: queue,
       subscriptionHandler: { $0.requestAll() },
       notificationHandler: {
-        q, result in
-        assert(q === queue)
+        _, result in
         queue.async { task(result) }
       }
     )
@@ -40,11 +39,13 @@ extension Stream
       subscriber: queue,
       subscriptionHandler: { $0.requestAll() },
       notificationHandler: {
-        q, result in
-        assert(q === queue)
-        if case .value(let value) = result
+        _, result in
+        switch result
         {
+        case .value(let value):
           queue.async { task(value) }
+        default:
+          break
         }
       }
     )
@@ -70,22 +71,17 @@ extension Stream
 
   public func onError(queue: DispatchQueue, task: @escaping (Error) -> Void)
   {
-    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
-
     self.subscribe(
       subscriber: queue,
       subscriptionHandler: { _ in },
       notificationHandler: {
-        q, result in
-        assert(q === queue)
+        _, result in
         switch result
         {
-        case .value:
-          break
-        case .error(_ as StreamCompleted):
+        case .value, .error(_ as StreamCompleted):
           break
         case .error(let error):
-          local.async { task(error) }
+          queue.async { task(error) }
         }
       }
     )
@@ -101,17 +97,17 @@ extension Stream
 
   public func onCompletion(queue: DispatchQueue, task: @escaping (StreamCompleted) -> Void)
   {
-    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
-
     self.subscribe(
       subscriber: queue,
       subscriptionHandler: { _ in },
       notificationHandler: {
-        q, result in
-        assert(q === queue)
-        if case .error(let status as StreamCompleted) = result
+        _, result in
+        switch result
         {
-          local.async { task(status) }
+        case .error(let completion as StreamCompleted):
+          queue.async { task(completion) }
+        default:
+          break
         }
       }
     )
