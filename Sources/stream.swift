@@ -33,7 +33,7 @@ public enum StreamError: Error
   case subscriptionFailed    // attempted to subscribe to a completed stream
 }
 
-open class Stream<Value>: Source
+open class Stream<Value>: Publisher
 {
   let queue: DispatchQueue
   private var observers = Dictionary<Subscription, (Result<Value>) -> Void>()
@@ -207,7 +207,7 @@ open class Stream<Value>: Source
     notificationHandler.notify(Result.error(StreamError.subscriptionFailed))
   }
 
-  // MARK: Source
+  // MARK: Publisher
 
   @discardableResult
   open func updateRequest(_ requested: Int64) -> Int64

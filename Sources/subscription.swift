@@ -8,13 +8,13 @@
 
 final public class Subscription
 {
-  private var source: Source?
+  private var source: Publisher?
 
   public private(set) var requested: Int64
 
   public var cancelled: Bool { return requested == Int64.min }
 
-  init(source: Source)
+  init(source: Publisher)
   {
     self.source = source
     self.requested = 0
