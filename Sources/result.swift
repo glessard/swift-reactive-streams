@@ -6,11 +6,11 @@
 //  Copyright © 2015 Guillaume Lessard. All rights reserved.
 //
 
-import Foundation.NSError
+import class Foundation.NSError
 
 /// A Result type, approximately like everyone else has done.
 ///
-/// The error case does not encode type beyond ErrorType.
+/// The error case does not encode type beyond the Error protocol.
 /// This way there is no need to ever map between error types, which mostly cannot make sense.
 
 public enum Result<Value>: CustomStringConvertible
@@ -18,7 +18,7 @@ public enum Result<Value>: CustomStringConvertible
   case value(Value)
   case error(Error)
 
-  public init( task: () throws -> Value)
+  public init(task: () throws -> Value)
   {
     do {
       let value = try task()
@@ -29,8 +29,7 @@ public enum Result<Value>: CustomStringConvertible
     }
   }
 
-  public func asValue() -> Value?
-  {
+  public var value: Value? {
     switch self
     {
     case .value(let value): return value
@@ -46,8 +45,7 @@ public enum Result<Value>: CustomStringConvertible
     }
   }
 
-  public func asError() -> Error?
-  {
+  public var error: Error? {
     switch self
     {
     case .value:            return nil
