@@ -17,7 +17,7 @@ open class OnRequestStream: Stream<Int>
     self.init(validated: ValidatedQueue(qos: qos), autostart: autostart)
   }
 
-  public convenience init(queue: DispatchQueue, autostart: Bool = true)
+  public convenience init(_ queue: DispatchQueue, autostart: Bool = true)
   {
     self.init(validated: ValidatedQueue(queue), autostart: autostart)
   }
@@ -75,11 +75,11 @@ open class OnRequestStream: Stream<Int>
 
   override func performCancellation(_ subscription: Subscription) -> Bool
   {
-    let unobserved = super.performCancellation(subscription)
-    if unobserved
+    if super.performCancellation(subscription)
     { // the event handler holds a strong reference to self; cancel it.
-      source.setEventHandler {}
+      source.setEventHandler(handler: nil)
+      return true
     }
-    return unobserved
+    return false
   }
 }
