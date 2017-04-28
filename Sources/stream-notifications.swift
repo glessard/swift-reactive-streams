@@ -71,8 +71,6 @@ extension Stream
 
   public func onError(queue: DispatchQueue, task: @escaping (Error) -> Void)
   {
-    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
-
     self.subscribe(
       subscriber: queue,
       subscriptionHandler: { _ in },
@@ -99,8 +97,6 @@ extension Stream
 
   public func onCompletion(queue: DispatchQueue, task: @escaping (StreamCompleted) -> Void)
   {
-    let local = DispatchQueue(label: "local-notify-queue", attributes: DispatchQueue.Attributes.concurrent, target: queue)
-
     self.subscribe(
       subscriber: queue,
       subscriptionHandler: { _ in },
