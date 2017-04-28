@@ -25,12 +25,12 @@ class flatMapTests: XCTestCase
 
   func testFlatMap1()
   {
-    let s = stream.Stream<Int>()
+    let s = EventStream<Int>()
     let e = expectation(description: "observation ends \(arc4random())")
 
     let m = s.flatMap {
-      count -> stream.Stream<Double> in
-      let s = stream.Stream<Double>()
+      count -> EventStream<Double> in
+      let s = EventStream<Double>()
       XCTFail()
       s.close()
       return s
@@ -82,8 +82,8 @@ class flatMapTests: XCTestCase
     let e = expectation(description: "observation ends \(#function)")
 
     let m = s.flatMap {
-      count -> stream.Stream<Double> in
-      let s = stream.Stream<Double>()
+      count -> EventStream<Double> in
+      let s = EventStream<Double>()
       s.close()
       // The new stream is already closed on return, therefore subscriptions will fail
       return s
@@ -148,7 +148,7 @@ class flatMapTests: XCTestCase
     let e = expectation(description: "observation ends \(arc4random())")
 
     let m = s.flatMap {
-      count -> stream.Stream<Double> in
+      count -> EventStream<Double> in
       let s = OnRequestStream().next(count: events).map {
         i throws -> Double in
         if i < limit { return Double(i) }

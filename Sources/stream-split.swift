@@ -6,21 +6,21 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-extension Stream
+extension EventStream
 {
-  public func split(qos: DispatchQoS = DispatchQoS.current()) -> (Stream, Stream)
+  public func split(qos: DispatchQoS = DispatchQoS.current()) -> (EventStream, EventStream)
   {
     let streams = self.split(qos: qos, count: 2)
     return (streams[0], streams[1])
   }
 
-  public func split(qos: DispatchQoS = DispatchQoS.current(), count: Int) -> [Stream]
+  public func split(qos: DispatchQoS = DispatchQoS.current(), count: Int) -> [EventStream]
   {
     precondition(count >= 0)
-    guard count > 0 else { return [Stream]() }
+    guard count > 0 else { return [EventStream]() }
 
     let streams = (0..<count).map {
-      _ -> Stream in
+      _ -> EventStream in
       let stream = SubStream<Value, Value>(qos: qos)
       self.subscribe(substream: stream) {
         mapped, result in

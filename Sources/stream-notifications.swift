@@ -6,7 +6,7 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-extension Stream
+extension EventStream
 {
   private func performNotify(queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
   {
@@ -31,7 +31,7 @@ extension Stream
   }
 }
 
-extension Stream
+extension EventStream
 {
   private func performOnValue(queue: DispatchQueue, task: @escaping (Value) -> Void)
   {
@@ -62,7 +62,7 @@ extension Stream
   }
 }
 
-extension Stream
+extension EventStream
 {
   public func onError(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Error) -> Void)
   {
@@ -88,7 +88,7 @@ extension Stream
   }
 }
 
-extension Stream
+extension EventStream
 {
   public func onCompletion(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (StreamCompleted) -> Void)
   {

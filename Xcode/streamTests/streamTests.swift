@@ -13,7 +13,7 @@ class streamTests: XCTestCase
 {
   func testLifetime1()
   {
-    class SpyStream: stream.Stream<Int>
+    class SpyStream: EventStream<Int>
     {
       let e: XCTestExpectation
 
@@ -37,7 +37,7 @@ class streamTests: XCTestCase
 
   func testLifetime2()
   {
-    class SpyStream: stream.Stream<Int>
+    class SpyStream: EventStream<Int>
     {
       let e: XCTestExpectation
 
@@ -53,7 +53,7 @@ class streamTests: XCTestCase
       }
     }
 
-    let p = UnsafeMutablePointer<stream.Stream<Int>>.allocate(capacity: 1)
+    let p = UnsafeMutablePointer<EventStream<Int>>.allocate(capacity: 1)
     p.initialize(to: SpyStream(expectation(description: "deletion")).final())
     p.deinitialize()
 
@@ -65,7 +65,7 @@ class streamTests: XCTestCase
   {
     // is there less messy way to do this test?
 
-    class SpyStream: stream.Stream<Int>
+    class SpyStream: EventStream<Int>
     {
       override init(validated queue: ValidatedQueue)
       {
@@ -78,7 +78,7 @@ class streamTests: XCTestCase
       }
     }
 
-    let p = UnsafeMutablePointer<stream.Stream<Int>>.allocate(capacity: 1)
+    let p = UnsafeMutablePointer<EventStream<Int>>.allocate(capacity: 1)
     p.initialize(to: SpyStream().final())
     // the SpyStream should leak because one of its observers is kept alive by the pointer
   }
@@ -169,7 +169,7 @@ class streamTests: XCTestCase
     s1.post(Result.error(NSError(domain: "error", code: -1, userInfo: nil)))
 
     let e2 = expectation(description: "observation onCompletion")
-    let s2 = stream.Stream<Int>()
+    let s2 = EventStream<Int>()
     s2.onCompletion {
       _ in e2.fulfill()
     }
