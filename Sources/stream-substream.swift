@@ -51,10 +51,7 @@ open class SubStream<InputValue, OutputValue>: Stream<OutputValue>
   open override func updateRequest(_ requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
-    if additional > 0
-    {
-      subscription?.request(additional)
-    }
+    subscription?.request(additional)
     return additional
   }
 
@@ -66,44 +63,7 @@ open class SubStream<InputValue, OutputValue>: Stream<OutputValue>
   }
 }
 
-open class SerialSubStream<InputValue, OutputValue>: SubStream<InputValue, OutputValue>
-{
-  public convenience init(qos: DispatchQoS = DispatchQoS.current())
-  {
-    self.init(validated: ValidatedQueue(qos: qos))
-  }
-
-  public convenience init(queue: DispatchQueue)
-  {
-    self.init(validated: ValidatedQueue(queue))
-  }
-
-  override init(validated: ValidatedQueue)
-  {
-    switch validated.queue
-    {
-    case .serial:
-      super.init(validated: validated)
-    case .concurrent(let queue):
-      super.init(validated: ValidatedQueue(queue))
-    }
-  }
-
-  /// precondition: must run on this stream's serial queue
-
-  open override func dispatch(_ result: Result<OutputValue>)
-  {
-    guard requested != Int64.min else { return }
-
-    switch result
-    {
-    case .value: dispatchValue(result)
-    case .error: dispatchError(result)
-    }
-  }
-}
-
-open class LimitedStream<InputValue, OutputValue>: SerialSubStream<InputValue, OutputValue>
+open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputValue>
 {
   let limit: Int64
   var count: Int64 = 0
