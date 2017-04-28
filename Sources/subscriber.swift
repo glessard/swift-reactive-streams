@@ -1,12 +1,12 @@
 //
-//  observer.swift
+//  subscriber.swift
 //  stream
 //
 //  Created by Guillaume Lessard on 29/04/2016.
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-public protocol Observer: class
+public protocol Subscriber: class
 {
   associatedtype Value
 
@@ -18,7 +18,7 @@ public protocol Observer: class
   func notify(_ result: Result<Value>)
 }
 
-extension Observer
+extension Subscriber
 {
   func notify(_ result: Result<Value>)
   {

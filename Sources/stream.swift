@@ -142,7 +142,7 @@ open class EventStream<Value>: Publisher
 
   // subscription methods
 
-  final public func subscribe<O: Observer>(_ observer: O)
+  final public func subscribe<O: Subscriber>(_ observer: O)
     where O.Value == Value
   {
     addSubscription(subscriptionHandler: observer.onSubscribe,
