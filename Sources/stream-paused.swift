@@ -41,9 +41,12 @@ open class Paused<Value>: SubStream<Value, Value>
   {
     if (!started)
     {
-      super.updateRequest(torequest)
-      torequest = 0
       started = true
+      if torequest > 0
+      {
+        super.updateRequest(torequest)
+        torequest = 0
+      }
     }
   }
 }
