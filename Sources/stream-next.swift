@@ -41,9 +41,9 @@ extension EventStream
     return next(LimitedStream<Value, Value>(qos: qos, count: Int64(max(count, 0))))
   }
 
-  public func next(queue: DispatchQueue, count: Int = 1) -> EventStream<Value>
+  public func next(_ queue: DispatchQueue, count: Int = 1) -> EventStream<Value>
   {
-    return next(LimitedStream<Value, Value>(queue: queue, count: Int64(max(count, 0))))
+    return next(LimitedStream<Value, Value>(queue, count: Int64(max(count, 0))))
   }
 }
 
@@ -81,8 +81,8 @@ extension EventStream
     return final(LimitedStream<Value, Value>(qos: qos, count: 1))
   }
 
-  public func final(queue: DispatchQueue) -> EventStream<Value>
+  public func final(_ queue: DispatchQueue) -> EventStream<Value>
   {
-    return final(LimitedStream<Value, Value>(queue: queue, count: 1))
+    return final(LimitedStream<Value, Value>(queue, count: 1))
   }
 }

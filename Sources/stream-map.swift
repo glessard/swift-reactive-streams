@@ -22,9 +22,9 @@ extension EventStream
     return map(SubStream<Value, U>(qos: qos), transform: transform)
   }
 
-  public func map<U>(queue: DispatchQueue, transform: @escaping (Value) throws -> U) -> EventStream<U>
+  public func map<U>(_ queue: DispatchQueue, transform: @escaping (Value) throws -> U) -> EventStream<U>
   {
-    return map(SubStream<Value, U>(queue: queue), transform: transform)
+    return map(SubStream<Value, U>(queue), transform: transform)
   }
 }
 
@@ -44,9 +44,9 @@ extension EventStream
     return map(SubStream<Value, U>(qos: qos), transform: transform)
   }
 
-  public func map<U>(queue: DispatchQueue, transform: @escaping (Value) -> Result<U>) -> EventStream<U>
+  public func map<U>(_ queue: DispatchQueue, transform: @escaping (Value) -> Result<U>) -> EventStream<U>
   {
-    return map(SubStream<Value, U>(queue: queue), transform: transform)
+    return map(SubStream<Value, U>(queue), transform: transform)
   }
 }
 
@@ -75,13 +75,13 @@ extension EventStream
     return stream
   }
 
-  public func flatMap<U>(queue: DispatchQueue, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
-  {
-    return flatMap(MergeStream(queue: queue), transform: transform)
-  }
-
   public func flatMap<U>(qos: DispatchQoS = DispatchQoS.current(), transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
   {
     return flatMap(MergeStream(qos: qos), transform: transform)
+  }
+
+  public func flatMap<U>(_ queue: DispatchQueue, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
+  {
+    return flatMap(MergeStream(queue), transform: transform)
   }
 }

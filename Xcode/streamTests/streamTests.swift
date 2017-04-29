@@ -406,7 +406,7 @@ class streamTests: XCTestCase
   
   func testReduce()
   {
-    let stream = PostBox<Int>(queue: DispatchQueue.global(qos: DispatchQoS.current().qosClass))
+    let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.current().qosClass))
     let events = 11
 
     let e1 = expectation(description: "observation onValue")
@@ -432,7 +432,7 @@ class streamTests: XCTestCase
 
   func testCoalesce()
   {
-    let stream = PostBox<Int>(queue: DispatchQueue.global(qos: DispatchQoS.current().qosClass))
+    let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.current().qosClass))
     let events = 10
 
     let e1 = expectation(description: "observation onValue")

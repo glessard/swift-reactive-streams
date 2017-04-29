@@ -8,7 +8,7 @@
 
 extension EventStream
 {
-  private func performNotify(queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
+  private func performNotify(_ queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
   {
     self.subscribe(
       subscriber: queue,
@@ -22,18 +22,18 @@ extension EventStream
 
   public func notify(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Result<Value>) -> Void)
   {
-    performNotify(queue: DispatchQueue(label: "local-notify-queue", qos: qos), task: task)
+    performNotify(DispatchQueue(label: "local-notify-queue", qos: qos), task: task)
   }
 
-  public func notify(queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
+  public func notify(_ queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
   {
-    performNotify(queue: DispatchQueue(label: "local-notify-queue", target: queue), task: task)
+    performNotify(DispatchQueue(label: "local-notify-queue", target: queue), task: task)
   }
 }
 
 extension EventStream
 {
-  private func performOnValue(queue: DispatchQueue, task: @escaping (Value) -> Void)
+  private func performOnValue(_ queue: DispatchQueue, task: @escaping (Value) -> Void)
   {
     self.subscribe(
       subscriber: queue,
@@ -53,12 +53,12 @@ extension EventStream
 
   public func onValue(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Value) -> Void)
   {
-    performOnValue(queue: DispatchQueue(label: "local-notify-queue", qos: qos), task: task)
+    performOnValue(DispatchQueue(label: "local-notify-queue", qos: qos), task: task)
   }
 
-  public func onValue(queue: DispatchQueue, task: @escaping (Value) -> Void)
+  public func onValue(_ queue: DispatchQueue, task: @escaping (Value) -> Void)
   {
-    performOnValue(queue: DispatchQueue(label: "local-notify-queue", target: queue), task: task)
+    performOnValue(DispatchQueue(label: "local-notify-queue", target: queue), task: task)
   }
 }
 
@@ -66,10 +66,10 @@ extension EventStream
 {
   public func onError(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Error) -> Void)
   {
-    onError(queue: DispatchQueue.global(qos: qos.qosClass), task: task)
+    onError(DispatchQueue.global(qos: qos.qosClass), task: task)
   }
 
-  public func onError(queue: DispatchQueue, task: @escaping (Error) -> Void)
+  public func onError(_ queue: DispatchQueue, task: @escaping (Error) -> Void)
   {
     self.subscribe(
       subscriber: queue,
@@ -92,10 +92,10 @@ extension EventStream
 {
   public func onCompletion(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (StreamCompleted) -> Void)
   {
-    onCompletion(queue: DispatchQueue.global(qos: qos.qosClass), task: task)
+    onCompletion(DispatchQueue.global(qos: qos.qosClass), task: task)
   }
 
-  public func onCompletion(queue: DispatchQueue, task: @escaping (StreamCompleted) -> Void)
+  public func onCompletion(_ queue: DispatchQueue, task: @escaping (StreamCompleted) -> Void)
   {
     self.subscribe(
       subscriber: queue,
