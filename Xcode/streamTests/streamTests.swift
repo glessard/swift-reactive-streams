@@ -29,7 +29,7 @@ class streamTests: XCTestCase
       }
     }
 
-    let s = SpyStream(expectation(description: "deletion")).final()
+    let s = SpyStream(expectation(description: "deletion")).finalValue()
     s.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
@@ -54,7 +54,7 @@ class streamTests: XCTestCase
     }
 
     let p = UnsafeMutablePointer<EventStream<Int>>.allocate(capacity: 1)
-    p.initialize(to: SpyStream(expectation(description: "deletion")).final())
+    p.initialize(to: SpyStream(expectation(description: "deletion")).finalValue())
     p.deinitialize()
 
     waitForExpectations(timeout: 1.0, handler: nil)
@@ -79,7 +79,7 @@ class streamTests: XCTestCase
     }
 
     let p = UnsafeMutablePointer<EventStream<Int>>.allocate(capacity: 1)
-    p.initialize(to: SpyStream().final())
+    p.initialize(to: SpyStream().finalValue())
     // the SpyStream should leak because one of its observers is kept alive by the pointer
   }
 
@@ -87,7 +87,7 @@ class streamTests: XCTestCase
   {
     let stream = PostBox<Int>()
 
-    var f = stream.final()
+    var f = stream.finalValue()
 
     stream.post(1)
 
@@ -186,7 +186,7 @@ class streamTests: XCTestCase
     let e2 = expectation(description: "observation onError")
 
     var d = Array<Double>()
-    let m = stream.map(transform: { 2.0*Double($0) }).map(transform: { d.append($0) }).final()
+    let m = stream.map(transform: { 2.0*Double($0) }).map(transform: { d.append($0) }).finalValue()
     m.onCompletion {
       completed in
       if case .normally = completed
@@ -341,7 +341,7 @@ class streamTests: XCTestCase
 
     let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
 
-    let f = stream.final()
+    let f = stream.finalValue()
     f.onValue {
       value in
       if value == d.last { e.fulfill() }
@@ -362,7 +362,7 @@ class streamTests: XCTestCase
 
     let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
 
-    let f = stream.final()
+    let f = stream.finalValue()
     f.notify {
       result in
       switch result
@@ -388,7 +388,7 @@ class streamTests: XCTestCase
 
     let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
 
-    let f = stream.final()
+    let f = stream.finalValue()
     f.notify {
       result in
       switch result

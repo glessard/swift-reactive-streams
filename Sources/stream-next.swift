@@ -49,7 +49,7 @@ extension EventStream
 
 extension EventStream
 {
-  private func final(_ stream: LimitedStream<Value, Value>) -> EventStream<Value>
+  private func finalValue(_ stream: LimitedStream<Value, Value>) -> EventStream<Value>
   {
     var last: Value? = nil
     self.subscribe(
@@ -76,13 +76,13 @@ extension EventStream
     return stream
   }
 
-  public func final(qos: DispatchQoS = DispatchQoS.current()) -> EventStream<Value>
+  public func finalValue(qos: DispatchQoS = DispatchQoS.current()) -> EventStream<Value>
   {
-    return final(LimitedStream<Value, Value>(qos: qos, count: 1))
+    return finalValue(LimitedStream<Value, Value>(qos: qos, count: 1))
   }
 
-  public func final(_ queue: DispatchQueue) -> EventStream<Value>
+  public func finalValue(_ queue: DispatchQueue) -> EventStream<Value>
   {
-    return final(LimitedStream<Value, Value>(queue, count: 1))
+    return finalValue(LimitedStream<Value, Value>(queue, count: 1))
   }
 }
