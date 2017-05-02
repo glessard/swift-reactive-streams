@@ -18,7 +18,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
 
   public func merge(_ source: EventStream<Value>)
   {
-    if self.closed { return }
+    if closed { return }
 
     queue.async { self.performMerge(source) }
   }
@@ -27,7 +27,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
 
   func performMerge(_ source: EventStream<Value>)
   {
-    if self.closed { return }
+    if closed { return }
 
     var subscription: Subscription! = nil
 
