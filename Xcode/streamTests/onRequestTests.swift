@@ -15,7 +15,7 @@ class onRequestTests: XCTestCase
   {
     let e = expectation(description: "on-request")
 
-    let o = OnRequestStream(DispatchQueue.global(qos: DispatchQoS.QoSClass.background), autostart: false)
+    let o = OnRequestStream(DispatchQueue.global(qos: .background), autostart: false)
 
     o.next(count: 10).reduce(0, +).notify {
       result in
@@ -45,7 +45,7 @@ class onRequestTests: XCTestCase
       init(expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(label: "test", qos: DispatchQoS.current()))
+        super.init(validated: ValidatedQueue(label: "test", qos: DispatchQoS.current ?? .utility))
       }
 
       deinit

@@ -12,7 +12,7 @@ struct ValidatedQueue
 {
   var queue: DispatchQueue
 
-  init(label: String, qos: DispatchQoS = DispatchQoS.current())
+  init(label: String, qos: DispatchQoS = DispatchQoS.current ?? .utility)
   {
     self.queue = DispatchQueue(label: label+"\(qos.qosClass.rawValue)", qos: qos)
   }

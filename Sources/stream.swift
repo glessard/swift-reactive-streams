@@ -41,7 +41,7 @@ open class EventStream<Value>: Publisher
   private var started: Int32 = 0
   public private(set) var requested: Int64 = 0
 
-  public convenience init(qos: DispatchQoS = DispatchQoS.current())
+  public convenience init(qos: DispatchQoS = DispatchQoS.current ?? .utility)
   {
     self.init(validated: ValidatedQueue(label: "eventstream", qos: qos))
   }
