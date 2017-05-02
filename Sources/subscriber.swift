@@ -14,8 +14,6 @@ public protocol Subscriber: class
   func onValue(_ value: Value)
   func onError(_ error: Error)
   func onCompletion(_ status: StreamCompleted)
-
-  func notify(_ result: Result<Value>)
 }
 
 extension Subscriber

@@ -24,6 +24,7 @@
 		038EB3A91CDD8B1200F4B44B /* mergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038EB3A81CDD8B1200F4B44B /* mergeTests.swift */; };
 		03A0D5BF1EB15ED000F4B44B /* stream-paused.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A0D5BE1EB15ED000F4B44B /* stream-paused.swift */; };
 		03A0D5C11EB31C0600F4B44B /* stream-limited.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A0D5C01EB31C0600F4B44B /* stream-limited.swift */; };
+		03A0D5C31EB5563700F4B44B /* subscriberTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A0D5C21EB5563700F4B44B /* subscriberTests.swift */; };
 		03D89FBE1CD46B4300F4B44B /* stream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FBD1CD46B4300F4B44B /* stream.swift */; };
 		03D89FC01CD46C0700F4B44B /* result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FBF1CD46C0700F4B44B /* result.swift */; };
 		03E1929B1CE4432000F4B44B /* subscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E1929A1CE4432000F4B44B /* subscription.swift */; };
@@ -65,6 +66,7 @@
 		038EB3A81CDD8B1200F4B44B /* mergeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = mergeTests.swift; sourceTree = "<group>"; };
 		03A0D5BE1EB15ED000F4B44B /* stream-paused.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-paused.swift"; sourceTree = "<group>"; };
 		03A0D5C01EB31C0600F4B44B /* stream-limited.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-limited.swift"; sourceTree = "<group>"; };
+		03A0D5C21EB5563700F4B44B /* subscriberTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = subscriberTests.swift; sourceTree = "<group>"; };
 		03D89FBD1CD46B4300F4B44B /* stream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.swift; sourceTree = "<group>"; };
 		03D89FBF1CD46C0700F4B44B /* result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = result.swift; sourceTree = "<group>"; };
 		03D89FC31CD4702400F4B44B /* subscriber.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = subscriber.swift; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 				038EB3A81CDD8B1200F4B44B /* mergeTests.swift */,
 				03F6666B1CE054FA00F4B44B /* flatMapTests.swift */,
 				031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */,
+				03A0D5C21EB5563700F4B44B /* subscriberTests.swift */,
 			);
 			path = streamTests;
 			sourceTree = "<group>";
@@ -308,6 +311,7 @@
 				031CFBBB1CEFD6B100F4B44B /* onRequestTests.swift in Sources */,
 				038EB3A91CDD8B1200F4B44B /* mergeTests.swift in Sources */,
 				03F6666C1CE054FA00F4B44B /* flatMapTests.swift in Sources */,
+				03A0D5C31EB5563700F4B44B /* subscriberTests.swift in Sources */,
 				038527E21CD46A1500F4B44B /* streamTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
