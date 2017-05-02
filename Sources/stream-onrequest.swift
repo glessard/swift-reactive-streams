@@ -14,12 +14,12 @@ open class OnRequestStream: EventStream<Int>
 
   public convenience init(qos: DispatchQoS = DispatchQoS.current(), autostart: Bool = true)
   {
-    self.init(validated: ValidatedQueue(qos: qos), autostart: autostart)
+    self.init(validated: ValidatedQueue(label: "onrequeststream", qos: qos), autostart: autostart)
   }
 
   public convenience init(_ queue: DispatchQueue, autostart: Bool = true)
   {
-    self.init(validated: ValidatedQueue(queue), autostart: autostart)
+    self.init(validated: ValidatedQueue(label: "onrequeststream", target: queue), autostart: autostart)
   }
 
   init(validated queue: ValidatedQueue, autostart: Bool = true)

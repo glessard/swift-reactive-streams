@@ -12,13 +12,13 @@ struct ValidatedQueue
 {
   var queue: DispatchQueue
 
-  init(qos: DispatchQoS = DispatchQoS.current())
+  init(label: String, qos: DispatchQoS = DispatchQoS.current())
   {
-    self.queue = DispatchQueue(label: "serial-queue", qos: qos)
+    self.queue = DispatchQueue(label: label+"\(qos.qosClass.rawValue)", qos: qos)
   }
 
-  init(_ queue: DispatchQueue)
+  init(label: String, target: DispatchQueue)
   {
-    self.queue = DispatchQueue(label: "dependent-queue", target: queue)
+    self.queue = DispatchQueue(label: label+"-"+target.label, target: target)
   }
 }

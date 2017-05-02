@@ -13,7 +13,7 @@ open class Paused<Value>: SubStream<Value, Value>
 
   public init(_ stream: EventStream<Value>)
   {
-    super.init(validated: ValidatedQueue(stream.queue))
+    super.init(validated: ValidatedQueue(label: "pausedrequests", target: stream.queue))
 
     stream.subscribe(
       substream: self,

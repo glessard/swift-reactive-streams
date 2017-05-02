@@ -20,7 +20,7 @@ class streamTests: XCTestCase
       init(_ expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(qos: DispatchQoS.current()))
+        super.init(validated: ValidatedQueue(label: "test", qos: DispatchQoS.current()))
       }
 
       deinit
@@ -44,7 +44,7 @@ class streamTests: XCTestCase
       init(_ expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(qos: DispatchQoS.current()))
+        super.init(validated: ValidatedQueue(label: "test", qos: DispatchQoS.current()))
       }
 
       deinit
