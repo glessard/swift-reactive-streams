@@ -6,9 +6,9 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-extension Stream
+extension EventStream
 {
-  private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) throws -> U) -> Stream<U>
+  private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) throws -> U) -> EventStream<U>
   {
     self.subscribe(substream: stream) {
       mapped, result in
@@ -17,20 +17,20 @@ extension Stream
     return stream
   }
 
-  public func map<U>(qos: DispatchQoS = DispatchQoS.current(), transform: @escaping (Value) throws -> U) -> Stream<U>
+  public func map<U>(qos: DispatchQoS = DispatchQoS.current(), transform: @escaping (Value) throws -> U) -> EventStream<U>
   {
     return map(SubStream<Value, U>(qos: qos), transform: transform)
   }
 
-  public func map<U>(queue: DispatchQueue, transform: @escaping (Value) throws -> U) -> Stream<U>
+  public func map<U>(_ queue: DispatchQueue, transform: @escaping (Value) throws -> U) -> EventStream<U>
   {
-    return map(SubStream<Value, U>(queue: queue), transform: transform)
+    return map(SubStream<Value, U>(queue), transform: transform)
   }
 }
 
-extension Stream
+extension EventStream
 {
-  private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) -> Result<U>) -> Stream<U>
+  private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) -> Result<U>) -> EventStream<U>
   {
     self.subscribe(substream: stream) {
       mapped, result in
@@ -39,20 +39,20 @@ extension Stream
     return stream
   }
 
-  public func map<U>(qos: DispatchQoS = DispatchQoS.current(), transform: @escaping (Value) -> Result<U>) -> Stream<U>
+  public func map<U>(qos: DispatchQoS = DispatchQoS.current(), transform: @escaping (Value) -> Result<U>) -> EventStream<U>
   {
     return map(SubStream<Value, U>(qos: qos), transform: transform)
   }
 
-  public func map<U>(queue: DispatchQueue, transform: @escaping (Value) -> Result<U>) -> Stream<U>
+  public func map<U>(_ queue: DispatchQueue, transform: @escaping (Value) -> Result<U>) -> EventStream<U>
   {
-    return map(SubStream<Value, U>(queue: queue), transform: transform)
+    return map(SubStream<Value, U>(queue), transform: transform)
   }
 }
 
-extension Stream
+extension EventStream
 {
-  private func flatMap<U>(_ stream: MergeStream<U>, transform: @escaping (Value) -> Stream<U>) -> Stream<U>
+  private func flatMap<U>(_ stream: MergeStream<U>, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
   {
     self.subscribe(
       subscriber: stream,
@@ -75,13 +75,13 @@ extension Stream
     return stream
   }
 
-  public func flatMap<U>(queue: DispatchQueue, transform: @escaping (Value) -> Stream<U>) -> Stream<U>
-  {
-    return flatMap(MergeStream(queue: queue), transform: transform)
-  }
-
-  public func flatMap<U>(qos: DispatchQoS = DispatchQoS.current(), transform: @escaping (Value) -> Stream<U>) -> Stream<U>
+  public func flatMap<U>(qos: DispatchQoS = DispatchQoS.current(), transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
   {
     return flatMap(MergeStream(qos: qos), transform: transform)
+  }
+
+  public func flatMap<U>(_ queue: DispatchQueue, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
+  {
+    return flatMap(MergeStream(queue), transform: transform)
   }
 }

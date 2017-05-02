@@ -16,7 +16,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
     super.init(validated: validated)
   }
 
-  public func merge(_ source: Stream<Value>)
+  public func merge(_ source: EventStream<Value>)
   {
     if self.closed { return }
 
@@ -27,7 +27,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
 
   /// precondition: must run on a barrier block or a serial queue
 
-  func performMerge(_ source: Stream<Value>)
+  func performMerge(_ source: EventStream<Value>)
   {
     if self.closed { return }
 

@@ -15,9 +15,9 @@ extension StreamState: CustomStringConvertible
   public var description: String {
     switch self
     {
-    case .waiting:   return "Stream waiting to begin processing events"
-    case .streaming: return "Stream active"
-    case .ended:     return "Stream has completed"
+    case .waiting:   return "EventStream waiting to begin processing events"
+    case .streaming: return "EventStream active"
+    case .ended:     return "EventStream has completed"
     }
   }
 }
@@ -33,7 +33,7 @@ public enum StreamError: Error
   case subscriptionFailed    // attempted to subscribe to a completed stream
 }
 
-open class Stream<Value>: Source
+open class EventStream<Value>: Publisher
 {
   let queue: DispatchQueue
   private var observers = Dictionary<Subscription, (Result<Value>) -> Void>()
@@ -46,7 +46,7 @@ open class Stream<Value>: Source
     self.init(validated: ValidatedQueue(qos: qos))
   }
 
-  public convenience init(queue: DispatchQueue)
+  public convenience init(_ queue: DispatchQueue)
   {
     self.init(validated: ValidatedQueue(queue))
   }
@@ -142,7 +142,7 @@ open class Stream<Value>: Source
 
   // subscription methods
 
-  final public func subscribe<O: Observer>(_ observer: O)
+  final public func subscribe<O: Subscriber>(_ observer: O)
     where O.Value == Value
   {
     addSubscription(subscriptionHandler: observer.onSubscribe,
@@ -207,7 +207,7 @@ open class Stream<Value>: Source
     notificationHandler.notify(Result.error(StreamError.subscriptionFailed))
   }
 
-  // MARK: Source
+  // MARK: Publisher
 
   @discardableResult
   open func updateRequest(_ requested: Int64) -> Int64

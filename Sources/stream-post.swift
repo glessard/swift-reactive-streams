@@ -6,7 +6,7 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-open class PostBox<Value>: Stream<Value>
+open class PostBox<Value>: EventStream<Value>
 {
   override init(validated: ValidatedQueue)
   {

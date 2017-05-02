@@ -16,7 +16,7 @@ open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputV
     self.init(validated: ValidatedQueue(qos: qos), count: max(count,0))
   }
 
-  public convenience init(queue: DispatchQueue, count: Int64)
+  public convenience init(_ queue: DispatchQueue, count: Int64)
   {
     self.init(validated: ValidatedQueue(queue), count: max(count,0))
   }

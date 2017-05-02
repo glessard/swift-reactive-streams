@@ -6,7 +6,7 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-open class OnRequestStream: Stream<Int>
+open class OnRequestStream: EventStream<Int>
 {
   private let source: DispatchSourceUserDataAdd
   private var additional: Int64 = 0

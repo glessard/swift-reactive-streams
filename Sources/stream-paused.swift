@@ -11,7 +11,7 @@ open class Paused<Value>: SubStream<Value, Value>
   private var torequest = Int64(0)
   private var started = false
 
-  public init(_ stream: Stream<Value>)
+  public init(_ stream: EventStream<Value>)
   {
     super.init(validated: ValidatedQueue(stream.queue))
 
@@ -51,7 +51,7 @@ open class Paused<Value>: SubStream<Value, Value>
   }
 }
 
-extension Stream
+extension EventStream
 {
   public func paused() -> Paused<Value>
   {
