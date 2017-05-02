@@ -46,6 +46,11 @@ final public class Subscription
     request(Int64.max)
   }
 
+  public func request(_ count: Int)
+  {
+    request(Int64(count))
+  }
+
   // called by our subscriber
 
   public func request(_ count: Int64)
