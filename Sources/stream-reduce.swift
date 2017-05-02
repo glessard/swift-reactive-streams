@@ -46,27 +46,22 @@ extension EventStream
     return stream
   }
 
-  public func reduce<U>(_ initial: U, _ combining: @escaping (U, Value) throws -> U) -> EventStream<U>
+  public func reduce<U>(qos: DispatchQoS = DispatchQoS.current(), _ initial: U, _ combine: @escaping (U, Value) throws -> U) -> EventStream<U>
   {
-    return reduce(LimitedStream<Value, U>(qos: DispatchQoS.current(), count: 1), initial: initial, combine: combining)
+    return reduce(LimitedStream<Value, U>(qos: DispatchQoS.current(), count: 1), initial: initial, combine: combine)
   }
 
-  public func reduce<U>(qos: DispatchQoS, initial: U, _ combining: @escaping (U, Value) throws -> U) -> EventStream<U>
+  public func reduce<U>(_ queue: DispatchQueue, _ initial: U, _ combine: @escaping (U, Value) throws -> U) -> EventStream<U>
   {
-    return reduce(LimitedStream<Value, U>(qos: qos, count: 1), initial: initial, combine: combining)
+    return reduce(LimitedStream<Value, U>(queue, count: 1), initial: initial, combine: combine)
   }
 
-  public func reduce<U>(_ queue: DispatchQueue, initial: U, _ combining: @escaping (U, Value) throws -> U) -> EventStream<U>
-  {
-    return reduce(LimitedStream<Value, U>(queue, count: 1), initial: initial, combine: combining)
-  }
-
-  public func reduce<U>(qos: DispatchQoS = DispatchQoS.current(), into: U, combine: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
+  public func reduce<U>(qos: DispatchQoS = DispatchQoS.current(), into: U, _ combine: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
   {
     return reduce(LimitedStream<Value, U>(qos: qos, count: 1), into: into, combine: combine)
   }
 
-  public func reduce<U>(_ queue: DispatchQueue, into: U, combine: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
+  public func reduce<U>(_ queue: DispatchQueue, into: U, _ combine: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
   {
     return reduce(LimitedStream<Value, U>(queue, count: 1), into: into, combine: combine)
   }
@@ -90,11 +85,11 @@ extension EventStream
 
   public func coalesce(qos: DispatchQoS = DispatchQoS.current()) -> EventStream<[Value]>
   {
-    return self.reduce(qos: qos, into: [], combine: { $0.append($1) })
+    return self.reduce(qos: qos, into: []) { $0.append($1) }
   }
   
   public func coalesce(_ queue: DispatchQueue) -> EventStream<[Value]>
   {
-    return self.reduce(queue, into: [], combine: { $0.append($1) })
+    return self.reduce(queue, into: []) { $0.append($1) }
   }
 }
