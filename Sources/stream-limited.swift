@@ -11,7 +11,7 @@ open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputV
   let limit: Int64
   var count: Int64 = 0
 
-  public convenience init(qos: DispatchQoS = DispatchQoS.current(), count: Int64)
+  public convenience init(qos: DispatchQoS, count: Int64)
   {
     self.init(validated: ValidatedQueue(qos: qos), count: max(count,0))
   }

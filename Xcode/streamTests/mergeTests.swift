@@ -148,7 +148,7 @@ class mergeTests: XCTestCase
     }
     merged.close()
 
-    let q = DispatchQueue.global(qos: DispatchQoS.current().qosClass)
+    let q = DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility)
     for stream in s
     {
       q.async {

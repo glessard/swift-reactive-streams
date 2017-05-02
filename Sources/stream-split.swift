@@ -8,20 +8,20 @@
 
 extension EventStream
 {
-  public func split(qos: DispatchQoS = DispatchQoS.current()) -> (EventStream, EventStream)
+  public func split(qos: DispatchQoS? = nil) -> (EventStream, EventStream)
   {
     let streams = self.split(qos: qos, count: 2)
     return (streams[0], streams[1])
   }
 
-  public func split(qos: DispatchQoS = DispatchQoS.current(), count: Int) -> [EventStream]
+  public func split(qos: DispatchQoS? = nil, count: Int) -> [EventStream]
   {
     precondition(count >= 0)
     guard count > 0 else { return [EventStream]() }
 
     let streams = (0..<count).map {
       _ -> EventStream in
-      let stream = SubStream<Value, Value>(qos: qos)
+      let stream = SubStream<Value, Value>(qos: qos ?? self.qos)
       self.subscribe(substream: stream) {
         mapped, result in
         mapped.queue.async { mapped.dispatch(result) }

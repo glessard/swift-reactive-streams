@@ -20,9 +20,9 @@ extension EventStream
     )
   }
 
-  public func notify(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Result<Value>) -> Void)
+  public func notify(qos: DispatchQoS? = nil, task: @escaping (Result<Value>) -> Void)
   {
-    performNotify(DispatchQueue(label: "local-notify-queue", qos: qos), task: task)
+    performNotify(DispatchQueue(label: "local-notify-queue", qos: qos ?? self.qos), task: task)
   }
 
   public func notify(_ queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
@@ -51,9 +51,9 @@ extension EventStream
     )
   }
 
-  public func onValue(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Value) -> Void)
+  public func onValue(qos: DispatchQoS? = nil, task: @escaping (Value) -> Void)
   {
-    performOnValue(DispatchQueue(label: "local-notify-queue", qos: qos), task: task)
+    performOnValue(DispatchQueue(label: "local-notify-queue", qos: qos ?? self.qos), task: task)
   }
 
   public func onValue(_ queue: DispatchQueue, task: @escaping (Value) -> Void)
@@ -64,9 +64,10 @@ extension EventStream
 
 extension EventStream
 {
-  public func onError(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (Error) -> Void)
+  public func onError(qos: DispatchQoS? = nil, task: @escaping (Error) -> Void)
   {
-    onError(DispatchQueue.global(qos: qos.qosClass), task: task)
+    let qos = qos?.qosClass ?? DispatchQoS.QoSClass.current ?? .utility
+    onError(DispatchQueue.global(qos: qos), task: task)
   }
 
   public func onError(_ queue: DispatchQueue, task: @escaping (Error) -> Void)
@@ -90,9 +91,10 @@ extension EventStream
 
 extension EventStream
 {
-  public func onCompletion(qos: DispatchQoS = DispatchQoS.current(), task: @escaping (StreamCompleted) -> Void)
+  public func onCompletion(qos: DispatchQoS? = nil, task: @escaping (StreamCompleted) -> Void)
   {
-    onCompletion(DispatchQueue.global(qos: qos.qosClass), task: task)
+    let qos = qos?.qosClass ?? DispatchQoS.QoSClass.current ?? .utility
+    onCompletion(DispatchQueue.global(qos: qos), task: task)
   }
 
   public func onCompletion(_ queue: DispatchQueue, task: @escaping (StreamCompleted) -> Void)

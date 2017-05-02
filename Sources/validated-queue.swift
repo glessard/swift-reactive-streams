@@ -12,8 +12,9 @@ struct ValidatedQueue
 {
   var queue: DispatchQueue
 
-  init(qos: DispatchQoS = DispatchQoS.current())
+  init(qos: DispatchQoS? = nil)
   {
+    let qos = qos ?? DispatchQoS.current ?? .utility
     self.queue = DispatchQueue(label: "serial-queue", qos: qos)
   }
 

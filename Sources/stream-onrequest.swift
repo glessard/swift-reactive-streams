@@ -12,7 +12,7 @@ open class OnRequestStream: EventStream<Int>
   private var additional: Int64 = 0
   private var started: Int32 = 0
 
-  public convenience init(qos: DispatchQoS = DispatchQoS.current(), autostart: Bool = true)
+  public convenience init(qos: DispatchQoS? = nil, autostart: Bool = true)
   {
     self.init(validated: ValidatedQueue(qos: qos), autostart: autostart)
   }
