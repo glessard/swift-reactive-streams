@@ -46,9 +46,9 @@ extension EventStream
     return stream
   }
 
-  public func reduce<U>(qos: DispatchQoS = DispatchQoS.current(), _ initial: U, _ combine: @escaping (U, Value) throws -> U) -> EventStream<U>
+  public func reduce<U>(qos: DispatchQoS? = nil, _ initial: U, _ combine: @escaping (U, Value) throws -> U) -> EventStream<U>
   {
-    return reduce(LimitedStream<Value, U>(qos: DispatchQoS.current(), count: 1), initial: initial, combine: combine)
+    return reduce(LimitedStream<Value, U>(qos: qos ?? self.qos, count: 1), initial: initial, combine: combine)
   }
 
   public func reduce<U>(_ queue: DispatchQueue, _ initial: U, _ combine: @escaping (U, Value) throws -> U) -> EventStream<U>
@@ -56,9 +56,9 @@ extension EventStream
     return reduce(LimitedStream<Value, U>(queue, count: 1), initial: initial, combine: combine)
   }
 
-  public func reduce<U>(qos: DispatchQoS = DispatchQoS.current(), into: U, _ combine: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
+  public func reduce<U>(qos: DispatchQoS? = nil, into: U, _ combine: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
   {
-    return reduce(LimitedStream<Value, U>(qos: qos, count: 1), into: into, combine: combine)
+    return reduce(LimitedStream<Value, U>(qos: qos ?? self.qos, count: 1), into: into, combine: combine)
   }
 
   public func reduce<U>(_ queue: DispatchQueue, into: U, _ combine: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
@@ -69,7 +69,7 @@ extension EventStream
 
 extension EventStream
 {
-  public func countEvents(qos: DispatchQoS = DispatchQoS.current()) -> EventStream<Int>
+  public func countEvents(qos: DispatchQoS? = nil) -> EventStream<Int>
   {
     return self.reduce(qos: qos, into: 0) { (count: inout Int, _) in count += 1 }
   }
@@ -83,7 +83,7 @@ extension EventStream
 extension EventStream
 {
 
-  public func coalesce(qos: DispatchQoS = DispatchQoS.current()) -> EventStream<[Value]>
+  public func coalesce(qos: DispatchQoS? = nil) -> EventStream<[Value]>
   {
     return self.reduce(qos: qos, into: []) { $0.append($1) }
   }

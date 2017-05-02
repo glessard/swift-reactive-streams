@@ -36,9 +36,9 @@ extension EventStream
     return stream
   }
 
-  public func next(qos: DispatchQoS = DispatchQoS.current(), count: Int = 1) -> EventStream<Value>
+  public func next(qos: DispatchQoS? = nil, count: Int = 1) -> EventStream<Value>
   {
-    return next(LimitedStream<Value, Value>(qos: qos, count: Int64(max(count, 0))))
+    return next(LimitedStream<Value, Value>(qos: qos ?? self.qos, count: Int64(max(count, 0))))
   }
 
   public func next(_ queue: DispatchQueue, count: Int = 1) -> EventStream<Value>
@@ -76,9 +76,9 @@ extension EventStream
     return stream
   }
 
-  public func finalValue(qos: DispatchQoS = DispatchQoS.current()) -> EventStream<Value>
+  public func finalValue(qos: DispatchQoS? = nil) -> EventStream<Value>
   {
-    return finalValue(LimitedStream<Value, Value>(qos: qos, count: 1))
+    return finalValue(LimitedStream<Value, Value>(qos: qos ?? self.qos, count: 1))
   }
 
   public func finalValue(_ queue: DispatchQueue) -> EventStream<Value>

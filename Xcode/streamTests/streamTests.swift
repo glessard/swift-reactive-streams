@@ -20,7 +20,7 @@ class streamTests: XCTestCase
       init(_ expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(qos: DispatchQoS.current()))
+        super.init(validated: ValidatedQueue())
       }
 
       deinit
@@ -44,7 +44,7 @@ class streamTests: XCTestCase
       init(_ expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(qos: DispatchQoS.current()))
+        super.init(validated: ValidatedQueue())
       }
 
       deinit
@@ -406,7 +406,7 @@ class streamTests: XCTestCase
   
   func testReduce()
   {
-    let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.current().qosClass))
+    let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility))
     let events = 11
 
     let e1 = expectation(description: "observation onValue")
@@ -432,7 +432,7 @@ class streamTests: XCTestCase
 
   func testCoalesce()
   {
-    let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.current().qosClass))
+    let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility))
     let events = 10
 
     let e1 = expectation(description: "observation onValue")
