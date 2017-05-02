@@ -249,7 +249,7 @@ class mergeTests: XCTestCase
         }))
       }
       stream.close()
-      stream.queue.sync(flags: .barrier, execute: {}) 
+      stream.queue.sync(execute: {})
     }
 
     waitForExpectations(timeout: 1.0, handler: nil)

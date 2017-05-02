@@ -378,7 +378,7 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
     stream.close()
   }
-  
+
   func testFinal3()
   {
     let stream = PostBox<Int>()
@@ -403,7 +403,7 @@ class streamTests: XCTestCase
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
-  
+
   func testReduce()
   {
     let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility))

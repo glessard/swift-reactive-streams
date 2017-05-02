@@ -128,9 +128,9 @@ open class EventStream<Value>: Publisher
   open func close()
   {
     guard requested != Int64.min else { return }
-    self.queue.async(flags: .barrier, execute: {
+    self.queue.async {
       self.dispatchError(Result.error(StreamCompleted.normally))
-    }) 
+    }
   }
 
   /// precondition: must run on a barrier block or a serial queue
@@ -171,7 +171,7 @@ open class EventStream<Value>: Publisher
 
     if started == 0 && OSAtomicCompareAndSwap32(0, 1, &started)
     { // the queue isn't running yet, no observers
-      queue.sync(flags: .barrier, execute: {
+      queue.sync {
         assert(self.observers.isEmpty)
         subscriptionHandler(subscription)
         if self.requested != Int64.min
@@ -182,13 +182,13 @@ open class EventStream<Value>: Publisher
         { // the stream was closed between the block's dispatch and its execution
           notificationHandler.notify(Result.error(StreamError.subscriptionFailed))
         }
-      }) 
+      }
       return
     }
 
     if self.requested != Int64.min
     {
-      queue.async(flags: .barrier, execute: {
+      queue.async {
         subscriptionHandler(subscription)
         if self.requested != Int64.min
         {
@@ -198,7 +198,7 @@ open class EventStream<Value>: Publisher
         { // the stream was closed between the block's dispatch and its execution
           notificationHandler.notify(Result.error(StreamError.subscriptionFailed))
         }
-      }) 
+      }
       return
     }
 
@@ -229,10 +229,10 @@ open class EventStream<Value>: Publisher
   {
     if requested != Int64.min
     {
-      queue.async(flags: .barrier, execute: {
+      queue.async {
         guard self.requested != Int64.min else { return }
         self.performCancellation(subscription)
-      }) 
+      }
     }
   }
 
