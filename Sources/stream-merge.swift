@@ -20,9 +20,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
   {
     if self.closed { return }
 
-    self.queue.async(flags: .barrier, execute: {
-      self.performMerge(source)
-    }) 
+    queue.async { self.performMerge(source) }
   }
 
   /// precondition: must run on a barrier block or a serial queue
@@ -78,13 +76,13 @@ public class MergeStream<Value>: SubStream<Value, Value>
 
   public override func close()
   {
-    queue.async(flags: .barrier, execute: {
+    queue.async {
       self.closed = true
       if self.sources.isEmpty
       {
         self.dispatchError(Result.error(StreamCompleted.normally))
       }
-    }) 
+    }
   }
 
   @discardableResult
