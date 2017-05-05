@@ -404,15 +404,15 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
-  func testReduce()
+  func testReduce1()
   {
     let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility))
     let events = 11
 
     let e1 = expectation(description: "observation onValue")
-    let e2 = expectation(description: "observation onError")
+    let e2 = expectation(description: "observation onCompletion")
 
-    let m = stream.reduce(0) { u,i in u+i }
+    let m = stream.reduce(0, +)
     m.notify {
       result in
       switch result
@@ -430,15 +430,73 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
-  func testCoalesce()
+  func testReduce2()
   {
-    let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility))
+    let stream = PostBox<Int>()
     let events = 10
 
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
-    let m = stream.map(transform: { i in Double(2*i) }).coalesce()
+    let m = stream.reduce(DispatchQueue(label: "test"), 0, {
+      sum, e throws -> Int in
+      guard sum <= events else { throw NSError(domain: "overflow", code: 11, userInfo: nil) }
+      return sum+e
+    })
+    m.notify {
+      result in
+      switch result
+      {
+      case .value(let value):
+        if value > events { e1.fulfill() }
+      case .error(let error):
+        if error is StreamCompleted { XCTFail() }
+        else { e2.fulfill() }
+      }
+    }
+
+    for i in 0..<events { stream.post(i) }
+    stream.close()
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testCountEvents()
+  {
+    let stream = PostBox<Int>(DispatchQueue(label: "serial", qos: .default))
+    let events = 10
+
+    let e1 = expectation(description: "observation onValue")
+    let e2 = expectation(description: "observation onCompletion")
+
+    let m = stream.countEvents(DispatchQueue.global(qos: .userInitiated))
+    m.notify {
+      result in
+      switch result
+      {
+      case .value(let value):
+        XCTAssert(value == events, "Counted \(value) events instead of \(events)")
+        if value == events { e1.fulfill() }
+      case .error(let error):
+        if error is StreamCompleted { e2.fulfill() }
+      }
+    }
+
+    for i in 0..<events { stream.post(i) }
+    stream.close()
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testCoalesce()
+  {
+    let stream = PostBox<Int>(DispatchQueue(label: "concurrent", qos: .utility, attributes: .concurrent))
+    let events = 10
+
+    let e1 = expectation(description: "observation onValue")
+    let e2 = expectation(description: "observation onCompletion")
+
+    let m = stream.map(transform: { i in Double(2*i) }).coalesce(DispatchQueue.global(qos: .userInitiated))
     m.notify {
       result in
       switch result
