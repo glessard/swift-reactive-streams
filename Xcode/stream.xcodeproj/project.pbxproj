@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		031C425E1CF5907000F4B44B /* notifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C425D1CF5907000F4B44B /* notifier.swift */; };
 		031C42651CFE4B9B00F4B44B /* stream-post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42641CFE4B9B00F4B44B /* stream-post.swift */; };
 		031C42671CFE632D00F4B44B /* stream-substream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42661CFE632D00F4B44B /* stream-substream.swift */; };
 		031C426A1CFE651700F4B44B /* stream-notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42691CFE651700F4B44B /* stream-notifications.swift */; };
@@ -46,7 +45,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		031C425D1CF5907000F4B44B /* notifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = notifier.swift; sourceTree = "<group>"; };
 		031C42641CFE4B9B00F4B44B /* stream-post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-post.swift"; sourceTree = "<group>"; };
 		031C42661CFE632D00F4B44B /* stream-substream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-substream.swift"; sourceTree = "<group>"; };
 		031C42691CFE651700F4B44B /* stream-notifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-notifications.swift"; sourceTree = "<group>"; };
@@ -163,7 +161,6 @@
 				03D89FBF1CD46C0700F4B44B /* result.swift */,
 				03E1929C1CE4474500F4B44B /* publisher.swift */,
 				03E1929A1CE4432000F4B44B /* subscription.swift */,
-				031C425D1CF5907000F4B44B /* notifier.swift */,
 				03D89FC31CD4702400F4B44B /* subscriber.swift */,
 				038EB3A61CDD361A00F4B44B /* validated-queue.swift */,
 				03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */,
@@ -298,7 +295,6 @@
 				038EB3A51CDD35EC00F4B44B /* stream-merge.swift in Sources */,
 				038EB3A71CDD361A00F4B44B /* validated-queue.swift in Sources */,
 				031C426A1CFE651700F4B44B /* stream-notifications.swift in Sources */,
-				031C425E1CF5907000F4B44B /* notifier.swift in Sources */,
 				03F6666A1CE0145100F4B44B /* subscriber.swift in Sources */,
 				03E1929B1CE4432000F4B44B /* subscription.swift in Sources */,
 			);

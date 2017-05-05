@@ -146,14 +146,20 @@ open class EventStream<Value>: Publisher
     where O.Value == Value
   {
     addSubscription(subscriptionHandler: observer.onSubscribe,
-                    notificationHandler: Notifier(target: observer, handler: { target, result in target.notify(result) }))
+                    notificationHandler: {
+                      [weak subscriber = observer] (event: Result<Value>) in
+                      if let observer = subscriber { observer.notify(event) }
+    })
   }
 
   final public func subscribe<U>(substream: SubStream<Value, U>,
                                  notificationHandler: @escaping (SubStream<Value, U>, Result<Value>) -> Void)
   {
     addSubscription(subscriptionHandler: substream.setSubscription,
-                    notificationHandler: Notifier(target: substream, handler: notificationHandler))
+                    notificationHandler: {
+                      [weak subscriber = substream] (event: Result<Value>) in
+                      if let substream = subscriber { notificationHandler(substream, event) }
+    })
   }
 
   final public func subscribe<T: AnyObject>(subscriber: T,
@@ -161,11 +167,14 @@ open class EventStream<Value>: Publisher
                                             notificationHandler: @escaping (T, Result<Value>) -> Void)
   {
     addSubscription(subscriptionHandler: subscriptionHandler,
-                    notificationHandler: Notifier(target: subscriber, handler: notificationHandler))
+                    notificationHandler: {
+                      [weak subscriber = subscriber] (event: Result<Value>) in
+                      if let subscriber = subscriber { notificationHandler(subscriber, event) }
+    })
   }
 
-  private func addSubscription<T: AnyObject>(subscriptionHandler: @escaping (Subscription) -> Void,
-                                             notificationHandler: Notifier<T, Value>)
+  private func addSubscription(subscriptionHandler: @escaping (Subscription) -> Void,
+                               notificationHandler: @escaping (Result<Value>) -> Void)
   {
     let subscription = Subscription(source: self)
 
@@ -176,11 +185,11 @@ open class EventStream<Value>: Publisher
         subscriptionHandler(subscription)
         if self.requested != Int64.min
         {
-          self.observers[subscription] = notificationHandler.notify
+          self.observers[subscription] = notificationHandler
         }
         else
         { // the stream was closed between the block's dispatch and its execution
-          notificationHandler.notify(Result.error(StreamError.subscriptionFailed))
+          notificationHandler(Result.error(StreamError.subscriptionFailed))
         }
       }
       return
@@ -192,11 +201,11 @@ open class EventStream<Value>: Publisher
         subscriptionHandler(subscription)
         if self.requested != Int64.min
         {
-          self.observers[subscription] = notificationHandler.notify
+          self.observers[subscription] = notificationHandler
         }
         else
         { // the stream was closed between the block's dispatch and its execution
-          notificationHandler.notify(Result.error(StreamError.subscriptionFailed))
+          notificationHandler(Result.error(StreamError.subscriptionFailed))
         }
       }
       return
@@ -204,7 +213,7 @@ open class EventStream<Value>: Publisher
 
     // dispatching on a queue is unnecessary in this case
     subscriptionHandler(subscription)
-    notificationHandler.notify(Result.error(StreamError.subscriptionFailed))
+    notificationHandler(Result.error(StreamError.subscriptionFailed))
   }
 
   // MARK: Publisher
