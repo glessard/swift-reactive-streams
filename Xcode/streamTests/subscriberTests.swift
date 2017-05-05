@@ -61,11 +61,12 @@ class subscriberTests: XCTestCase
   {
     let e = expectation(description: #function)
 
-    let stream = OnRequestStream()
+    let stream = OnRequestStream().paused()
 
     let subscriber = TestSubscriber(expectation: e)
 
     stream.subscribe(subscriber)
+    stream.start()
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
