@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import stream
+import stream
 
 class streamTests: XCTestCase
 {
@@ -20,7 +20,7 @@ class streamTests: XCTestCase
       init(_ expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(label: "test", qos: DispatchQoS.current ?? .utility))
+        super.init(validated: ValidatedQueue(label: "test", qos: .utility))
       }
 
       deinit
@@ -44,7 +44,7 @@ class streamTests: XCTestCase
       init(_ expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(label: "test", qos: DispatchQoS.current ?? .utility))
+        super.init(validated: ValidatedQueue(label: "test", qos: .utility))
       }
 
       deinit
@@ -406,7 +406,7 @@ class streamTests: XCTestCase
 
   func testReduce1()
   {
-    let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility))
+    let stream = PostBox<Int>(DispatchQueue.global(qos: .utility))
     let events = 11
 
     let e1 = expectation(description: "observation onValue")

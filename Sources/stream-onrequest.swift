@@ -23,7 +23,7 @@ open class OnRequestStream: EventStream<Int>
     self.init(validated: ValidatedQueue(label: "onrequeststream", target: queue), autostart: autostart)
   }
 
-  init(validated queue: ValidatedQueue, autostart: Bool = true)
+  public init(validated queue: ValidatedQueue, autostart: Bool = true)
   {
     source = DispatchSource.makeUserDataAddSource(queue: queue.queue)
     super.init(validated: queue)

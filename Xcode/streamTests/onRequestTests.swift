@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import stream
+import stream
 
 class onRequestTests: XCTestCase
 {
@@ -45,7 +45,7 @@ class onRequestTests: XCTestCase
       init(expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(label: "test", qos: DispatchQoS.current ?? .utility))
+        super.init(validated: ValidatedQueue(label: "test", qos: .utility))
       }
 
       deinit

@@ -51,7 +51,7 @@ open class EventStream<Value>: Publisher
     self.init(validated: ValidatedQueue(label: "eventstream", target: queue))
   }
 
-  init(validated queue: ValidatedQueue)
+  public init(validated queue: ValidatedQueue)
   {
     self.queue = queue.queue
   }

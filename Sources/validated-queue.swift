@@ -8,16 +8,16 @@
 
 import Dispatch
 
-struct ValidatedQueue
+public struct ValidatedQueue
 {
   var queue: DispatchQueue
 
-  init(label: String, qos: DispatchQoS = DispatchQoS.current ?? .utility)
+  public init(label: String, qos: DispatchQoS = DispatchQoS.current ?? .utility)
   {
     self.queue = DispatchQueue(label: label+"\(qos.qosClass.rawValue)", qos: qos)
   }
 
-  init(label: String, target: DispatchQueue)
+  public init(label: String, target: DispatchQueue)
   {
     self.queue = DispatchQueue(label: label+"-"+target.label, target: target)
   }
