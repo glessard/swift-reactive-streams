@@ -660,4 +660,38 @@ class streamTests: XCTestCase
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
+
+  func testSplit4()
+  {
+    let stream = PostBox<Int>()
+    let split = stream.map(transform: {$0+1}).split()
+    let events = 10
+
+    let e1 = expectation(description: "\(events) events")
+    let e2 = expectation(description: "1 event")
+
+    split.0.countEvents().onValue {
+      if $0 == events { e1.fulfill() }
+    }
+
+    let sem = DispatchSemaphore(value: 0)
+    split.1.notify {
+      result in
+      switch result
+      {
+      case .value(let v):
+        if v == 1 { sem.signal() }
+      case .error:
+        e2.fulfill()
+      }
+    }
+
+    stream.post(0)
+    _ = sem.wait(timeout: DispatchTime.now() + 1)
+    split.1.close()
+    (1..<events).forEach { stream.post($0) }
+    stream.close()
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+  }
 }
