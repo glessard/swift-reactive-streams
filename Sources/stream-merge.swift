@@ -18,8 +18,6 @@ public class MergeStream<Value>: SubStream<Value, Value>
 
   public func merge(_ source: EventStream<Value>)
   {
-    if closed { return }
-
     queue.async { self.performMerge(source) }
   }
 

@@ -254,4 +254,21 @@ class mergeTests: XCTestCase
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
+
+  func testMerge8()
+  {
+    let s1 = PostBox<Int>()
+    let e1 = expectation(description: "s1")
+    s1.onCompletion { _ in e1.fulfill() }
+
+    let merged = MergeStream<Int>()
+    let e2 = expectation(description: "merged")
+    merged.onCompletion { _ in e2.fulfill() }
+
+    merged.close()
+    merged.merge(s1)
+    s1.close()
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+  }
 }
