@@ -97,8 +97,8 @@
 		031C42681CFE64C000F4B44B /* stream operations */ = {
 			isa = PBXGroup;
 			children = (
-				038EB3A41CDD35EC00F4B44B /* stream-merge.swift */,
 				03FCE9D11CD8F93D00F4B44B /* stream-map.swift */,
+				038EB3A41CDD35EC00F4B44B /* stream-merge.swift */,
 				031C42691CFE651700F4B44B /* stream-notifications.swift */,
 				031C426B1CFE65C900F4B44B /* stream-reduce.swift */,
 				031C426D1CFE660900F4B44B /* stream-next.swift */,
