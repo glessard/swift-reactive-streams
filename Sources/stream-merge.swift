@@ -97,3 +97,39 @@ public class MergeStream<Value>: SubStream<Value, Value>
     return additional
   }
 }
+
+extension EventStream
+{
+  private func flatMap<U>(_ stream: MergeStream<U>, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
+  {
+    self.subscribe(
+      subscriber: stream,
+      subscriptionHandler: stream.setSubscription,
+      notificationHandler: {
+        merged, result in
+        merged.queue.async {
+          switch result
+          {
+          case .value(let value):
+            merged.performMerge(transform(value))
+          case .error(_ as StreamCompleted):
+            merged.close()
+          case .error(let error):
+            merged.dispatchError(Result.error(error))
+          }
+        }
+    }
+    )
+    return stream
+  }
+
+  public func flatMap<U>(qos: DispatchQoS? = nil, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
+  {
+    return flatMap(MergeStream(qos: qos ?? self.qos), transform: transform)
+  }
+
+  public func flatMap<U>(_ queue: DispatchQueue, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
+  {
+    return flatMap(MergeStream(queue), transform: transform)
+  }
+}
