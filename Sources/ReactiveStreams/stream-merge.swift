@@ -134,3 +134,18 @@ extension EventStream
     return flatMap(MergeStream(queue), transform: transform)
   }
 }
+
+extension EventStream
+{
+  public func merge(with other: EventStream<Value>) -> EventStream<Value>
+  {
+    let merged = MergeStream<Value>(qos: self.queue.qos)
+
+    merged.queue.async {
+      merged.performMerge(self)
+      merged.performMerge(other)
+    }
+
+    return merged
+  }
+}
