@@ -48,7 +48,6 @@ class mergeTests: XCTestCase
 
     let count = 10
 
-    // let q = dispatch_get_global_queue(qos_class_self(), 0)
     let merged = MergeStream<Int>()
     merged.merge(s)
 
@@ -136,7 +135,7 @@ class mergeTests: XCTestCase
     }
     merged.close()
 
-    let q = DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility)
+    let q = DispatchQueue.global(qos: .utility)
     for stream in s
     {
       q.async {
