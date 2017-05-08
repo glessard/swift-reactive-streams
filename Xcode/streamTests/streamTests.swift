@@ -121,6 +121,7 @@ class streamTests: XCTestCase
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
+    stream.post(Int.max)
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
