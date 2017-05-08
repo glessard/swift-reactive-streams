@@ -69,7 +69,7 @@ class flatMapTests: XCTestCase
 
     let e = expectation(description: "observation ends \(#function)")
 
-    let m = s.flatMap {
+    let m = s.flatMap(DispatchQueue.global()) {
       count -> EventStream<Double> in
       let s = EventStream<Double>()
       s.close()
