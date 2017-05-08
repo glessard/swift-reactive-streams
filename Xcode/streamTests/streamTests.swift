@@ -121,9 +121,26 @@ class streamTests: XCTestCase
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
-    stream.post(Int.max)
 
     waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testPost()
+  {
+    let e1 = expectation(description: "closed")
+    let stream = PostBox<Int>()
+
+    stream.onCompletion { _ in e1.fulfill() }
+
+    stream.post(0)
+    stream.post(.value(1))
+    stream.post(StreamCompleted.normally)
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+
+    stream.post(Int.max)
+    stream.post(.value(Int.min))
+    stream.post(NSError(domain: "wont-post", code: -1, userInfo: nil))
   }
 
   func testOnValue()
