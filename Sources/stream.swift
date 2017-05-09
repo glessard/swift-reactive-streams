@@ -43,15 +43,15 @@ open class EventStream<Value>: Publisher
 
   public convenience init(qos: DispatchQoS = DispatchQoS.current ?? .utility)
   {
-    self.init(validated: ValidatedQueue(qos: qos))
+    self.init(validated: ValidatedQueue(label: "eventstream", qos: qos))
   }
 
   public convenience init(_ queue: DispatchQueue)
   {
-    self.init(validated: ValidatedQueue(queue))
+    self.init(validated: ValidatedQueue(label: "eventstream", target: queue))
   }
 
-  init(validated queue: ValidatedQueue)
+  public init(validated queue: ValidatedQueue)
   {
     self.queue = queue.queue
   }

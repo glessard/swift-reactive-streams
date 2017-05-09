@@ -8,8 +8,10 @@
 
 extension EventStream
 {
-  private func performNotify(_ queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
+  private func performNotify(_ validated: ValidatedQueue, task: @escaping (Result<Value>) -> Void)
   {
+    let queue = validated.queue
+
     self.subscribe(
       subscriber: queue,
       subscriptionHandler: { $0.requestAll() },
@@ -22,19 +24,21 @@ extension EventStream
 
   public func notify(qos: DispatchQoS? = nil, task: @escaping (Result<Value>) -> Void)
   {
-    performNotify(DispatchQueue(label: "local-notify-queue", qos: qos ?? self.qos), task: task)
+    performNotify(ValidatedQueue(label: "notify", qos: qos ?? self.qos), task: task)
   }
 
   public func notify(_ queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
   {
-    performNotify(DispatchQueue(label: "local-notify-queue", target: queue), task: task)
+    performNotify(ValidatedQueue(label: "notify", target: queue), task: task)
   }
 }
 
 extension EventStream
 {
-  private func performOnValue(_ queue: DispatchQueue, task: @escaping (Value) -> Void)
+  private func performOnValue(_ validated: ValidatedQueue, task: @escaping (Value) -> Void)
   {
+    let queue = validated.queue
+
     self.subscribe(
       subscriber: queue,
       subscriptionHandler: { $0.requestAll() },
@@ -53,12 +57,12 @@ extension EventStream
 
   public func onValue(qos: DispatchQoS? = nil, task: @escaping (Value) -> Void)
   {
-    performOnValue(DispatchQueue(label: "local-notify-queue", qos: qos ?? self.qos), task: task)
+    performOnValue(ValidatedQueue(label: "onvalue", qos: qos ?? self.qos), task: task)
   }
 
   public func onValue(_ queue: DispatchQueue, task: @escaping (Value) -> Void)
   {
-    performOnValue(DispatchQueue(label: "local-notify-queue", target: queue), task: task)
+    performOnValue(ValidatedQueue(label: "onvalue", target: queue), task: task)
   }
 }
 

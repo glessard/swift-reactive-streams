@@ -11,18 +11,6 @@ import XCTest
 
 class mergeTests: XCTestCase
 {
-  override func setUp()
-  {
-    super.setUp()
-    // Put setup code here. This method is called before the invocation of each test method in the class.
-  }
-
-  override func tearDown()
-  {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-    super.tearDown()
-  }
-
   func testMerge1()
   {
     let s = PostBox<Int>()
@@ -60,7 +48,6 @@ class mergeTests: XCTestCase
 
     let count = 10
 
-    // let q = dispatch_get_global_queue(qos_class_self(), 0)
     let merged = MergeStream<Int>()
     merged.merge(s)
 
@@ -148,7 +135,7 @@ class mergeTests: XCTestCase
     }
     merged.close()
 
-    let q = DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility)
+    let q = DispatchQueue.global(qos: .utility)
     for stream in s
     {
       q.async {
@@ -251,6 +238,23 @@ class mergeTests: XCTestCase
       stream.close()
       stream.queue.sync(execute: {})
     }
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testMerge8()
+  {
+    let s1 = PostBox<Int>()
+    let e1 = expectation(description: "s1")
+    s1.onCompletion { _ in e1.fulfill() }
+
+    let merged = MergeStream<Int>()
+    let e2 = expectation(description: "merged")
+    merged.onCompletion { _ in e2.fulfill() }
+
+    merged.close()
+    merged.merge(s1)
+    s1.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }

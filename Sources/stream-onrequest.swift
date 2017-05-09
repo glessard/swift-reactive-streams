@@ -14,15 +14,16 @@ open class OnRequestStream: EventStream<Int>
 
   public convenience init(qos: DispatchQoS? = nil, autostart: Bool = true)
   {
-    self.init(validated: ValidatedQueue(qos: qos), autostart: autostart)
+    let qos = qos ?? DispatchQoS.current ?? .utility
+    self.init(validated: ValidatedQueue(label: "onrequeststream", qos: qos), autostart: autostart)
   }
 
   public convenience init(_ queue: DispatchQueue, autostart: Bool = true)
   {
-    self.init(validated: ValidatedQueue(queue), autostart: autostart)
+    self.init(validated: ValidatedQueue(label: "onrequeststream", target: queue), autostart: autostart)
   }
 
-  init(validated queue: ValidatedQueue, autostart: Bool = true)
+  public init(validated queue: ValidatedQueue, autostart: Bool = true)
   {
     source = DispatchSource.makeUserDataAddSource(queue: queue.queue)
     super.init(validated: queue)

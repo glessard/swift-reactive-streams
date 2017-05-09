@@ -8,18 +8,17 @@
 
 import Dispatch
 
-struct ValidatedQueue
+public struct ValidatedQueue
 {
   var queue: DispatchQueue
 
-  init(qos: DispatchQoS? = nil)
+  public init(label: String, qos: DispatchQoS = DispatchQoS.current ?? .utility)
   {
-    let qos = qos ?? DispatchQoS.current ?? .utility
-    self.queue = DispatchQueue(label: "serial-queue", qos: qos)
+    self.queue = DispatchQueue(label: label+"\(qos.qosClass.rawValue)", qos: qos)
   }
 
-  init(_ queue: DispatchQueue)
+  public init(label: String, target: DispatchQueue)
   {
-    self.queue = DispatchQueue(label: "dependent-queue", target: queue)
+    self.queue = DispatchQueue(label: label+"-"+target.label, target: target)
   }
 }

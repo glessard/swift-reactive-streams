@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import stream
+import stream
 
 class streamTests: XCTestCase
 {
@@ -20,7 +20,7 @@ class streamTests: XCTestCase
       init(_ expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue())
+        super.init(validated: ValidatedQueue(label: "test", qos: .utility))
       }
 
       deinit
@@ -44,7 +44,7 @@ class streamTests: XCTestCase
       init(_ expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue())
+        super.init(validated: ValidatedQueue(label: "test", qos: .utility))
       }
 
       deinit
@@ -108,7 +108,7 @@ class streamTests: XCTestCase
     let e2 = expectation(description: "observation onError")
     let stream = PostBox<Int>()
 
-    stream.notify {
+    stream.notify(DispatchQueue.global()) {
       result in
       switch result
       {
@@ -125,13 +125,31 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
+  func testPost()
+  {
+    let e1 = expectation(description: "closed")
+    let stream = PostBox<Int>()
+
+    stream.onCompletion { _ in e1.fulfill() }
+
+    stream.post(0)
+    stream.post(.value(1))
+    stream.post(StreamCompleted.normally)
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+
+    stream.post(Int.max)
+    stream.post(.value(Int.min))
+    stream.post(NSError(domain: "wont-post", code: -1, userInfo: nil))
+  }
+
   func testOnValue()
   {
     let events = 10
     let e1 = expectation(description: "observation onValue")
     let stream = PostBox<Int>()
 
-    stream.onValue {
+    stream.onValue(DispatchQueue.global()) {
       v in
       if v == events { e1.fulfill() }
     }
@@ -213,7 +231,7 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
-    let m = stream.map {
+    let m = stream.map(DispatchQueue.global()) {
       i throws -> Int in
       if i < limit { return i+1 }
       throw NSError(domain: "bogus", code: -1, userInfo: nil)
@@ -244,16 +262,21 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
-    let m = stream.map {
+    let m1 = stream.map {
       i -> Result<Int> in
-      if i < limit { return Result.value(i+1) }
-      return Result.error(NSError(domain: "bogus", code: -1, userInfo: nil))
+      return
+        i < limit ?
+          .value(i+1) :
+          .error(NSError(domain: "bogus", code: -1, userInfo: nil))
     }
-    m.onValue {
+
+    let m2 = m1.map(DispatchQueue.global()) { Result.value($0+1) }
+
+    m2.onValue {
       v in
-      if v == limit { e1.fulfill() }
+      if v == (limit+1) { e1.fulfill() }
     }
-    m.onError {
+    m2.onError {
       error in
       let error = error as NSError
       if error.domain == "bogus" { e2.fulfill() }
@@ -275,7 +298,7 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
-    let m = stream.next(count: limit)
+    let m = stream.next(DispatchQueue.global(), count: limit)
     m.notify {
       result in
       switch result
@@ -388,7 +411,7 @@ class streamTests: XCTestCase
 
     let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
 
-    let f = stream.finalValue()
+    let f = stream.finalValue(DispatchQueue.global())
     f.notify {
       result in
       switch result
@@ -404,15 +427,15 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
-  func testReduce()
+  func testReduce1()
   {
-    let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility))
+    let stream = PostBox<Int>(DispatchQueue.global(qos: .utility))
     let events = 11
 
     let e1 = expectation(description: "observation onValue")
-    let e2 = expectation(description: "observation onError")
+    let e2 = expectation(description: "observation onCompletion")
 
-    let m = stream.reduce(0) { u,i in u+i }
+    let m = stream.reduce(0, +)
     m.notify {
       result in
       switch result
@@ -430,15 +453,73 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
-  func testCoalesce()
+  func testReduce2()
   {
-    let stream = PostBox<Int>(DispatchQueue.global(qos: DispatchQoS.QoSClass.current ?? .utility))
+    let stream = PostBox<Int>()
     let events = 10
 
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
-    let m = stream.map(transform: { i in Double(2*i) }).coalesce()
+    let m = stream.reduce(DispatchQueue(label: "test"), 0, {
+      sum, e throws -> Int in
+      guard sum <= events else { throw NSError(domain: "overflow", code: 11, userInfo: nil) }
+      return sum+e
+    })
+    m.notify {
+      result in
+      switch result
+      {
+      case .value(let value):
+        if value > events { e1.fulfill() }
+      case .error(let error):
+        if error is StreamCompleted { XCTFail() }
+        else { e2.fulfill() }
+      }
+    }
+
+    for i in 0..<events { stream.post(i) }
+    stream.close()
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testCountEvents()
+  {
+    let stream = PostBox<Int>(DispatchQueue(label: "serial", qos: .default))
+    let events = 10
+
+    let e1 = expectation(description: "observation onValue")
+    let e2 = expectation(description: "observation onCompletion")
+
+    let m = stream.countEvents(DispatchQueue.global(qos: .userInitiated))
+    m.notify {
+      result in
+      switch result
+      {
+      case .value(let value):
+        XCTAssert(value == events, "Counted \(value) events instead of \(events)")
+        if value == events { e1.fulfill() }
+      case .error(let error):
+        if error is StreamCompleted { e2.fulfill() }
+      }
+    }
+
+    for i in 0..<events { stream.post(i) }
+    stream.close()
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testCoalesce()
+  {
+    let stream = PostBox<Int>(DispatchQueue(label: "concurrent", qos: .utility, attributes: .concurrent))
+    let events = 10
+
+    let e1 = expectation(description: "observation onValue")
+    let e2 = expectation(description: "observation onCompletion")
+
+    let m = stream.map(transform: { i in Double(2*i) }).coalesce(DispatchQueue.global(qos: .userInitiated))
     m.notify {
       result in
       switch result
@@ -581,6 +662,40 @@ class streamTests: XCTestCase
     split.1.onError { _ in e3.fulfill() }
 
     XCTAssert(split.1.state == .ended)
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testSplit4()
+  {
+    let stream = PostBox<Int>()
+    let split = stream.map(transform: {$0+1}).split()
+    let events = 10
+
+    let e1 = expectation(description: "\(events) events")
+    let e2 = expectation(description: "1 event")
+
+    split.0.countEvents().onValue {
+      if $0 == events { e1.fulfill() }
+    }
+
+    let sem = DispatchSemaphore(value: 0)
+    split.1.notify {
+      result in
+      switch result
+      {
+      case .value(let v):
+        if v == 1 { sem.signal() }
+      case .error:
+        e2.fulfill()
+      }
+    }
+
+    stream.post(0)
+    _ = sem.wait(timeout: DispatchTime.now() + 1)
+    split.1.close()
+    (1..<events).forEach { stream.post($0) }
+    stream.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }

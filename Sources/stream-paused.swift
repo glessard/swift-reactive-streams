@@ -13,7 +13,7 @@ open class Paused<Value>: SubStream<Value, Value>
 
   public init(_ stream: EventStream<Value>)
   {
-    super.init(validated: ValidatedQueue(stream.queue))
+    super.init(validated: ValidatedQueue(label: "pausedrequests", target: stream.queue))
 
     stream.subscribe(
       substream: self,
@@ -33,8 +33,21 @@ open class Paused<Value>: SubStream<Value, Value>
       return super.updateRequest(requested)
     }
 
-    torequest += requested
-    return torequest
+    precondition(requested > 0)
+
+    var p = torequest
+    assert(p >= 0)
+    while p != Int64.max
+    {
+      let tentatively = p &+ requested // could overflow; avoid trapping
+      let updatedRequest = tentatively > 0 ? tentatively : Int64.max
+      if OSAtomicCompareAndSwap64(p, updatedRequest, &torequest)
+      {
+        return updatedRequest
+      }
+      p = torequest
+    }
+    return Int64.max
   }
 
   open func start()
@@ -42,11 +55,13 @@ open class Paused<Value>: SubStream<Value, Value>
     if (!started)
     {
       started = true
-      if torequest > 0
+      var p = torequest
+      while  !OSAtomicCompareAndSwap64(p, 0, &torequest)
       {
-        super.updateRequest(torequest)
-        torequest = 0
+        p = torequest
       }
+
+      super.updateRequest(p)
     }
   }
 }
