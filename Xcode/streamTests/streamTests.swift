@@ -108,7 +108,7 @@ class streamTests: XCTestCase
     let e2 = expectation(description: "observation onError")
     let stream = PostBox<Int>()
 
-    stream.notify {
+    stream.notify(DispatchQueue.global()) {
       result in
       switch result
       {
@@ -149,7 +149,7 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let stream = PostBox<Int>()
 
-    stream.onValue {
+    stream.onValue(DispatchQueue.global()) {
       v in
       if v == events { e1.fulfill() }
     }
