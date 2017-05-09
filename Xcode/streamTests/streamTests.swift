@@ -293,7 +293,7 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
-    let m = stream.next(count: limit)
+    let m = stream.next(DispatchQueue.global(), count: limit)
     m.notify {
       result in
       switch result
@@ -406,7 +406,7 @@ class streamTests: XCTestCase
 
     let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
 
-    let f = stream.finalValue()
+    let f = stream.finalValue(DispatchQueue.global())
     f.notify {
       result in
       switch result
