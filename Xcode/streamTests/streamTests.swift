@@ -231,7 +231,7 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
-    let m = stream.map {
+    let m = stream.map(DispatchQueue.global()) {
       i throws -> Int in
       if i < limit { return i+1 }
       throw NSError(domain: "bogus", code: -1, userInfo: nil)
@@ -262,16 +262,21 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
-    let m = stream.map {
+    let m1 = stream.map {
       i -> Result<Int> in
-      if i < limit { return Result.value(i+1) }
-      return Result.error(NSError(domain: "bogus", code: -1, userInfo: nil))
+      return
+        i < limit ?
+          .value(i+1) :
+          .error(NSError(domain: "bogus", code: -1, userInfo: nil))
     }
-    m.onValue {
+
+    let m2 = m1.map(DispatchQueue.global()) { Result.value($0+1) }
+
+    m2.onValue {
       v in
-      if v == limit { e1.fulfill() }
+      if v == (limit+1) { e1.fulfill() }
     }
-    m.onError {
+    m2.onError {
       error in
       let error = error as NSError
       if error.domain == "bogus" { e2.fulfill() }
