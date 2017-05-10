@@ -35,19 +35,15 @@ open class Paused<Value>: SubStream<Value, Value>
 
     precondition(requested > 0)
 
-    var p = torequest
-    assert(p >= 0)
-    while p != Int64.max
-    {
-      let tentatively = p &+ requested // could overflow; avoid trapping
-      let updatedRequest = tentatively > 0 ? tentatively : Int64.max
-      if OSAtomicCompareAndSwap64(p, updatedRequest, &torequest)
-      {
-        return updatedRequest
-      }
-      p = torequest
-    }
-    return Int64.max
+    var prev, updated: Int64
+    repeat {
+      prev = torequest
+      if prev == Int64.max { return Int64.max }
+      let tentatively = prev &+ requested  // could overflow; avoid trapping
+      updated = tentatively > 0 ? tentatively : Int64.max
+    } while !OSAtomicCompareAndSwap64(prev, updated, &torequest)
+
+    return updated
   }
 
   open func start()
@@ -55,13 +51,12 @@ open class Paused<Value>: SubStream<Value, Value>
     if (!started)
     {
       started = true
-      var p = torequest
-      while  !OSAtomicCompareAndSwap64(p, 0, &torequest)
-      {
-        p = torequest
-      }
+      var prev: Int64
+      repeat { // atomic swap would be better here
+        prev = torequest
+      } while !OSAtomicCompareAndSwap64(prev, 0, &torequest)
 
-      super.updateRequest(p)
+      super.updateRequest(prev)
     }
   }
 }

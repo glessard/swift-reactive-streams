@@ -24,19 +24,13 @@ final public class Subscription
 
   func shouldNotify() -> Bool
   {
-    var p = requested
-    if p == Int64.max { return true }
-
-    while p > 0
-    {
-      if OSAtomicCompareAndSwap64(p, p-1, &requested)
-      {
-        return true
-      }
+    var p: Int64
+    repeat {
       p = requested
-    }
-
-    return false
+      if p == Int64.max { break }
+      if p <= 0 { return false }
+    } while !OSAtomicCompareAndSwap64(p, p-1, &requested)
+    return true
   }
 
   // called by our subscriber
@@ -57,33 +51,27 @@ final public class Subscription
   {
     if count < 1 { return }
 
-    var p = requested
-    assert(p == Int64.min || p >= 0)
-    while p != Int64.min && p < Int64.max
-    {
-      let tentatively = p &+ count // could technically overflow; avoid trapping
-      let updatedRequest = tentatively > 0 ? tentatively : Int64.max
-      if OSAtomicCompareAndSwap64(p, updatedRequest, &requested)
-      {
-        source?.updateRequest(updatedRequest)
-        return
-      }
-      p = requested
-    }
+    var prev, updated: Int64
+    repeat {
+      prev = requested
+      if prev == Int64.min || prev == Int64.max { return }
+      assert(prev >= 0)
+
+      let tentatively = prev &+ count // could overflow; avoid trapping
+      updated = tentatively > 0 ? tentatively : Int64.max
+    } while !OSAtomicCompareAndSwap64(prev, updated, &requested)
+    source?.updateRequest(updated)
   }
 
   // called by our subscriber
 
   public func cancel()
   {
-    var p = requested
-    guard p != Int64.min else { return }
-
-    // an atomic store would do better here.
-    while !OSAtomicCompareAndSwap64(p, Int64.min, &requested)
-    {
-      p = requested
-    }
+    var prev: Int64
+    repeat {
+      prev = requested
+      if prev == Int64.min { return }
+    } while !OSAtomicCompareAndSwap64(prev, Int64.min, &requested)
 
     source?.cancel(subscription: self)
     source = nil

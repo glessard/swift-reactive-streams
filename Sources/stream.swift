@@ -90,18 +90,16 @@ open class EventStream<Value>: Publisher
   {
     assert(value.isValue)
 
-    var req = requested
-    while req > 0
-    { // decrement iff req is not Int64.max
-      if req == Int64.max || OSAtomicCompareAndSwap64(req, req-1, &requested)
-      {
-        for (subscription, notificationHandler) in self.observers
-        {
-          if subscription.shouldNotify() { notificationHandler(value) }
-        }
-        break
-      }
-      req = requested
+    var prev: Int64
+    repeat {
+      prev = requested
+      if prev == Int64.max { break }
+      if prev <= 0 { return }
+    } while !OSAtomicCompareAndSwap64(prev, prev-1, &requested)
+
+    for (subscription, notificationHandler) in self.observers
+    {
+      if subscription.shouldNotify() { notificationHandler(value) }
     }
   }
 
@@ -111,18 +109,14 @@ open class EventStream<Value>: Publisher
   {
     assert(error.isError)
 
-    var req = requested
-    while req != Int64.min
-    {
-      // This should be an unconditional swap, with notification occuring iff the value has been changed
-      if OSAtomicCompareAndSwap64(req, Int64.min, &requested)
-      {
-        for notificationHandler in self.observers.values { notificationHandler(error) }
-        self.finalizeStream()
-        break
-      }
-      req = requested
-    }
+    var prev: Int64
+    repeat {
+      prev = requested
+      if prev == Int64.min { return }
+    } while !OSAtomicCompareAndSwap64(prev, Int64.min, &requested)
+
+    for notificationHandler in self.observers.values { notificationHandler(error) }
+    self.finalizeStream()
   }
 
   open func close()
@@ -222,16 +216,14 @@ open class EventStream<Value>: Publisher
   open func updateRequest(_ requested: Int64) -> Int64
   {
     precondition(requested > 0)
-    var cur = self.requested
-    while cur < requested && cur != Int64.min
-    { // an atomic store wouldn't really be better
-      if OSAtomicCompareAndSwap64(cur, requested, &self.requested)
-      {
-        return (requested-cur)
-      }
-      cur = self.requested
-    }
-    return 0
+
+    var prev: Int64
+    repeat {
+      prev = self.requested
+      if prev >= requested || prev == Int64.min { return 0 }
+    } while !OSAtomicCompareAndSwap64(prev, requested, &self.requested)
+
+    return (requested-prev)
   }
 
   final public func cancel(subscription: Subscription)
