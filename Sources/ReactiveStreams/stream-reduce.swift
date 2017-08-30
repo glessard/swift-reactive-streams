@@ -6,6 +6,8 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
+import Dispatch
+
 extension EventStream
 {
   private func reduce<U>(_ stream: LimitedStream<Value, U>, initial: U, combine: @escaping (U, Value) throws -> U) -> EventStream<U>

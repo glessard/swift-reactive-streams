@@ -6,6 +6,8 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
+import Dispatch
+
 extension EventStream
 {
   private func performNotify(_ validated: ValidatedQueue, task: @escaping (Result<Value>) -> Void)

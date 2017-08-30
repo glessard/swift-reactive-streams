@@ -6,6 +6,8 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
+import Dispatch
+
 extension EventStream
 {
   private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) throws -> U) -> EventStream<U>
