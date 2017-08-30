@@ -11,6 +11,17 @@ import XCTest
 
 class mergeTests: XCTestCase
 {
+  static let allTests = [
+    ("testMerge1", testMerge1),
+    ("testMerge2", testMerge2),
+    ("testMerge3", testMerge3),
+    ("testMerge4", testMerge4),
+    ("testMerge5", testMerge5),
+    ("testMerge6", testMerge6),
+    ("testMerge7", testMerge7),
+    ("testMerge8", testMerge8),
+  ]
+
   func testMerge1()
   {
     let s = PostBox<Int>()

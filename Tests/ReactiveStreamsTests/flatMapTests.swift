@@ -11,6 +11,15 @@ import ReactiveStreams
 
 class flatMapTests: XCTestCase
 {
+  static let allTests = [
+    ("testFlatMap1", testFlatMap1),
+    ("testFlatMap2", testFlatMap2),
+    ("testFlatMap3", testFlatMap3),
+    ("testFlatMap4", testFlatMap4),
+    ("testFlatMap5", testFlatMap5),
+    ("testFlatMap6", testFlatMap6),
+  ]
+
   func testFlatMap1()
   {
     let s = EventStream<Int>()

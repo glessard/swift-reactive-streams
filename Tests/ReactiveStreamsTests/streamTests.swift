@@ -11,6 +11,35 @@ import ReactiveStreams
 
 class streamTests: XCTestCase
 {
+  static let allTests = [
+    ("testLifetime1", testLifetime1),
+    ("testLifetime2", testLifetime2),
+    ("testLifetime3", testLifetime3),
+    ("testLifetime4", testLifetime4),
+    ("testNotify", testNotify),
+    ("testPost", testPost),
+    ("testOnValue", testOnValue),
+    ("testOnError", testOnError),
+    ("testOnComplete", testOnComplete),
+    ("testMap1", testMap1),
+    ("testMap2", testMap2),
+    ("testMap3", testMap3),
+    ("testNextN", testNextN),
+    ("testNextTruncated", testNextTruncated),
+    ("testFinal1", testFinal1),
+    ("testFinal2", testFinal2),
+    ("testFinal3", testFinal3),
+    ("testReduce1", testReduce1),
+    ("testReduce2", testReduce2),
+    ("testCountEvents", testCountEvents),
+    ("testCoalesce", testCoalesce),
+    ("testSplit0", testSplit0),
+    ("testSplit1", testSplit1),
+    ("testSplit2", testSplit2),
+    ("testSplit3", testSplit3),
+    ("testSplit4", testSplit4),
+  ].sorted(by: {$0.0 < $1.0})
+
   func testLifetime1()
   {
     class SpyStream: EventStream<Int>
