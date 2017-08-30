@@ -7,12 +7,13 @@
 //
 
 import Dispatch
+import CAtomics
 
 open class OnRequestStream: EventStream<Int>
 {
   private let source: DispatchSourceUserDataAdd
-  private var additional: Int64 = 0
-  private var started: Int32 = 0
+  private var additional = CAtomicsInt64()
+  private var started = CAtomicsBoolean()
 
   public convenience init(qos: DispatchQoS? = nil, autostart: Bool = true)
   {
@@ -27,7 +28,10 @@ open class OnRequestStream: EventStream<Int>
 
   public init(validated queue: ValidatedQueue, autostart: Bool = true)
   {
+    CAtomicsInt64Init(0, &additional)
+    CAtomicsBooleanInit(autostart, &started)
     source = DispatchSource.makeUserDataAddSource(queue: queue.queue)
+
     super.init(validated: queue)
 
     var counter = 0
@@ -35,24 +39,22 @@ open class OnRequestStream: EventStream<Int>
       self.dispatchValue(Result.value(counter))
       counter += 1
 
-      let updated = OSAtomicAdd64(-1, &self.additional)
-      if updated > 0
-      {
-        // TODO: ensure 32-bit sanity
-        self.source.add(data: UInt(truncatingIfNeeded: updated))
+      if CAtomicsInt64Add(-1, &self.additional, .relaxed) > 1
+      { // There are events remaining; nudge the data source.
+        self.source.add(data: 1)
       }
     }
 
     if autostart
     {
       source.resume()
-      started = 1
     }
   }
 
   open func start()
   {
-    if started == 0 && OSAtomicIncrement32(&started) == 1
+    var s = false
+    if CAtomicsBooleanCAS(&s, true, &started, .strong, .relaxed, .relaxed)
     {
       source.resume()
     }
@@ -64,11 +66,9 @@ open class OnRequestStream: EventStream<Int>
     let additional = super.updateRequest(requested)
     if additional > 0
     {
-      let updated = OSAtomicAdd64(additional, &self.additional)
-      if updated == additional
-      {
-        // TODO: ensure 32-bit sanity
-        self.source.add(data: UInt(truncatingIfNeeded: updated))
+      if CAtomicsInt64Add(additional, &self.additional, .relaxed) == 0
+      { // There were no events remaining; nudge the data source
+        self.source.add(data: 1)
       }
     }
     return additional
