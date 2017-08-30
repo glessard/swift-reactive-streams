@@ -37,7 +37,7 @@ open class OnRequestStream: EventStream<Int>
       if updated > 0
       {
         // TODO: ensure 32-bit sanity
-        self.source.add(data: UInt(truncatingBitPattern: updated))
+        self.source.add(data: UInt(truncatingIfNeeded: updated))
       }
     }
 
@@ -66,7 +66,7 @@ open class OnRequestStream: EventStream<Int>
       if updated == additional
       {
         // TODO: ensure 32-bit sanity
-        self.source.add(data: UInt(truncatingBitPattern: updated))
+        self.source.add(data: UInt(truncatingIfNeeded: updated))
       }
     }
     return additional

@@ -12,7 +12,7 @@ import Dispatch
 
 extension DispatchQoS
 {
-  static var current: DispatchQoS?
+  public static var current: DispatchQoS?
   {
     if let qosClass = DispatchQoS.QoSClass.current
     {

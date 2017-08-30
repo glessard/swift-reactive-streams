@@ -362,7 +362,7 @@ class streamTests: XCTestCase
 
     let e = expectation(description: "observation onValue")
 
-    let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
+    let d = (0..<events).map { _ in Int(truncatingIfNeeded: UInt64(arc4random())) }
 
     let f = stream.finalValue()
     f.onValue {
@@ -383,7 +383,7 @@ class streamTests: XCTestCase
 
     let e = expectation(description: "observation onValue")
 
-    let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
+    let d = (0..<events).map { _ in Int(truncatingIfNeeded: UInt64(arc4random())) }
 
     let f = stream.finalValue()
     f.notify {
@@ -409,7 +409,7 @@ class streamTests: XCTestCase
 
     let e = expectation(description: "observation onValue")
 
-    let d = (0..<events).map { _ in Int(truncatingBitPattern: UInt64(arc4random())) }
+    let d = (0..<events).map { _ in Int(truncatingIfNeeded: UInt64(arc4random())) }
 
     let f = stream.finalValue(DispatchQueue.global())
     f.notify {

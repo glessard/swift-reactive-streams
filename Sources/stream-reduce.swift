@@ -85,11 +85,11 @@ extension EventStream
 
   public func coalesce(qos: DispatchQoS? = nil) -> EventStream<[Value]>
   {
-    return self.reduce(qos: qos, into: []) { $0.append($1) }
+    return self.reduce(qos: qos, into: []) { (c: inout [Value], e: Value) in c.append(e) }
   }
 
   public func coalesce(_ queue: DispatchQueue) -> EventStream<[Value]>
   {
-    return self.reduce(queue, into: []) { $0.append($1) }
+    return self.reduce(queue, into: []) { (c: inout [Value], e: Value) in c.append(e) }
   }
 }
