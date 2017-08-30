@@ -6,6 +6,8 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
+import func Darwin.OSAtomicCompareAndSwap64
+
 final public class Subscription
 {
   private var source: Publisher?

@@ -6,6 +6,8 @@
 //  Copyright © 2017 Guillaume Lessard. All rights reserved.
 //
 
+import Dispatch
+
 open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputValue>
 {
   let limit: Int64

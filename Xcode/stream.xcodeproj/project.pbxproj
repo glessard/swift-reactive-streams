@@ -62,6 +62,7 @@
 		038EB3A41CDD35EC00F4B44B /* stream-merge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-merge.swift"; sourceTree = "<group>"; };
 		038EB3A61CDD361A00F4B44B /* validated-queue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "validated-queue.swift"; sourceTree = "<group>"; };
 		038EB3A81CDD8B1200F4B44B /* mergeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = mergeTests.swift; sourceTree = "<group>"; };
+		038FD36F1F573C2D00F4B44B /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Package.swift; path = ../Package.swift; sourceTree = "<group>"; };
 		03A0D5BE1EB15ED000F4B44B /* stream-paused.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-paused.swift"; sourceTree = "<group>"; };
 		03A0D5C01EB31C0600F4B44B /* stream-limited.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-limited.swift"; sourceTree = "<group>"; };
 		03A0D5C21EB5563700F4B44B /* subscriberTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = subscriberTests.swift; sourceTree = "<group>"; };
@@ -111,6 +112,7 @@
 		038527C81CD46A1500F4B44B = {
 			isa = PBXGroup;
 			children = (
+				038FD36F1F573C2D00F4B44B /* Package.swift */,
 				03D89FBC1CD46B4300F4B44B /* Sources */,
 				038527D41CD46A1500F4B44B /* stream */,
 				038527E01CD46A1500F4B44B /* streamTests */,
@@ -166,7 +168,7 @@
 				03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */,
 			);
 			name = Sources;
-			path = ../Sources;
+			path = ../Sources/ReactiveStreams;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

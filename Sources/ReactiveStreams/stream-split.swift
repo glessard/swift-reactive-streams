@@ -6,6 +6,8 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
+import Dispatch
+
 extension EventStream
 {
   public func split(qos: DispatchQoS? = nil) -> (EventStream, EventStream)

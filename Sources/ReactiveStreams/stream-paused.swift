@@ -6,6 +6,8 @@
 //  Copyright © 2017 Guillaume Lessard. All rights reserved.
 //
 
+import func Darwin.OSAtomicCompareAndSwap64
+
 open class Paused<Value>: SubStream<Value, Value>
 {
   private var torequest = Int64(0)

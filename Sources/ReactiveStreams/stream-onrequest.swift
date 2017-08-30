@@ -6,6 +6,8 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
+import Dispatch
+
 open class OnRequestStream: EventStream<Int>
 {
   private let source: DispatchSourceUserDataAdd
