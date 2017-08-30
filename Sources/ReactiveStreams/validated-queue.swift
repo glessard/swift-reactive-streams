@@ -10,11 +10,11 @@ import Dispatch
 
 public struct ValidatedQueue
 {
-  var queue: DispatchQueue
+  let queue: DispatchQueue
 
   public init(label: String, qos: DispatchQoS = DispatchQoS.current ?? .utility)
   {
-    self.queue = DispatchQueue(label: label+"\(qos.qosClass.rawValue)", qos: qos)
+    self.queue = DispatchQueue(label: label+"\(qos.qosClass)", qos: qos)
   }
 
   public init(label: String, target: DispatchQueue)

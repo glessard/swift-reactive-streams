@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import Dispatch
 import ReactiveStreams
 
 class streamTests: XCTestCase
@@ -260,10 +261,11 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
+    let id = nzRandom()
     let m = stream.map(DispatchQueue.global()) {
       i throws -> Int in
       if i < limit { return i+1 }
-      throw NSError(domain: "bogus", code: -1, userInfo: nil)
+      throw TestError(id)
     }
     m.onValue {
       v in
@@ -271,8 +273,8 @@ class streamTests: XCTestCase
     }
     m.onError {
       error in
-      let error = error as NSError
-      if error.domain == "bogus" { e2.fulfill() }
+      if let error = error as? TestError, error == TestError(id)
+      { e2.fulfill() }
     }
 
     for i in 0..<events { stream.post(i+1) }
@@ -291,12 +293,13 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
+    let id = nzRandom()
     let m1 = stream.map {
       i -> Result<Int> in
       return
         i < limit ?
           .value(i+1) :
-          .error(NSError(domain: "bogus", code: -1, userInfo: nil))
+          .error(TestError(id))
     }
 
     let m2 = m1.map(DispatchQueue.global()) { Result.value($0+1) }
@@ -307,8 +310,8 @@ class streamTests: XCTestCase
     }
     m2.onError {
       error in
-      let error = error as NSError
-      if error.domain == "bogus" { e2.fulfill() }
+      if let error = error as? TestError, error == TestError(id)
+      { e2.fulfill() }
     }
 
     for i in 0..<events { stream.post(i+1) }
@@ -358,11 +361,12 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
+    let id = nzRandom()
     let m = stream.next(count: limit)
     let t = m.map {
       i throws -> Int in
       if i <= truncation { return i }
-      throw NSError(domain: "bogus", code: -1, userInfo: nil)
+      throw TestError(id)
     }
     t.notify {
       result in
@@ -370,9 +374,9 @@ class streamTests: XCTestCase
       {
       case .value(let value):
         if value == truncation { e1.fulfill() }
-      case .error(let error):
-        let e = error as NSError
-        if (e.domain == "bogus") { e2.fulfill() }
+      case .error(let error as TestError):
+        if error == TestError(id) { e2.fulfill() }
+      default: XCTFail()
       }
     }
 
@@ -391,7 +395,7 @@ class streamTests: XCTestCase
 
     let e = expectation(description: "observation onValue")
 
-    let d = (0..<events).map { _ in Int(truncatingIfNeeded: UInt64(arc4random())) }
+    let d = (0..<events).map { _ in nzRandom() }
 
     let f = stream.finalValue()
     f.onValue {
@@ -412,7 +416,7 @@ class streamTests: XCTestCase
 
     let e = expectation(description: "observation onValue")
 
-    let d = (0..<events).map { _ in Int(truncatingIfNeeded: UInt64(arc4random())) }
+    let d = (0..<events).map { _ in nzRandom() }
 
     let f = stream.finalValue()
     f.notify {
@@ -438,7 +442,7 @@ class streamTests: XCTestCase
 
     let e = expectation(description: "observation onValue")
 
-    let d = (0..<events).map { _ in Int(truncatingIfNeeded: UInt64(arc4random())) }
+    let d = (0..<events).map { _ in nzRandom() }
 
     let f = stream.finalValue(DispatchQueue.global())
     f.notify {

@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import Dispatch 
 import ReactiveStreams
 
 class onRequestTests: XCTestCase

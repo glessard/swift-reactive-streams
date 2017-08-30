@@ -32,6 +32,8 @@
 		03E1929D1CE4474500F4B44B /* publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E1929C1CE4474500F4B44B /* publisher.swift */; };
 		03F6666A1CE0145100F4B44B /* subscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FC31CD4702400F4B44B /* subscriber.swift */; };
 		03F6666C1CE054FA00F4B44B /* flatMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F6666B1CE054FA00F4B44B /* flatMapTests.swift */; };
+		03F768B41F5787E000F4B44B /* nzRandom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F768B31F5787DF00F4B44B /* nzRandom.swift */; };
+		03F768B61F5789F300F4B44B /* TestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F768B51F5789F300F4B44B /* TestError.swift */; };
 		03FCE9D21CD8F93D00F4B44B /* stream-map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FCE9D11CD8F93D00F4B44B /* stream-map.swift */; };
 		03FE12DD1EA8802800F4B44B /* dispatch-utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */; };
 /* End PBXBuildFile section */
@@ -78,6 +80,8 @@
 		03E1929A1CE4432000F4B44B /* subscription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = subscription.swift; sourceTree = "<group>"; };
 		03E1929C1CE4474500F4B44B /* publisher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = publisher.swift; sourceTree = "<group>"; };
 		03F6666B1CE054FA00F4B44B /* flatMapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = flatMapTests.swift; path = ../../Tests/ReactiveStreamsTests/flatMapTests.swift; sourceTree = "<group>"; };
+		03F768B31F5787DF00F4B44B /* nzRandom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = nzRandom.swift; path = ../../Tests/ReactiveStreamsTests/nzRandom.swift; sourceTree = "<group>"; };
+		03F768B51F5789F300F4B44B /* TestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestError.swift; path = ../../Tests/ReactiveStreamsTests/TestError.swift; sourceTree = "<group>"; };
 		03FCE9D11CD8F93D00F4B44B /* stream-map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-map.swift"; sourceTree = "<group>"; };
 		03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "dispatch-utilities.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -154,6 +158,8 @@
 				03F6666B1CE054FA00F4B44B /* flatMapTests.swift */,
 				031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */,
 				03A0D5C21EB5563700F4B44B /* subscriberTests.swift */,
+				03F768B31F5787DF00F4B44B /* nzRandom.swift */,
+				03F768B51F5789F300F4B44B /* TestError.swift */,
 			);
 			path = streamTests;
 			sourceTree = "<group>";
@@ -334,10 +340,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03F768B41F5787E000F4B44B /* nzRandom.swift in Sources */,
 				031CFBBB1CEFD6B100F4B44B /* onRequestTests.swift in Sources */,
 				038EB3A91CDD8B1200F4B44B /* mergeTests.swift in Sources */,
 				03F6666C1CE054FA00F4B44B /* flatMapTests.swift in Sources */,
 				03A0D5C31EB5563700F4B44B /* subscriberTests.swift in Sources */,
+				03F768B61F5789F300F4B44B /* TestError.swift in Sources */,
 				038527E21CD46A1500F4B44B /* streamTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

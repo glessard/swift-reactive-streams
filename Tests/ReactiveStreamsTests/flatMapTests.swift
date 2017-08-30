@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import Dispatch
 import ReactiveStreams
 
 class flatMapTests: XCTestCase
@@ -23,7 +24,7 @@ class flatMapTests: XCTestCase
   func testFlatMap1()
   {
     let s = EventStream<Int>()
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     let m = s.flatMap {
       count -> EventStream<Double> in
@@ -54,7 +55,7 @@ class flatMapTests: XCTestCase
     let events = 10
     let reps = 5
 
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
@@ -113,7 +114,7 @@ class flatMapTests: XCTestCase
     let stream = PostBox<Int>()
     let events = 10
 
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
@@ -142,7 +143,7 @@ class flatMapTests: XCTestCase
     let events = 10
     let limit = 5
 
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     let m = s.flatMap {
       count -> EventStream<Double> in
@@ -179,7 +180,7 @@ class flatMapTests: XCTestCase
     let events = 10
     let limit = 5
 
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 

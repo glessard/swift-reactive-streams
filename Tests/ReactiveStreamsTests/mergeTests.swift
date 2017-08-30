@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import Dispatch
 @testable import ReactiveStreams
 
 class mergeTests: XCTestCase
@@ -31,7 +32,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     merged.countEvents().notify {
       result in
@@ -62,7 +63,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     merged.countEvents().notify {
       result in
@@ -95,7 +96,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     merged.countEvents().notify {
       result in
@@ -126,7 +127,7 @@ class mergeTests: XCTestCase
   func testMerge4()
   {
     let s = [PostBox<Int>(), PostBox<Int>()]
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     let count = 10
 
@@ -190,7 +191,7 @@ class mergeTests: XCTestCase
   func testMerge6()
   {
     let s = PostBox<Int>()
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
     let count = 10
 
     let merged = MergeStream<Int>()
@@ -202,7 +203,7 @@ class mergeTests: XCTestCase
 
     waitForExpectations(timeout: 1.0, handler: nil)
 
-    let g = expectation(description: "observation ends \(arc4random())")
+    let g = expectation(description: "observation ends \(#function)")
 
     merged.onCompletion { _ in g.fulfill() }
     merged.close()
@@ -213,7 +214,7 @@ class mergeTests: XCTestCase
   func testMerge7()
   {
     let s = [PostBox<Int>(), PostBox<Int>()]
-    let e = expectation(description: "observation ends \(arc4random())")
+    let e = expectation(description: "observation ends \(#function)")
 
     let count = 10
 
