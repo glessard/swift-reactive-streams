@@ -10,22 +10,6 @@ import Dispatch
 
 // these extensions could be a separate module, but why bother
 
-extension DispatchTimeInterval
-{
-  var seconds: Double {
-    @inline(__always)
-    get {
-      switch self
-      {
-      case .nanoseconds(let ns):  return Double(ns)*1e-9
-      case .microseconds(let µs): return Double(µs)*1e-6
-      case .milliseconds(let ms): return Double(ms)*1e-3
-      case .seconds(let seconds): return Double(seconds)
-      }
-    }
-  }
-}
-
 extension DispatchQoS
 {
   static var current: DispatchQoS?
