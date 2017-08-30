@@ -7,6 +7,7 @@
 //
 
 import Dispatch
+import CAtomics
 
 public enum StreamState { case waiting, streaming, ended }
 
@@ -38,8 +39,12 @@ open class EventStream<Value>: Publisher
   let queue: DispatchQueue
   private var observers = Dictionary<Subscription, (Result<Value>) -> Void>()
 
-  private var started: Int32 = 0
-  public private(set) var requested: Int64 = 0
+  private var begun = CAtomicsBoolean()
+  private var started: Bool { return CAtomicsBooleanLoad(&begun, .relaxed) }
+
+  private var pending = CAtomicsInt64()
+  public  var requested: Int64 { return CAtomicsInt64Load(&pending, .relaxed) }
+  private var completed: Bool  { return CAtomicsInt64Load(&pending, .relaxed) == Int64.min }
 
   public convenience init(qos: DispatchQoS = DispatchQoS.current ?? .utility)
   {
@@ -53,11 +58,13 @@ open class EventStream<Value>: Publisher
 
   public init(validated queue: ValidatedQueue)
   {
+    CAtomicsInt64Init(0, &pending)
+    CAtomicsBooleanInit(false, &begun)
     self.queue = queue.queue
   }
 
   public var state: StreamState {
-    if started == 0 { return .waiting }
+    if !started { return .waiting }
     switch requested
     {
     case Int64.min:         return .ended
@@ -90,12 +97,12 @@ open class EventStream<Value>: Publisher
   {
     assert(value.isValue)
 
-    var prev: Int64
-    repeat {
-      prev = requested
+    var prev: Int64 = 1
+    while !CAtomicsInt64CAS(&prev, prev-1, &pending, .weak, .relaxed, .relaxed)
+    {
       if prev == Int64.max { break }
       if prev <= 0 { return }
-    } while !OSAtomicCompareAndSwap64(prev, prev-1, &requested)
+    }
 
     for (subscription, notificationHandler) in self.observers
     {
@@ -109,11 +116,11 @@ open class EventStream<Value>: Publisher
   {
     assert(error.isError)
 
-    var prev: Int64
-    repeat {
-      prev = requested
+    var prev: Int64 = 1
+    while !CAtomicsInt64CAS(&prev, Int64.min, &pending, .weak, .relaxed, .relaxed)
+    {
       if prev == Int64.min { return }
-    } while !OSAtomicCompareAndSwap64(prev, Int64.min, &requested)
+    }
 
     for notificationHandler in self.observers.values { notificationHandler(error) }
     self.finalizeStream()
@@ -121,7 +128,7 @@ open class EventStream<Value>: Publisher
 
   open func close()
   {
-    guard requested != Int64.min else { return }
+    guard !completed else { return }
     self.queue.async {
       self.dispatchError(Result.error(StreamCompleted.normally))
     }
@@ -172,35 +179,32 @@ open class EventStream<Value>: Publisher
   {
     let subscription = Subscription(source: self)
 
-    if started == 0 && OSAtomicCompareAndSwap32(0, 1, &started)
+    func processSubscription()
+    {
+      subscriptionHandler(subscription)
+      if self.requested != Int64.min
+      {
+        self.observers[subscription] = notificationHandler
+      }
+      else
+      { // the stream was closed between the block's dispatch and its execution
+        notificationHandler(Result.error(StreamError.subscriptionFailed))
+      }
+    }
+
+    if !started
     { // the queue isn't running yet, no observers
       queue.sync {
-        assert(self.observers.isEmpty)
-        subscriptionHandler(subscription)
-        if self.requested != Int64.min
-        {
-          self.observers[subscription] = notificationHandler
-        }
-        else
-        { // the stream was closed between the block's dispatch and its execution
-          notificationHandler(Result.error(StreamError.subscriptionFailed))
-        }
+        CAtomicsBooleanStore(true, &begun, .relaxed)
+        processSubscription()
       }
       return
     }
 
-    if self.requested != Int64.min
+    if !completed
     {
       queue.async {
-        subscriptionHandler(subscription)
-        if self.requested != Int64.min
-        {
-          self.observers[subscription] = notificationHandler
-        }
-        else
-        { // the stream was closed between the block's dispatch and its execution
-          notificationHandler(Result.error(StreamError.subscriptionFailed))
-        }
+        processSubscription()
       }
       return
     }
@@ -217,18 +221,18 @@ open class EventStream<Value>: Publisher
   {
     precondition(requested > 0)
 
-    var prev: Int64
-    repeat {
-      prev = self.requested
+    var prev: Int64 = 1
+    while !CAtomicsInt64CAS(&prev, requested, &pending, .weak, .relaxed, .relaxed)
+    {
       if prev >= requested || prev == Int64.min { return 0 }
-    } while !OSAtomicCompareAndSwap64(prev, requested, &self.requested)
+    }
 
     return (requested-prev)
   }
 
   final public func cancel(subscription: Subscription)
   {
-    if requested != Int64.min
+    if !completed
     {
       queue.async {
         guard self.requested != Int64.min else { return }

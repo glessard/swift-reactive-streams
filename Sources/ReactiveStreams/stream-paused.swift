@@ -6,15 +6,17 @@
 //  Copyright © 2017 Guillaume Lessard. All rights reserved.
 //
 
-import func Darwin.OSAtomicCompareAndSwap64
+import CAtomics
 
 open class Paused<Value>: SubStream<Value, Value>
 {
-  private var torequest = Int64(0)
-  private var started = false
+  private var torequest = CAtomicsInt64()
+  private var started = CAtomicsBoolean()
 
   public init(_ stream: EventStream<Value>)
   {
+    CAtomicsInt64Init(0, &torequest)
+    CAtomicsBooleanInit(false, &started)
     super.init(validated: ValidatedQueue(label: "pausedrequests", target: stream.queue))
 
     stream.subscribe(
@@ -30,35 +32,31 @@ open class Paused<Value>: SubStream<Value, Value>
   @discardableResult
   open override func updateRequest(_ requested: Int64) -> Int64
   {
-    if started
+    if CAtomicsBooleanLoad(&started, .relaxed)
     {
       return super.updateRequest(requested)
     }
 
     precondition(requested > 0)
 
-    var prev, updated: Int64
+    var updated: Int64
+    var current = CAtomicsInt64Load(&torequest, .relaxed)
     repeat {
-      prev = torequest
-      if prev == Int64.max { return Int64.max }
-      let tentatively = prev &+ requested  // could overflow; avoid trapping
+      if current == Int64.max { return Int64.max }
+      let tentatively = current &+ requested  // could overflow; avoid trapping
       updated = tentatively > 0 ? tentatively : Int64.max
-    } while !OSAtomicCompareAndSwap64(prev, updated, &torequest)
+    } while !CAtomicsInt64CAS(&current, updated, &torequest, .weak, .relaxed, .relaxed)
 
     return updated
   }
 
   open func start()
   {
-    if (!started)
+    var f = false
+    if CAtomicsBooleanCAS(&f, true, &started, .strong, .relaxed, .relaxed)
     {
-      started = true
-      var prev: Int64
-      repeat { // atomic swap would be better here
-        prev = torequest
-      } while !OSAtomicCompareAndSwap64(prev, 0, &torequest)
-
-      super.updateRequest(prev)
+      let request = CAtomicsInt64Swap(0, &torequest, .relaxed)
+      super.updateRequest(request)
     }
   }
 }

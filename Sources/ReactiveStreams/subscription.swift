@@ -6,32 +6,32 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-import func Darwin.OSAtomicCompareAndSwap64
+import CAtomics
 
 final public class Subscription
 {
   private var source: Publisher?
 
-  public private(set) var requested: Int64
+  private var requested = CAtomicsInt64()
 
-  public var cancelled: Bool { return requested == Int64.min }
+  public var cancelled: Bool { return CAtomicsInt64Load(&requested, .relaxed) == Int64.min }
 
   init(source: Publisher)
   {
     self.source = source
-    self.requested = 0
+    CAtomicsInt64Init(0, &requested)
   }
 
   // called by our source
 
   func shouldNotify() -> Bool
   {
-    var p: Int64
-    repeat {
-      p = requested
+    var p: Int64 = 1
+    while !CAtomicsInt64CAS(&p, p-1, &requested, .weak, .relaxed, .relaxed)
+    {
       if p == Int64.max { break }
       if p <= 0 { return false }
-    } while !OSAtomicCompareAndSwap64(p, p-1, &requested)
+    }
     return true
   }
 
@@ -53,15 +53,14 @@ final public class Subscription
   {
     if count < 1 { return }
 
-    var prev, updated: Int64
+    var updated: Int64
+    var current = CAtomicsInt64Load(&requested, .relaxed)
     repeat {
-      prev = requested
-      if prev == Int64.min || prev == Int64.max { return }
-      assert(prev >= 0)
-
-      let tentatively = prev &+ count // could overflow; avoid trapping
+      if current == Int64.min || current == Int64.max { return }
+      let tentatively = current &+ count // could overflow; avoid trapping
       updated = tentatively > 0 ? tentatively : Int64.max
-    } while !OSAtomicCompareAndSwap64(prev, updated, &requested)
+    } while !CAtomicsInt64CAS(&current, updated, &requested, .weak, .relaxed, .relaxed)
+
     source?.updateRequest(updated)
   }
 
@@ -69,11 +68,8 @@ final public class Subscription
 
   public func cancel()
   {
-    var prev: Int64
-    repeat {
-      prev = requested
-      if prev == Int64.min { return }
-    } while !OSAtomicCompareAndSwap64(prev, Int64.min, &requested)
+    let prev = CAtomicsInt64Swap(Int64.min, &requested, .relaxed)
+    guard prev != Int64.min else { return }
 
     source?.cancel(subscription: self)
     source = nil
