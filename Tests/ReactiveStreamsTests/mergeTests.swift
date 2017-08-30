@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import stream
+@testable import ReactiveStreams
 
 class mergeTests: XCTestCase
 {

@@ -16,7 +16,7 @@
 		031CFBB91CEFB6CD00F4B44B /* stream-onrequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CFBB81CEFB6CD00F4B44B /* stream-onrequest.swift */; };
 		031CFBBB1CEFD6B100F4B44B /* onRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */; };
 		038527D61CD46A1500F4B44B /* stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 038527D51CD46A1500F4B44B /* stream.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		038527DD1CD46A1500F4B44B /* stream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 038527D21CD46A1500F4B44B /* stream.framework */; };
+		038527DD1CD46A1500F4B44B /* ReactiveStreams.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 038527D21CD46A1500F4B44B /* ReactiveStreams.framework */; };
 		038527E21CD46A1500F4B44B /* streamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038527E11CD46A1500F4B44B /* streamTests.swift */; };
 		038EB3A51CDD35EC00F4B44B /* stream-merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038EB3A41CDD35EC00F4B44B /* stream-merge.swift */; };
 		038EB3A71CDD361A00F4B44B /* validated-queue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038EB3A61CDD361A00F4B44B /* validated-queue.swift */; };
@@ -52,26 +52,26 @@
 		031C426D1CFE660900F4B44B /* stream-next.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-next.swift"; sourceTree = "<group>"; };
 		031C426F1CFE666600F4B44B /* stream-split.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-split.swift"; sourceTree = "<group>"; };
 		031CFBB81CEFB6CD00F4B44B /* stream-onrequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-onrequest.swift"; sourceTree = "<group>"; };
-		031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = onRequestTests.swift; sourceTree = "<group>"; };
-		038527D21CD46A1500F4B44B /* stream.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = stream.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = onRequestTests.swift; path = ../../Tests/ReactiveStreamsTests/onRequestTests.swift; sourceTree = "<group>"; };
+		038527D21CD46A1500F4B44B /* ReactiveStreams.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReactiveStreams.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		038527D51CD46A1500F4B44B /* stream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stream.h; sourceTree = "<group>"; };
 		038527D71CD46A1500F4B44B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		038527DC1CD46A1500F4B44B /* streamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = streamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		038527E11CD46A1500F4B44B /* streamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = streamTests.swift; sourceTree = "<group>"; };
+		038527DC1CD46A1500F4B44B /* ReactiveStreamsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReactiveStreamsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		038527E11CD46A1500F4B44B /* streamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = streamTests.swift; path = ../../Tests/ReactiveStreamsTests/streamTests.swift; sourceTree = "<group>"; };
 		038527E31CD46A1500F4B44B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		038EB3A41CDD35EC00F4B44B /* stream-merge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-merge.swift"; sourceTree = "<group>"; };
 		038EB3A61CDD361A00F4B44B /* validated-queue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "validated-queue.swift"; sourceTree = "<group>"; };
-		038EB3A81CDD8B1200F4B44B /* mergeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = mergeTests.swift; sourceTree = "<group>"; };
+		038EB3A81CDD8B1200F4B44B /* mergeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = mergeTests.swift; path = ../../Tests/ReactiveStreamsTests/mergeTests.swift; sourceTree = "<group>"; };
 		038FD36F1F573C2D00F4B44B /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Package.swift; path = ../Package.swift; sourceTree = "<group>"; };
 		03A0D5BE1EB15ED000F4B44B /* stream-paused.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-paused.swift"; sourceTree = "<group>"; };
 		03A0D5C01EB31C0600F4B44B /* stream-limited.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-limited.swift"; sourceTree = "<group>"; };
-		03A0D5C21EB5563700F4B44B /* subscriberTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = subscriberTests.swift; sourceTree = "<group>"; };
+		03A0D5C21EB5563700F4B44B /* subscriberTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = subscriberTests.swift; path = ../../Tests/ReactiveStreamsTests/subscriberTests.swift; sourceTree = "<group>"; };
 		03D89FBD1CD46B4300F4B44B /* stream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.swift; sourceTree = "<group>"; };
 		03D89FBF1CD46C0700F4B44B /* result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = result.swift; sourceTree = "<group>"; };
 		03D89FC31CD4702400F4B44B /* subscriber.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = subscriber.swift; sourceTree = "<group>"; };
 		03E1929A1CE4432000F4B44B /* subscription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = subscription.swift; sourceTree = "<group>"; };
 		03E1929C1CE4474500F4B44B /* publisher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = publisher.swift; sourceTree = "<group>"; };
-		03F6666B1CE054FA00F4B44B /* flatMapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = flatMapTests.swift; sourceTree = "<group>"; };
+		03F6666B1CE054FA00F4B44B /* flatMapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = flatMapTests.swift; path = ../../Tests/ReactiveStreamsTests/flatMapTests.swift; sourceTree = "<group>"; };
 		03FCE9D11CD8F93D00F4B44B /* stream-map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-map.swift"; sourceTree = "<group>"; };
 		03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "dispatch-utilities.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -88,7 +88,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				038527DD1CD46A1500F4B44B /* stream.framework in Frameworks */,
+				038527DD1CD46A1500F4B44B /* ReactiveStreams.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,8 +123,8 @@
 		038527D31CD46A1500F4B44B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				038527D21CD46A1500F4B44B /* stream.framework */,
-				038527DC1CD46A1500F4B44B /* streamTests.xctest */,
+				038527D21CD46A1500F4B44B /* ReactiveStreams.framework */,
+				038527DC1CD46A1500F4B44B /* ReactiveStreamsTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -185,9 +185,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		038527D11CD46A1500F4B44B /* stream */ = {
+		038527D11CD46A1500F4B44B /* ReactiveStreams */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 038527E61CD46A1500F4B44B /* Build configuration list for PBXNativeTarget "stream" */;
+			buildConfigurationList = 038527E61CD46A1500F4B44B /* Build configuration list for PBXNativeTarget "ReactiveStreams" */;
 			buildPhases = (
 				038527CD1CD46A1500F4B44B /* Sources */,
 				038527CE1CD46A1500F4B44B /* Frameworks */,
@@ -198,14 +198,14 @@
 			);
 			dependencies = (
 			);
-			name = stream;
+			name = ReactiveStreams;
 			productName = stream;
-			productReference = 038527D21CD46A1500F4B44B /* stream.framework */;
+			productReference = 038527D21CD46A1500F4B44B /* ReactiveStreams.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		038527DB1CD46A1500F4B44B /* streamTests */ = {
+		038527DB1CD46A1500F4B44B /* ReactiveStreamsTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 038527E91CD46A1500F4B44B /* Build configuration list for PBXNativeTarget "streamTests" */;
+			buildConfigurationList = 038527E91CD46A1500F4B44B /* Build configuration list for PBXNativeTarget "ReactiveStreamsTests" */;
 			buildPhases = (
 				038527D81CD46A1500F4B44B /* Sources */,
 				038527D91CD46A1500F4B44B /* Frameworks */,
@@ -216,9 +216,9 @@
 			dependencies = (
 				038527DF1CD46A1500F4B44B /* PBXTargetDependency */,
 			);
-			name = streamTests;
+			name = ReactiveStreamsTests;
 			productName = streamTests;
-			productReference = 038527DC1CD46A1500F4B44B /* streamTests.xctest */;
+			productReference = 038527DC1CD46A1500F4B44B /* ReactiveStreamsTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -253,8 +253,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				038527D11CD46A1500F4B44B /* stream */,
-				038527DB1CD46A1500F4B44B /* streamTests */,
+				038527D11CD46A1500F4B44B /* ReactiveStreams */,
+				038527DB1CD46A1500F4B44B /* ReactiveStreamsTests */,
 			);
 		};
 /* End PBXProject section */
@@ -319,7 +319,7 @@
 /* Begin PBXTargetDependency section */
 		038527DF1CD46A1500F4B44B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 038527D11CD46A1500F4B44B /* stream */;
+			target = 038527D11CD46A1500F4B44B /* ReactiveStreams */;
 			targetProxy = 038527DE1CD46A1500F4B44B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -505,7 +505,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		038527E61CD46A1500F4B44B /* Build configuration list for PBXNativeTarget "stream" */ = {
+		038527E61CD46A1500F4B44B /* Build configuration list for PBXNativeTarget "ReactiveStreams" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				038527E71CD46A1500F4B44B /* Debug */,
@@ -514,7 +514,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		038527E91CD46A1500F4B44B /* Build configuration list for PBXNativeTarget "streamTests" */ = {
+		038527E91CD46A1500F4B44B /* Build configuration list for PBXNativeTarget "ReactiveStreamsTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				038527EA1CD46A1500F4B44B /* Debug */,

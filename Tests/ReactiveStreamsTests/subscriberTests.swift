@@ -8,7 +8,7 @@
 
 import XCTest
 
-import stream
+import ReactiveStreams
 
 class TestSubscriber: Subscriber
 {
