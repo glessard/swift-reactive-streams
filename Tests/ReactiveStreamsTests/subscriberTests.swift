@@ -88,7 +88,7 @@ class subscriberTests: XCTestCase
 
     stream.post(1)
     stream.post(1)
-    stream.post(NSError(domain: "bogus", code: -1, userInfo: nil))
+    stream.post(TestError())
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }

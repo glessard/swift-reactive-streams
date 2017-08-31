@@ -26,12 +26,13 @@ class onRequestTests: XCTestCase
 
     o.next(count: 10).reduce(0, +).notify {
       result in
-      switch result
-      {
-      case .value(let value) where value == 45: e.fulfill()
-      case .error(_ as StreamCompleted):        break
-      default:                                  XCTFail()
+      do {
+        let value = try result.getValue()
+        if value == 45 { e.fulfill() }
+        else { XCTFail() }
       }
+      catch is StreamCompleted {}
+      catch { XCTFail() }
     }
 
     o.start()
@@ -79,12 +80,13 @@ class onRequestTests: XCTestCase
     let p0 = s.0.paused()
     p0.next(count: 10).reduce(0, +).notify {
       result in
-      switch result
-      {
-      case .value(let value) where value == 45: e0.fulfill()
-      case .error(_ as StreamCompleted):        break
-      default:                                  XCTFail()
+      do {
+        let value = try result.getValue()
+        if value == 45 { e0.fulfill() }
+        else { XCTFail() }
       }
+      catch is StreamCompleted {}
+      catch { XCTFail() }
     }
     p0.start()
 
@@ -97,12 +99,13 @@ class onRequestTests: XCTestCase
     let p1 = s.1.paused()
     p1.next(count: 10).reduce(0, +).notify {
       result in
-      switch result
-      {
-      case .value(let value) where value == 145: e1.fulfill()
-      case .error(_ as StreamCompleted):         break
-      default:                                   XCTFail()
+      do {
+        let value = try result.getValue()
+        if value == 145 { e1.fulfill() }
+        else { XCTFail() }
       }
+      catch is StreamCompleted {}
+      catch { XCTFail() }
     }
     p1.start()
 

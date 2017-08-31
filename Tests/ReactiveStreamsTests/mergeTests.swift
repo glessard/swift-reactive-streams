@@ -36,14 +36,12 @@ class mergeTests: XCTestCase
 
     merged.countEvents().notify {
       result in
-      switch result
-      {
-      case .value(let value):
+      do {
+        let value = try result.getValue()
         XCTAssert(value == count)
-        if value != count { print(value) }
-      case .error(let error):
-        if error is StreamCompleted { e.fulfill() }
       }
+      catch is StreamCompleted { e.fulfill() }
+      catch {}
     }
 
     for i in 0..<count { s.post(i+1) }
@@ -67,16 +65,12 @@ class mergeTests: XCTestCase
 
     merged.countEvents().notify {
       result in
-      switch result
-      {
-      case .value(let value):
+      do {
+        let value = try result.getValue()
         XCTAssert(value == count)
-        if value != count { print(value) }
-      case .error(let error):
-        e.fulfill()
-        if error is StreamCompleted {}
-        else { print(error) }
       }
+      catch is StreamCompleted { e.fulfill() }
+      catch { print(error) }
     }
 
     merged.close()
@@ -92,6 +86,7 @@ class mergeTests: XCTestCase
     let s = PostBox<Int>()
 
     let count = 0
+    let id = nzRandom()
 
     let merged = MergeStream<Int>()
     merged.merge(s)
@@ -100,22 +95,18 @@ class mergeTests: XCTestCase
 
     merged.countEvents().notify {
       result in
-      switch result
-      {
-      case .value(let value):
+      do {
+        let value = try result.getValue()
         XCTAssert(value == count)
-        if value != count { print(value) }
-      case .error(let error as NSError):
-        if error.domain == "bogus" { e.fulfill() }
-        else { print(error) }
-      default:
-        XCTFail()
       }
+      catch let error as TestError {
+        if error.error == id { e.fulfill() }
+      }
+      catch { XCTFail() }
     }
 
-    // merged.post(Result.error(NSError(domain: "bogus", code: -1, userInfo: nil)))
     merged.queue.async {
-      merged.dispatchError(Result.error(NSError(domain: "bogus", code: -1, userInfo: nil)))
+      merged.dispatchError(Result.error(TestError(id)))
     }
 
     for i in 0..<count { s.post(i+1) }
@@ -136,14 +127,12 @@ class mergeTests: XCTestCase
 
     merged.countEvents().notify {
       result in
-      switch result
-      {
-      case .value(let value):
+      do {
+        let value = try result.getValue()
         XCTAssert(value == count*s.count)
-        if value != count*s.count { print(value) }
-      case .error(let error):
-        if error is StreamCompleted { e.fulfill() }
       }
+      catch is StreamCompleted { e.fulfill() }
+      catch { XCTFail() }
     }
     merged.close()
 
@@ -224,17 +213,14 @@ class mergeTests: XCTestCase
 
     merged.countEvents().notify {
       result in
-      switch result
-      {
-      case .value(let value):
+      do {
+        let value = try result.getValue()
         XCTAssert(value == (count + count/2))
-        if value != (count + count/2) { print(value) }
-      case .error(let error as NSError):
-        if error.domain == "bogus" { e.fulfill() }
-        else { print(error) }
-      default:
-        XCTFail()
       }
+      catch let error as TestError {
+        if error.error == count { e.fulfill() }
+      }
+      catch { XCTFail() }
     }
 
     for (n,stream) in s.enumerated()
@@ -244,7 +230,7 @@ class mergeTests: XCTestCase
         stream.post(Result.value((n+1)*i).map({
           v throws -> Int in
           if v < count { return v }
-          throw NSError(domain: "bogus", code: -1, userInfo: nil)
+          throw TestError(v)
         }))
       }
       stream.close()
