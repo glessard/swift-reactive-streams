@@ -52,7 +52,7 @@ open class EventStream<Value>: Publisher
 
   private var pending = CAtomicsInt64()
   public  var requested: Int64 { return CAtomicsInt64Load(&pending, .relaxed) }
-  private var completed: Bool  { return CAtomicsInt64Load(&pending, .relaxed) == Int64.min }
+  public  var completed: Bool  { return CAtomicsInt64Load(&pending, .relaxed) == Int64.min }
 
   public convenience init(qos: DispatchQoS = DispatchQoS.current ?? .utility)
   {
@@ -90,7 +90,7 @@ open class EventStream<Value>: Publisher
 
   open func dispatch(_ result: Result<Value>)
   {
-    guard requested != Int64.min else { return }
+    guard !completed else { return }
 
     switch result
     {
@@ -190,12 +190,12 @@ open class EventStream<Value>: Publisher
     func processSubscription()
     {
       subscriptionHandler(subscription)
-      if self.requested != Int64.min
+      if !completed
       {
-        self.observers[subscription] = notificationHandler
+        observers[subscription] = notificationHandler
       }
       else
-      { // the stream was closed between the block's dispatch and its execution
+      {
         notificationHandler(Result.error(StreamError.subscriptionFailed))
       }
     }
@@ -209,17 +209,9 @@ open class EventStream<Value>: Publisher
       return
     }
 
-    if !completed
-    {
-      queue.async {
-        processSubscription()
-      }
-      return
+    queue.async {
+      processSubscription()
     }
-
-    // dispatching on a queue is unnecessary in this case
-    subscriptionHandler(subscription)
-    notificationHandler(Result.error(StreamError.subscriptionFailed))
   }
 
   // MARK: Publisher
@@ -243,7 +235,7 @@ open class EventStream<Value>: Publisher
     if !completed
     {
       queue.async {
-        guard self.requested != Int64.min else { return }
+        guard !self.completed else { return }
         self.performCancellation(subscription)
       }
     }

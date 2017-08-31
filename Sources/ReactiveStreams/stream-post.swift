@@ -15,7 +15,7 @@ open class PostBox<Value>: EventStream<Value>
 
   final public func post(_ result: Result<Value>)
   {
-    guard requested != Int64.min else { return }
+    guard !completed else { return }
     self.queue.async {
       switch result {
       case .value: self.dispatchValue(result)
@@ -26,7 +26,7 @@ open class PostBox<Value>: EventStream<Value>
 
   final public func post(_ value: Value)
   {
-    guard requested != Int64.min else { return }
+    guard !completed else { return }
     self.queue.async {
       self.dispatchValue(Result.value(value))
     }
@@ -34,7 +34,7 @@ open class PostBox<Value>: EventStream<Value>
 
   final public func post(_ error: Error)
   {
-    guard requested != Int64.min else { return }
+    guard !completed else { return }
     self.queue.async {
       self.dispatchError(Result.error(error))
     }
