@@ -9,10 +9,10 @@
 import Dispatch
 import CAtomics
 
-public enum StreamState { case waiting, streaming, ended }
-
-extension StreamState: CustomStringConvertible
+public enum StreamState: CustomStringConvertible
 {
+  case waiting, streaming, ended
+
   public var description: String {
     switch self
     {
@@ -23,10 +23,18 @@ extension StreamState: CustomStringConvertible
   }
 }
 
-public enum StreamCompleted: Error
+public enum StreamCompleted: Error, CustomStringConvertible
 {
   case normally              // normal completion
-  case subscriptionCancelled
+  case subscriberCancelled
+
+  public var description: String {
+    switch self
+    {
+    case .normally:            return "Stream ended by producer"
+    case .subscriberCancelled: return "Stream cancelled by subscriber"
+    }
+  }
 }
 
 public enum StreamError: Error
@@ -249,7 +257,7 @@ open class EventStream<Value>: Publisher
     guard let notificationHandler = observers.removeValue(forKey: subscription)
       else { fatalError("Tried to cancel an inactive subscription") }
 
-    notificationHandler(Result.error(StreamCompleted.subscriptionCancelled))
+    notificationHandler(Result.error(StreamCompleted.subscriberCancelled))
     return observers.isEmpty
   }
 }
