@@ -36,13 +36,12 @@ class flatMapTests: XCTestCase
 
     m.notify {
       result in
-      switch result
-      {
-      case .value: XCTFail()
-      case .error(let error):
-        if error is StreamCompleted { e.fulfill() }
-        else { print(error) }
+      do {
+        _ = try result.getValue()
+        XCTFail()
       }
+      catch StreamCompleted.normally { e.fulfill() }
+      catch { XCTFail() }
     }
 
     s.close()
@@ -89,18 +88,12 @@ class flatMapTests: XCTestCase
 
     m.countEvents().notify {
       result in
-      switch result
-      {
-      case .value(let value):
-        if value != 0 { print(value) }
+      do {
+        let value = try result.getValue()
         XCTAssert(value == 0)
-      case .error(let error as StreamError):
-        if case .subscriptionFailed = error { e.fulfill() }
-        else { XCTFail() }
-      case .error(let error):
-        print(error)
-        XCTFail()
       }
+      catch StreamError.subscriptionFailed { e.fulfill() }
+      catch { XCTFail() }
     }
 
     s.post(events)
@@ -120,15 +113,12 @@ class flatMapTests: XCTestCase
 
     m.countEvents().notify {
       result in
-      switch result
-      {
-      case .value(let value):
-        if value != events*events { print(value) }
+      do {
+        let value = try result.getValue()
         XCTAssert(value == events*events)
-      case .error(let error):
-        if error is StreamCompleted { e.fulfill() }
-        else { print(error) }
       }
+      catch StreamCompleted.normally { e.fulfill() }
+      catch { XCTFail() }
     }
 
     for _ in (0..<events) { stream.post(events) }
@@ -150,22 +140,21 @@ class flatMapTests: XCTestCase
       let s = OnRequestStream().next(count: events).map {
         i throws -> Double in
         if i < limit { return Double(i) }
-        else { throw NSError(domain: "bogus", code: i*count, userInfo: nil) }
+        else { throw TestError(i*count) }
       }
       return s
     }
 
     m.notify {
       result in
-      switch result
-      {
-      case .value(let value):
+      do {
+        let value = try result.getValue()
         XCTAssert(value < Double(limit), "value of \(value) reported")
-      case .error(let error as NSError):
-        if error.domain == "bogus" { e.fulfill() }
-        else { print(error) }
-      default: XCTFail()
       }
+      catch let error as TestError {
+        if error.error == 5 { e.fulfill() }
+      }
+      catch { XCTFail() }
     }
 
     for i in (1...events) { s.post(i) }
@@ -186,21 +175,20 @@ class flatMapTests: XCTestCase
 
     m.countEvents().notify {
       result in
-      switch result
-      {
-      case .value(let value):
+      do {
+        let value = try result.getValue()
         XCTAssert(value == 0, "counted \(value) events instead of zero")
-      case .error(let error as NSError):
-        if error.domain == "bogus" { e.fulfill() }
-        else { print(error) }
-      default: XCTFail()
       }
+      catch let error as TestError {
+        if error.error == events { e.fulfill() }
+      }
+      catch { XCTFail() }
     }
 
     for i in (1...events).reversed()
     {
       if i < limit { stream.post(i) }
-      else         { stream.post(NSError(domain: "bogus", code: i, userInfo: nil)) }
+      else         { stream.post(TestError(i)) }
     }
     stream.close()
 
