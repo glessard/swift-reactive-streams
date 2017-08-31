@@ -10,7 +10,7 @@ import Dispatch
 
 extension EventStream
 {
-  private func performNotify(_ validated: ValidatedQueue, task: @escaping (Result<Value>) -> Void)
+  private func performNotify(_ validated: ValidatedQueue, task: @escaping (Event<Value>) -> Void)
   {
     let queue = validated.queue
 
@@ -18,18 +18,18 @@ extension EventStream
       subscriber: queue,
       subscriptionHandler: { $0.requestAll() },
       notificationHandler: {
-        _, result in
-        queue.async { task(result) }
+        _, event in
+        queue.async { task(event) }
       }
     )
   }
 
-  public func notify(qos: DispatchQoS? = nil, task: @escaping (Result<Value>) -> Void)
+  public func notify(qos: DispatchQoS? = nil, task: @escaping (Event<Value>) -> Void)
   {
     performNotify(ValidatedQueue(label: "notify", qos: qos ?? self.qos), task: task)
   }
 
-  public func notify(_ queue: DispatchQueue, task: @escaping (Result<Value>) -> Void)
+  public func notify(_ queue: DispatchQueue, task: @escaping (Event<Value>) -> Void)
   {
     performNotify(ValidatedQueue(label: "notify", target: queue), task: task)
   }
@@ -45,8 +45,8 @@ extension EventStream
       subscriber: queue,
       subscriptionHandler: { $0.requestAll() },
       notificationHandler: {
-        _, result in
-        if case .value(let value) = result
+        _, event in
+        if case .value(let value) = event
         {
           queue.async { task(value) }
         }
@@ -79,8 +79,8 @@ extension EventStream
       subscriber: queue,
       subscriptionHandler: { _ in },
       notificationHandler: {
-        _, result in
-        if case .error(let error) = result, !(error is StreamCompleted)
+        _, event in
+        if case .error(let error) = event, !(error is StreamCompleted)
         {
           queue.async { task(error) }
         }
@@ -103,8 +103,8 @@ extension EventStream
       subscriber: queue,
       subscriptionHandler: { _ in },
       notificationHandler: {
-        _, result in
-        if case .error(let final as StreamCompleted) = result
+        _, event in
+        if case .error(let final as StreamCompleted) = event
         {
           queue.async { task(final) }
         }

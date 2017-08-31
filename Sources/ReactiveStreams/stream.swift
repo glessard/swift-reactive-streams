@@ -45,7 +45,7 @@ public enum StreamError: Error
 open class EventStream<Value>: Publisher
 {
   let queue: DispatchQueue
-  private var observers = Dictionary<Subscription, (Result<Value>) -> Void>()
+  private var observers = Dictionary<Subscription, (Event<Value>) -> Void>()
 
   private var begun = CAtomicsBoolean()
   private var started: Bool { return CAtomicsBooleanLoad(&begun, .relaxed) }
@@ -88,20 +88,20 @@ open class EventStream<Value>: Publisher
 
   /// precondition: must run on this stream's serial queue
 
-  open func dispatch(_ result: Result<Value>)
+  open func dispatch(_ event: Event<Value>)
   {
     guard !completed else { return }
 
-    switch result
+    switch event
     {
-    case .value: dispatchValue(result)
-    case .error: dispatchError(result)
+    case .value: dispatchValue(event)
+    case .error: dispatchError(event)
     }
   }
 
   /// precondition: must run on this Stream's serial queue
 
-  final func dispatchValue(_ value: Result<Value>)
+  final func dispatchValue(_ value: Event<Value>)
   {
     assert(value.isValue)
 
@@ -120,7 +120,7 @@ open class EventStream<Value>: Publisher
 
   /// precondition: must run on a barrier block or a serial queue
 
-  final func dispatchError(_ error: Result<Value>)
+  final func dispatchError(_ error: Event<Value>)
   {
     assert(!error.isValue)
 
@@ -138,7 +138,7 @@ open class EventStream<Value>: Publisher
   {
     guard !completed else { return }
     self.queue.async {
-      self.dispatchError(Result.error(StreamCompleted.normally))
+      self.dispatchError(Event.error(StreamCompleted.normally))
     }
   }
 
@@ -156,34 +156,34 @@ open class EventStream<Value>: Publisher
   {
     addSubscription(subscriptionHandler: observer.onSubscribe,
                     notificationHandler: {
-                      [weak subscriber = observer] (event: Result<Value>) in
+                      [weak subscriber = observer] (event: Event<Value>) in
                       if let observer = subscriber { observer.notify(event) }
     })
   }
 
   final public func subscribe<U>(substream: SubStream<Value, U>,
-                                 notificationHandler: @escaping (SubStream<Value, U>, Result<Value>) -> Void)
+                                 notificationHandler: @escaping (SubStream<Value, U>, Event<Value>) -> Void)
   {
     addSubscription(subscriptionHandler: substream.setSubscription,
                     notificationHandler: {
-                      [weak subscriber = substream] (event: Result<Value>) in
+                      [weak subscriber = substream] (event: Event<Value>) in
                       if let substream = subscriber { notificationHandler(substream, event) }
     })
   }
 
   final public func subscribe<T: AnyObject>(subscriber: T,
                                             subscriptionHandler: @escaping (Subscription) -> Void,
-                                            notificationHandler: @escaping (T, Result<Value>) -> Void)
+                                            notificationHandler: @escaping (T, Event<Value>) -> Void)
   {
     addSubscription(subscriptionHandler: subscriptionHandler,
                     notificationHandler: {
-                      [weak subscriber = subscriber] (event: Result<Value>) in
+                      [weak subscriber = subscriber] (event: Event<Value>) in
                       if let subscriber = subscriber { notificationHandler(subscriber, event) }
     })
   }
 
   private func addSubscription(subscriptionHandler: @escaping (Subscription) -> Void,
-                               notificationHandler: @escaping (Result<Value>) -> Void)
+                               notificationHandler: @escaping (Event<Value>) -> Void)
   {
     let subscription = Subscription(source: self)
 
@@ -196,7 +196,7 @@ open class EventStream<Value>: Publisher
       }
       else
       {
-        notificationHandler(Result.error(StreamError.subscriptionFailed))
+        notificationHandler(Event.error(StreamError.subscriptionFailed))
       }
     }
 
@@ -249,7 +249,7 @@ open class EventStream<Value>: Publisher
     guard let notificationHandler = observers.removeValue(forKey: subscription)
       else { fatalError("Tried to cancel an inactive subscription") }
 
-    notificationHandler(Result.error(StreamCompleted.subscriberCancelled))
+    notificationHandler(Event.error(StreamCompleted.subscriberCancelled))
     return observers.isEmpty
   }
 }

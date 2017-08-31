@@ -18,10 +18,10 @@ public protocol Subscriber: class
 
 extension Subscriber
 {
-  func notify(_ result: Result<Value>)
+  func notify(_ event: Event<Value>)
   {
     do {
-      self.onValue(try result.getValue())
+      self.onValue(try event.getValue())
     }
     catch let final as StreamCompleted {
       self.onCompletion(final)

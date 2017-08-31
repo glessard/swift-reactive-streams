@@ -40,21 +40,21 @@ public class MergeStream<Value>: SubStream<Value, Value>
         sub.request(self.requested)
       },
       notificationHandler: {
-        merged, result in
+        merged, event in
         merged.queue.async {
-          switch result
+          switch event
           {
           case .value:
-            merged.dispatchValue(result)
+            merged.dispatchValue(event)
           case .error(_ as StreamCompleted):
             merged.sources.remove(subscription)
             if merged.closed && merged.sources.isEmpty
             {
-              merged.dispatchError(result)
+              merged.dispatchError(event)
             }
           case .error:
             merged.sources.remove(subscription)
-            merged.dispatchError(result)
+            merged.dispatchError(event)
           }
         }
       }
@@ -80,7 +80,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
       self.closed = true
       if self.sources.isEmpty
       {
-        self.dispatchError(Result.error(StreamCompleted.normally))
+        self.dispatchError(Event.error(StreamCompleted.normally))
       }
     }
   }
@@ -108,16 +108,16 @@ extension EventStream
       subscriber: stream,
       subscriptionHandler: stream.setSubscription,
       notificationHandler: {
-        merged, result in
+        merged, event in
         merged.queue.async {
           do {
-            merged.performMerge(transform(try result.getValue()))
+            merged.performMerge(transform(try event.getValue()))
           }
           catch is StreamCompleted {
             merged.close()
           }
           catch {
-            merged.dispatchError(Result.error(error))
+            merged.dispatchError(Event.error(error))
           }
         }
     }

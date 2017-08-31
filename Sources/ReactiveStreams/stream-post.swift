@@ -13,13 +13,13 @@ open class PostBox<Value>: EventStream<Value>
     super.init(validated: validated)
   }
 
-  final public func post(_ result: Result<Value>)
+  final public func post(_ event: Event<Value>)
   {
     guard !completed else { return }
     self.queue.async {
-      switch result {
-      case .value: self.dispatchValue(result)
-      case .error: self.dispatchError(result)
+      switch event {
+      case .value: self.dispatchValue(event)
+      case .error: self.dispatchError(event)
       }
     }
   }
@@ -28,7 +28,7 @@ open class PostBox<Value>: EventStream<Value>
   {
     guard !completed else { return }
     self.queue.async {
-      self.dispatchValue(Result.value(value))
+      self.dispatchValue(Event.value(value))
     }
   }
 
@@ -36,7 +36,7 @@ open class PostBox<Value>: EventStream<Value>
   {
     guard !completed else { return }
     self.queue.async {
-      self.dispatchError(Result.error(error))
+      self.dispatchError(Event.error(error))
     }
   }
 }

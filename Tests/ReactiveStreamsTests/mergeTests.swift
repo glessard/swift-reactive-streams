@@ -35,9 +35,9 @@ class mergeTests: XCTestCase
     let e = expectation(description: "observation ends \(#function)")
 
     merged.countEvents().notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value == count)
       }
       catch is StreamCompleted { e.fulfill() }
@@ -64,9 +64,9 @@ class mergeTests: XCTestCase
     let e = expectation(description: "observation ends \(#function)")
 
     merged.countEvents().notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value == count)
       }
       catch is StreamCompleted { e.fulfill() }
@@ -94,9 +94,9 @@ class mergeTests: XCTestCase
     let e = expectation(description: "observation ends \(#function)")
 
     merged.countEvents().notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value == count)
       }
       catch let error as TestError {
@@ -106,7 +106,7 @@ class mergeTests: XCTestCase
     }
 
     merged.queue.async {
-      merged.dispatchError(Result.error(TestError(id)))
+      merged.dispatchError(Event.error(TestError(id)))
     }
 
     for i in 0..<count { s.post(i+1) }
@@ -126,9 +126,9 @@ class mergeTests: XCTestCase
     s.forEach(merged.merge)
 
     merged.countEvents().notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value == count*s.count)
       }
       catch is StreamCompleted { e.fulfill() }
@@ -212,9 +212,9 @@ class mergeTests: XCTestCase
     merged.close()
 
     merged.countEvents().notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value == (count + count/2))
       }
       catch let error as TestError {
@@ -227,7 +227,7 @@ class mergeTests: XCTestCase
     {
       for i in 0..<count
       {
-        stream.post(Result.value((n+1)*i).map({
+        stream.post(Event.value((n+1)*i).map({
           v throws -> Int in
           if v < count { return v }
           throw TestError(v)

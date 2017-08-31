@@ -36,7 +36,7 @@ open class OnRequestStream: EventStream<Int>
 
     var counter = 0
     source.setEventHandler {
-      self.dispatchValue(Result.value(counter))
+      self.dispatchValue(Event.value(counter))
       counter += 1
 
       if CAtomicsInt64Add(-1, &self.additional, .relaxed) > 1

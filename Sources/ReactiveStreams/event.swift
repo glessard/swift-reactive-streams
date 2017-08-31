@@ -1,12 +1,12 @@
 //
-//  Result.swift
-//  async-deferred
+//  event.swift
+//  ReactiveStreams
 //
 //  Created by Guillaume Lessard on 2015-07-16.
 //  Copyright © 2015 Guillaume Lessard. All rights reserved.
 //
 
-public enum Result<Value>
+public enum Event<Value>
 {
   case value(Value)
   // The error case does not encode type beyond the Error protocol.
@@ -87,16 +87,16 @@ public enum Result<Value>
     }
   }
 
-  public func map<Other>(_ transform: (Value) throws -> Other) -> Result<Other>
+  public func map<Other>(_ transform: (Value) throws -> Other) -> Event<Other>
   {
     switch self
     {
-    case .value(let value): return Result<Other> { try transform(value) }
+    case .value(let value): return Event<Other> { try transform(value) }
     case .error(let error): return .error(error)
     }
   }
 
-  public func flatMap<Other>(_ transform: (Value) -> Result<Other>) -> Result<Other>
+  public func flatMap<Other>(_ transform: (Value) -> Event<Other>) -> Event<Other>
   {
     switch self
     {
@@ -105,7 +105,7 @@ public enum Result<Value>
     }
   }
 
-  public func recover(_ transform: (Error) -> Result) -> Result
+  public func recover(_ transform: (Error) -> Event) -> Event
   {
     switch self
     {
@@ -115,7 +115,7 @@ public enum Result<Value>
   }
 }
 
-extension Result: CustomStringConvertible
+extension Event: CustomStringConvertible
 {
   public var description: String {
     switch self
@@ -127,7 +127,7 @@ extension Result: CustomStringConvertible
   }
 }
 
-public func ?? <Value> (possible: Result<Value>, alternate: @autoclosure () -> Value) -> Value
+public func ?? <Value> (possible: Event<Value>, alternate: @autoclosure () -> Value) -> Value
 {
   switch possible
   {

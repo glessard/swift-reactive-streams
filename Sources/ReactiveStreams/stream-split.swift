@@ -25,8 +25,8 @@ extension EventStream
       _ -> EventStream in
       let stream = SubStream<Value, Value>(qos: qos ?? self.qos)
       self.subscribe(substream: stream) {
-        mapped, result in
-        mapped.queue.async { mapped.dispatch(result) }
+        mapped, event in
+        mapped.queue.async { mapped.dispatch(event) }
       }
       return stream
     }

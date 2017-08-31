@@ -17,17 +17,17 @@ extension EventStream
       subscriber: stream,
       subscriptionHandler: stream.setSubscription,
       notificationHandler: {
-        mapped, result in
+        mapped, event in
         mapped.queue.async {
           switch mapped.count+1
           {
           case let c where c < limit:
             mapped.count = c
-            mapped.dispatch(result)
+            mapped.dispatch(event)
           case limit:
             mapped.count = limit
-            mapped.dispatch(result)
-            if case .value = result { mapped.close() }
+            mapped.dispatch(event)
+            if case .value = event { mapped.close() }
           default:
             break
           }
@@ -53,7 +53,7 @@ extension EventStream
 {
   private func finalValue(_ stream: LimitedStream<Value, Value>) -> EventStream<Value>
   {
-    var latest: Result<Value>? = nil
+    var latest: Event<Value>? = nil
     self.subscribe(
       subscriber: stream,
       subscriptionHandler: {
@@ -62,15 +62,15 @@ extension EventStream
         stream.setSubscription(subscription)
       },
       notificationHandler: {
-        mapped, result in
+        mapped, event in
         mapped.queue.async {
-          switch result
+          switch event
           {
           case .value:
-            latest = result
+            latest = event
           case .error:
             if let latest = latest { mapped.dispatchValue(latest) }
-            mapped.dispatchError(result)
+            mapped.dispatchError(event)
           }
         }
       }

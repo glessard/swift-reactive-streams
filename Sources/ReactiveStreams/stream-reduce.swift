@@ -26,14 +26,14 @@ extension EventStream
         stream.setSubscription(subscription)
       },
       notificationHandler: {
-        mapped, result in
+        mapped, event in
         mapped.queue.async {
           do {
-            try combine(&current, result.getValue())
+            try combine(&current, event.getValue())
           }
           catch {
-            mapped.dispatchValue(Result.value(current))
-            mapped.dispatchError(Result.error(error))
+            mapped.dispatchValue(Event.value(current))
+            mapped.dispatchError(Event.error(error))
           }
         }
       }

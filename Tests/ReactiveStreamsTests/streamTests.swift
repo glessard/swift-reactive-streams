@@ -139,9 +139,9 @@ class streamTests: XCTestCase
     let stream = PostBox<Int>()
 
     stream.notify(DispatchQueue.global()) {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         if value == events { e1.fulfill() }
       }
       catch StreamCompleted.normally { e2.fulfill() }
@@ -162,13 +162,13 @@ class streamTests: XCTestCase
     stream.onCompletion { _ in e1.fulfill() }
 
     stream.post(0)
-    stream.post(Result.value(1))
+    stream.post(Event.value(1))
     stream.post(StreamCompleted.normally)
 
     waitForExpectations(timeout: 1.0, handler: nil)
 
     stream.post(Int.max)
-    stream.post(Result.value(Int.min))
+    stream.post(Event.value(Int.min))
     stream.post(TestError(-1))
   }
 
@@ -294,14 +294,14 @@ class streamTests: XCTestCase
 
     let id = nzRandom()
     let m1 = stream.map {
-      i -> Result<Int> in
+      i -> Event<Int> in
       return
         i < limit ?
-          Result.value((i+1)) :
-          Result.error(TestError(id))
+          Event.value((i+1)) :
+          Event.error(TestError(id))
     }
 
-    let m2 = m1.map(DispatchQueue.global()) { Result.value($0+1) }
+    let m2 = m1.map(DispatchQueue.global()) { Event.value($0+1) }
 
     m2.onValue {
       v in
@@ -331,9 +331,9 @@ class streamTests: XCTestCase
 
     let m = stream.next(DispatchQueue.global(), count: limit)
     m.notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         if value == limit { e1.fulfill() }
       }
       catch StreamCompleted.normally { e2.fulfill() }
@@ -367,9 +367,9 @@ class streamTests: XCTestCase
       throw TestError(id)
     }
     t.notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         if value == truncation { e1.fulfill() }
       }
       catch let error as TestError {
@@ -418,9 +418,9 @@ class streamTests: XCTestCase
 
     let f = stream.finalValue()
     f.notify {
-      result in
+      event in
       do {
-        _ = try result.getValue()
+        _ = try event.getValue()
         XCTFail("not expected to get a value when \"final\" stream is closed")
       }
       catch { e.fulfill() }
@@ -444,9 +444,9 @@ class streamTests: XCTestCase
 
     let f = stream.finalValue(DispatchQueue.global())
     f.notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value == d.first)
       }
       catch { e.fulfill() }
@@ -468,9 +468,9 @@ class streamTests: XCTestCase
 
     let m = stream.reduce(0, +)
     m.notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         if value == (events-1)*events/2 { e1.fulfill() }
       }
       catch StreamCompleted.normally { e2.fulfill() }
@@ -497,9 +497,9 @@ class streamTests: XCTestCase
       return sum+e
     })
     m.notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         if value > events { e1.fulfill() }
       }
       catch is StreamCompleted { XCTFail() }
@@ -522,9 +522,9 @@ class streamTests: XCTestCase
 
     let m = stream.countEvents(DispatchQueue.global(qos: .userInitiated))
     m.notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value == events, "Counted \(value) events instead of \(events)")
         if value == events { e1.fulfill() }
       }
@@ -548,9 +548,9 @@ class streamTests: XCTestCase
 
     let m = stream.map(transform: { i in Double(2*i) }).coalesce(DispatchQueue.global(qos: .userInitiated))
     m.notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value.count == events, "Coalesced \(value.count) events instead of \(events)")
         let reduced = value.reduce(0, +)
         if reduced == Double((events-1)*events) { e1.fulfill() }
@@ -586,9 +586,9 @@ class streamTests: XCTestCase
 
     var a0 = [Int]()
     split.0.coalesce().notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         a0 = value
         if value.count == events { e1.fulfill() }
         else { print("a0 has \(a0.count) elements") }
@@ -706,9 +706,9 @@ class streamTests: XCTestCase
 
     let sem = DispatchSemaphore(value: 0)
     split.1.notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         if value == 1 { sem.signal() }
       }
       catch { e2.fulfill() }

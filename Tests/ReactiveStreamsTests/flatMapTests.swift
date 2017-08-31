@@ -35,9 +35,9 @@ class flatMapTests: XCTestCase
     }
 
     m.notify {
-      result in
+      event in
       do {
-        _ = try result.getValue()
+        _ = try event.getValue()
         XCTFail()
       }
       catch StreamCompleted.normally { e.fulfill() }
@@ -87,9 +87,9 @@ class flatMapTests: XCTestCase
     }
 
     m.countEvents().notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value == 0)
       }
       catch StreamError.subscriptionFailed { e.fulfill() }
@@ -112,9 +112,9 @@ class flatMapTests: XCTestCase
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
     m.countEvents().notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value == events*events)
       }
       catch StreamCompleted.normally { e.fulfill() }
@@ -146,9 +146,9 @@ class flatMapTests: XCTestCase
     }
 
     m.notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value < Double(limit), "value of \(value) reported")
       }
       catch let error as TestError {
@@ -174,9 +174,9 @@ class flatMapTests: XCTestCase
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
     m.countEvents().notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         XCTAssert(value == 0, "counted \(value) events instead of zero")
       }
       catch let error as TestError {

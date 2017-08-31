@@ -25,9 +25,9 @@ class onRequestTests: XCTestCase
     let o = OnRequestStream(DispatchQueue.global(qos: .background), autostart: false)
 
     o.next(count: 10).reduce(0, +).notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         if value == 45 { e.fulfill() }
         else { XCTFail() }
       }
@@ -79,9 +79,9 @@ class onRequestTests: XCTestCase
     let e0 = expectation(description: "first")
     let p0 = s.0.paused()
     p0.next(count: 10).reduce(0, +).notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         if value == 45 { e0.fulfill() }
         else { XCTFail() }
       }
@@ -98,9 +98,9 @@ class onRequestTests: XCTestCase
     let e1 = expectation(description: "second")
     let p1 = s.1.paused()
     p1.next(count: 10).reduce(0, +).notify {
-      result in
+      event in
       do {
-        let value = try result.getValue()
+        let value = try event.getValue()
         if value == 145 { e1.fulfill() }
         else { XCTFail() }
       }
