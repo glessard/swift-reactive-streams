@@ -6,16 +6,11 @@
 //  Copyright © 2015 Guillaume Lessard. All rights reserved.
 //
 
-import class Foundation.NSError
-
-/// A Result type, approximately like everyone else has done.
-///
-/// The error case does not encode type beyond the Error protocol.
-/// This way there is no need to ever map between error types, which mostly cannot make sense.
-
-public enum Result<Value>: CustomStringConvertible
+public enum Result<Value>
 {
   case value(Value)
+  // The error case does not encode type beyond the Error protocol.
+  // This way there is no need to map between error types, which mostly cannot make sense.
   case error(Error)
 
   public init(task: () throws -> Value)
@@ -27,6 +22,21 @@ public enum Result<Value>: CustomStringConvertible
     catch {
       self = .error(error)
     }
+  }
+
+  public init(value: Value)
+  {
+    self = .value(value)
+  }
+
+  public init(final: StreamCompleted)
+  {
+    self = .error(final)
+  }
+
+  public init(error: Error)
+  {
+    self = .error(error)
   }
 
   public init(_ optional: Value?, or error: Error)
@@ -54,12 +64,18 @@ public enum Result<Value>: CustomStringConvertible
     }
   }
 
+  public var final: StreamCompleted? {
+    if case .error(let final as StreamCompleted) = self
+    { return final }
+    else
+    { return nil }
+  }
+
   public var error: Error? {
-    switch self
-    {
-    case .value:            return nil
-    case .error(let error): return error
-    }
+    if case .error(let error) = self, !(error is StreamCompleted)
+    { return error }
+    else
+    { return nil }
   }
 
   public func getValue() throws -> Value
@@ -70,16 +86,6 @@ public enum Result<Value>: CustomStringConvertible
     case .error(let error): throw error
     }
   }
-
-
-  public var description: String {
-    switch self
-    {
-    case .value(let value): return String(describing: value)
-    case .error(let error): return "Error: \(error)"
-    }
-  }
-
 
   public func map<Other>(_ transform: (Value) throws -> Other) -> Result<Other>
   {
@@ -99,12 +105,24 @@ public enum Result<Value>: CustomStringConvertible
     }
   }
 
-  public func recover(_ transform: (Error) -> Result<Value>) -> Result<Value>
+  public func recover(_ transform: (Error) -> Result) -> Result
   {
     switch self
     {
     case .value:            return self
     case .error(let error): return transform(error)
+    }
+  }
+}
+
+extension Result: CustomStringConvertible
+{
+  public var description: String {
+    switch self
+    {
+    case .value(let value): return String(describing: value)
+    case .error(let final as StreamCompleted): return "\(final)"
+    case .error(let error): return "Error: \(error)"
     }
   }
 }
@@ -117,4 +135,3 @@ public func ?? <Value> (possible: Result<Value>, alternate: @autoclosure () -> V
   case .error:            return alternate()
   }
 }
-
