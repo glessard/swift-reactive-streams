@@ -62,14 +62,6 @@ public enum Result<Value>: CustomStringConvertible
     }
   }
 
-  public var isError: Bool {
-    switch self
-    {
-    case .value: return false
-    case .error: return true
-    }
-  }
-
   public func getValue() throws -> Value
   {
     switch self
@@ -107,36 +99,6 @@ public enum Result<Value>: CustomStringConvertible
     }
   }
 
-  public func apply<Other>(_ transform: Result<(Value) throws -> Other>) -> Result<Other>
-  {
-    switch self
-    {
-    case .value(let value):
-      switch transform
-      {
-      case .value(let transform): return Result<Other> { try transform(value) }
-      case .error(let error):     return .error(error)
-      }
-
-    case .error(let error):       return .error(error)
-    }
-  }
-
-  public func apply<Other>(_ transform: Result<(Value) -> Result<Other>>) -> Result<Other>
-  {
-    switch self
-    {
-    case .value(let value):
-      switch transform
-      {
-      case .value(let transform): return transform(value)
-      case .error(let error):     return .error(error)
-      }
-
-    case .error(let error):       return .error(error)
-    }
-  }
-
   public func recover(_ transform: (Error) -> Result<Value>) -> Result<Value>
   {
     switch self
@@ -156,41 +118,3 @@ public func ?? <Value> (possible: Result<Value>, alternate: @autoclosure () -> V
   }
 }
 
-public func == <Value: Equatable> (lhr: Result<Value>, rhr: Result<Value>) -> Bool
-{
-  switch (lhr, rhr)
-  {
-  case (.value(let lv), .value(let rv)):
-    return lv == rv
-
-  case (.error(let le as NSError), .error(let re as NSError)):
-    // Use NSObject's equality method, and assume the result to be correct.
-    return le.isEqual(re)
-
-  default: return false
-  }
-}
-
-public func != <Value: Equatable> (lhr: Result<Value>, rhr: Result<Value>) -> Bool
-{
-  return !(lhr == rhr)
-}
-
-public func == <C: Collection, Value: Equatable> (lha: C, rha: C) -> Bool
-  where C.Iterator.Element == Result<Value>
-{
-  guard lha.count == rha.count else { return false }
-
-  for (le, re) in zip(lha, rha)
-  {
-    guard le == re else { return false }
-  }
-
-  return true
-}
-
-public func != <C: Collection, Value: Equatable> (lha: C, rha: C) -> Bool
-  where C.Iterator.Element == Result<Value>
-{
-  return !(lha == rha)
-}
