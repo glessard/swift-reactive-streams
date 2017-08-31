@@ -53,7 +53,7 @@ extension EventStream
 {
   private func finalValue(_ stream: LimitedStream<Value, Value>) -> EventStream<Value>
   {
-    var last: Value? = nil
+    var latest: Result<Value>? = nil
     self.subscribe(
       subscriber: stream,
       subscriptionHandler: {
@@ -66,10 +66,10 @@ extension EventStream
         mapped.queue.async {
           switch result
           {
-          case .value(let value):
-            last = value
+          case .value:
+            latest = result
           case .error:
-            if let value = last { mapped.dispatchValue(Result.value(value)) }
+            if let latest = latest { mapped.dispatchValue(latest) }
             mapped.dispatchError(result)
           }
         }

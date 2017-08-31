@@ -28,17 +28,10 @@ extension EventStream
       notificationHandler: {
         mapped, result in
         mapped.queue.async {
-          switch result
-          {
-          case .value(let value):
-            do {
-              try combine(&current, value)
-            }
-            catch {
-              mapped.dispatchValue(Result.value(current))
-              mapped.dispatchError(Result.error(error))
-            }
-          case .error(let error):
+          do {
+            try combine(&current, result.getValue())
+          }
+          catch {
             mapped.dispatchValue(Result.value(current))
             mapped.dispatchError(Result.error(error))
           }

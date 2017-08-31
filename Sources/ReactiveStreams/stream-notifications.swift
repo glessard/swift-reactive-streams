@@ -46,12 +46,9 @@ extension EventStream
       subscriptionHandler: { $0.requestAll() },
       notificationHandler: {
         _, result in
-        switch result
+        if case .value(let value) = result
         {
-        case .value(let value):
           queue.async { task(value) }
-        default:
-          break
         }
       }
     )
@@ -83,11 +80,8 @@ extension EventStream
       subscriptionHandler: { _ in },
       notificationHandler: {
         _, result in
-        switch result
+        if case .error(let error) = result, !(error is StreamCompleted)
         {
-        case .value, .error(_ as StreamCompleted):
-          break
-        case .error(let error):
           queue.async { task(error) }
         }
       }
@@ -110,12 +104,9 @@ extension EventStream
       subscriptionHandler: { _ in },
       notificationHandler: {
         _, result in
-        switch result
+        if case .error(let final as StreamCompleted) = result
         {
-        case .error(let completion as StreamCompleted):
-          queue.async { task(completion) }
-        default:
-          break
+          queue.async { task(final) }
         }
       }
     )

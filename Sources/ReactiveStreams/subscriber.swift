@@ -20,13 +20,13 @@ extension Subscriber
 {
   func notify(_ result: Result<Value>)
   {
-    switch result
-    {
-    case .value(let value):
-      self.onValue(value)
-    case .error(let closed as StreamCompleted):
-      self.onCompletion(closed)
-    case .error(let error):
+    do {
+      self.onValue(try result.getValue())
+    }
+    catch let final as StreamCompleted {
+      self.onCompletion(final)
+    }
+    catch {
       self.onError(error)
     }
   }

@@ -110,13 +110,13 @@ extension EventStream
       notificationHandler: {
         merged, result in
         merged.queue.async {
-          switch result
-          {
-          case .value(let value):
-            merged.performMerge(transform(value))
-          case .error(_ as StreamCompleted):
+          do {
+            merged.performMerge(transform(try result.getValue()))
+          }
+          catch is StreamCompleted {
             merged.close()
-          case .error(let error):
+          }
+          catch {
             merged.dispatchError(Result.error(error))
           }
         }
