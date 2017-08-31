@@ -122,7 +122,7 @@ open class EventStream<Value>: Publisher
 
   final func dispatchError(_ error: Result<Value>)
   {
-    assert(error.isError)
+    assert(!error.isValue)
 
     var prev: Int64 = 1
     while !CAtomicsInt64CAS(&prev, Int64.min, &pending, .weak, .relaxed, .relaxed)
