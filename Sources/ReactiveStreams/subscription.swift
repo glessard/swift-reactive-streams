@@ -10,13 +10,13 @@ import CAtomics
 
 final public class Subscription
 {
-  private var source: Publisher?
+  private var source: EventSource?
 
   private var requested = CAtomicsInt64()
 
   public var cancelled: Bool { return CAtomicsInt64Load(&requested, .relaxed) == Int64.min }
 
-  init(source: Publisher)
+  init(source: EventSource)
   {
     self.source = source
     CAtomicsInt64Init(0, &requested)

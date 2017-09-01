@@ -44,6 +44,8 @@ public enum StreamError: Error
 
 open class EventStream<Value>: Publisher
 {
+  public typealias EventType = Value
+
   let queue: DispatchQueue
   private var observers = Dictionary<Subscription, (Event<Value>) -> Void>()
 
@@ -151,13 +153,13 @@ open class EventStream<Value>: Publisher
 
   // subscription methods
 
-  final public func subscribe<O: Subscriber>(_ observer: O)
-    where O.Value == Value
+  final public func subscribe<S: Subscriber>(_ subscriber: S)
+    where S.Value == Value
   {
-    addSubscription(subscriptionHandler: observer.onSubscribe,
+    addSubscription(subscriptionHandler: subscriber.onSubscribe,
                     notificationHandler: {
-                      [weak subscriber = observer] (event: Event<Value>) in
-                      if let observer = subscriber { observer.notify(event) }
+                      [weak subscriber = subscriber] (event: Event<Value>) in
+                      if let subscriber = subscriber { subscriber.notify(event) }
     })
   }
 
