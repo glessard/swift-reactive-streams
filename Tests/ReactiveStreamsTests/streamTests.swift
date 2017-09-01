@@ -39,6 +39,8 @@ class streamTests: XCTestCase
     ("testSplit2", testSplit2),
     ("testSplit3", testSplit3),
     ("testSplit4", testSplit4),
+    ("testPause1", testPaused1),
+    ("testPause2", testPaused2),
   ].sorted(by: {$0.0 < $1.0})
 
   func testLifetime1()
@@ -719,6 +721,35 @@ class streamTests: XCTestCase
     split.1.close()
     (1..<events).forEach { stream.post($0) }
     stream.close()
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testPaused1()
+  {
+    let postbox = PostBox<Int>()
+    let stream = postbox.paused()
+    stream.start()
+  }
+
+  func testPaused2()
+  {
+    let postbox = PostBox<Int>()
+    let stream = postbox.paused()
+
+    let e1 = expectation(description: "count events")
+    let e2 = expectation(description: "coalesce events")
+
+    stream.countEvents().onValue {
+      if $0 == 1 { e1.fulfill() }
+    }
+    stream.coalesce().onValue {
+      if $0.count == 1 { e2.fulfill() }
+    }
+
+    stream.start()
+    postbox.post(1)
+    postbox.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }

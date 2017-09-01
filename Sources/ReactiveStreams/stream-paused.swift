@@ -56,7 +56,7 @@ open class Paused<Value>: SubStream<Value, Value>
     if CAtomicsBooleanCAS(&f, true, &started, .strong, .relaxed, .relaxed)
     {
       let request = CAtomicsInt64Swap(0, &torequest, .relaxed)
-      super.updateRequest(request)
+      if request > 0 { super.updateRequest(request) }
     }
   }
 }
