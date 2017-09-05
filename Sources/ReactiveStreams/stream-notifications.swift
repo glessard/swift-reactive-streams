@@ -8,20 +8,74 @@
 
 import Dispatch
 
+private class NotificationSubscriber<T>: Subscriber
+{
+  typealias Value = T
+
+  private let queue: DispatchQueue
+  private var subscription: Subscription? = nil
+
+  var eventHandler: ((T) -> Void)? = nil
+  var errorHandler: ((Error) -> Void)? = nil
+  var completionHandler: ((StreamCompleted) -> Void)? = nil
+
+  init(_ queue: DispatchQueue)
+  {
+    self.queue = queue
+  }
+
+  func onSubscribe(_ subscription: Subscription)
+  {
+    precondition(self.subscription == nil, "received multiple calls to \(#function)")
+
+    self.subscription = subscription
+    guard eventHandler != nil else { return }
+    subscription.requestAll()
+  }
+
+  func onValue(_ value: T)
+  {
+    if let handler = self.eventHandler
+    {
+      queue.async { handler(value) }
+    }
+  }
+
+  func onError(_ error: Error)
+  {
+    queue.async {
+      if let handler = self.errorHandler { handler(error) }
+      self.cleanup()
+    }
+  }
+
+  func onCompletion(_ status: StreamCompleted)
+  {
+    queue.async {
+      if let handler = self.completionHandler { handler(status) }
+      self.cleanup()
+    }
+  }
+
+  private func cleanup()
+  {
+    eventHandler = nil
+    errorHandler = nil
+    completionHandler = nil
+  }
+}
+
 extension EventStream
 {
   private func performNotify(_ validated: ValidatedQueue, task: @escaping (Event<Value>) -> Void)
   {
-    let queue = validated.queue
+    let notifier = NotificationSubscriber<Value>(validated.queue)
+    notifier.eventHandler = { value in withExtendedLifetime(notifier) { task(Event.value(value)) } }
+    // making Subscriber.notify overrideable might be better, but not problem-free
+    notifier.errorHandler = { task(Event.error($0)) }
+    notifier.completionHandler = { task(Event.error($0)) }
 
-    self.subscribe(
-      subscriber: queue,
-      subscriptionHandler: { $0.requestAll() },
-      notificationHandler: {
-        _, event in
-        queue.async { task(event) }
-      }
-    )
+    self.subscribe(notifier)
   }
 
   public func notify(qos: DispatchQoS? = nil, task: @escaping (Event<Value>) -> Void)
@@ -39,19 +93,9 @@ extension EventStream
 {
   private func performOnValue(_ validated: ValidatedQueue, task: @escaping (Value) -> Void)
   {
-    let queue = validated.queue
-
-    self.subscribe(
-      subscriber: queue,
-      subscriptionHandler: { $0.requestAll() },
-      notificationHandler: {
-        _, event in
-        if case .value(let value) = event
-        {
-          queue.async { task(value) }
-        }
-      }
-    )
+    let notifier = NotificationSubscriber<Value>(validated.queue)
+    notifier.eventHandler = { value in withExtendedLifetime(notifier) { task(value) } }
+    self.subscribe(notifier)
   }
 
   public func onValue(qos: DispatchQoS? = nil, task: @escaping (Value) -> Void)
@@ -75,17 +119,9 @@ extension EventStream
 
   public func onError(_ queue: DispatchQueue, task: @escaping (Error) -> Void)
   {
-    self.subscribe(
-      subscriber: queue,
-      subscriptionHandler: { _ in },
-      notificationHandler: {
-        _, event in
-        if case .error(let error) = event, !(error is StreamCompleted)
-        {
-          queue.async { task(error) }
-        }
-      }
-    )
+    let notifier = NotificationSubscriber<Value>(queue)
+    notifier.errorHandler = { error in withExtendedLifetime(notifier) { task(error) } }
+    self.subscribe(notifier)
   }
 }
 
@@ -99,16 +135,8 @@ extension EventStream
 
   public func onCompletion(_ queue: DispatchQueue, task: @escaping (StreamCompleted) -> Void)
   {
-    self.subscribe(
-      subscriber: queue,
-      subscriptionHandler: { _ in },
-      notificationHandler: {
-        _, event in
-        if case .error(let final as StreamCompleted) = event
-        {
-          queue.async { task(final) }
-        }
-      }
-    )
+    let notifier = NotificationSubscriber<Value>(queue)
+    notifier.completionHandler = { status in withExtendedLifetime(notifier) { task(status) } }
+    self.subscribe(notifier)
   }
 }
