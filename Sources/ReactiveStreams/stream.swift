@@ -47,7 +47,7 @@ open class EventStream<Value>: Publisher
   public typealias EventType = Value
 
   let queue: DispatchQueue
-  private var observers = Dictionary<Subscription, (Event<Value>) -> Void>()
+  private var observers = Dictionary<WeakSubscription, (Event<Value>) -> Void>()
 
   private var begun = CAtomicsBoolean()
   private var started: Bool { return CAtomicsBooleanLoad(&begun, .relaxed) }
@@ -114,9 +114,16 @@ open class EventStream<Value>: Publisher
       if prev <= 0 { return }
     }
 
-    for (subscription, notificationHandler) in self.observers
+    for (ws, notificationHandler) in self.observers
     {
-      if subscription.shouldNotify() { notificationHandler(value) }
+      if let subscription = ws.reference
+      {
+        if subscription.shouldNotify() { notificationHandler(value) }
+      }
+      else
+      { // subscription no longer exists: remove handler.
+        self.observers.removeValue(forKey: ws)
+      }
     }
   }
 
@@ -194,7 +201,7 @@ open class EventStream<Value>: Publisher
       subscriptionHandler(subscription)
       if !completed
       {
-        observers[subscription] = notificationHandler
+        observers[WeakSubscription(subscription)] = notificationHandler
       }
       else
       {
@@ -248,10 +255,29 @@ open class EventStream<Value>: Publisher
   @discardableResult
   func performCancellation(_ subscription: Subscription) -> Bool
   {
-    guard let notificationHandler = observers.removeValue(forKey: subscription)
+    let key = WeakSubscription(subscription)
+    guard let notificationHandler = observers.removeValue(forKey: key)
       else { fatalError("Tried to cancel an inactive subscription") }
 
     notificationHandler(Event.error(StreamCompleted.subscriberCancelled))
     return observers.isEmpty
+  }
+}
+
+
+struct WeakSubscription: Equatable, Hashable
+{
+  let hashValue: Int
+  weak var reference: Subscription?
+
+  init(_ r: Subscription)
+  {
+    reference = r
+    hashValue = ObjectIdentifier(r).hashValue
+  }
+
+  static func == (l: WeakSubscription, r: WeakSubscription) -> Bool
+  {
+    return l.hashValue == r.hashValue
   }
 }
