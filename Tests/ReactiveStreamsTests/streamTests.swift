@@ -87,10 +87,10 @@ class streamTests: XCTestCase
 
     let p = UnsafeMutablePointer<EventStream<Int>>.allocate(capacity: 1)
     p.initialize(to: SpyStream(expectation(description: "deletion")).finalValue())
-    p.deinitialize()
+    p.deinitialize(count: 1)
 
     waitForExpectations(timeout: 1.0, handler: nil)
-    p.deallocate(capacity: 1)
+    p.deallocate()
   }
 
   func testLifetime3()
