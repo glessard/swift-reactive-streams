@@ -152,7 +152,7 @@ class flatMapTests: XCTestCase
         XCTAssert(value < Double(limit), "value of \(value) reported")
       }
       catch let error as TestError {
-        if error.error == 5 { e.fulfill() }
+        if error.error >= 5 { e.fulfill() }
       }
       catch { XCTFail() }
     }
