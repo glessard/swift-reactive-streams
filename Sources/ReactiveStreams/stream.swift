@@ -49,12 +49,12 @@ open class EventStream<Value>: Publisher
   let queue: DispatchQueue
   private var observers = Dictionary<WeakSubscription, (Event<Value>) -> Void>()
 
-  private var begun = CAtomicsBoolean()
-  private var started: Bool { return CAtomicsBooleanLoad(&begun, .relaxed) }
+  private var begun = AtomicBool()
+  private var started: Bool { return begun.load(.relaxed) }
 
-  private var pending = CAtomicsInt64()
-  public  var requested: Int64 { return CAtomicsInt64Load(&pending, .relaxed) }
-  public  var completed: Bool  { return CAtomicsInt64Load(&pending, .relaxed) == Int64.min }
+  private var pending = AtomicInt64()
+  public  var requested: Int64 { return pending.load(.relaxed) }
+  public  var completed: Bool  { return pending.load(.relaxed) == Int64.min }
 
   public convenience init(qos: DispatchQoS = DispatchQoS.current ?? .utility)
   {
@@ -68,8 +68,8 @@ open class EventStream<Value>: Publisher
 
   public init(validated queue: ValidatedQueue)
   {
-    CAtomicsInt64Init(0, &pending)
-    CAtomicsBooleanInit(false, &begun)
+    pending.initialize(0)
+    begun.initialize(false)
     self.queue = queue.queue
   }
 
@@ -108,7 +108,7 @@ open class EventStream<Value>: Publisher
     assert(value.isValue)
 
     var prev: Int64 = 1
-    while !CAtomicsInt64CAS(&prev, prev-1, &pending, .weak, .relaxed, .relaxed)
+    while !pending.loadCAS(&prev, prev-1, .weak, .relaxed, .relaxed)
     {
       if prev == Int64.max { break }
       if prev <= 0 { return }
@@ -134,7 +134,7 @@ open class EventStream<Value>: Publisher
     assert(!error.isValue)
 
     var prev: Int64 = 1
-    while !CAtomicsInt64CAS(&prev, Int64.min, &pending, .weak, .relaxed, .relaxed)
+    while !pending.loadCAS(&prev, Int64.min, .weak, .relaxed, .relaxed)
     {
       if prev == Int64.min { return }
     }
@@ -212,7 +212,7 @@ open class EventStream<Value>: Publisher
     if !started
     { // the queue isn't running yet, no observers
       queue.sync {
-        CAtomicsBooleanStore(true, &begun, .relaxed)
+        begun.store(true, .relaxed)
         processSubscription()
       }
       return
@@ -231,7 +231,7 @@ open class EventStream<Value>: Publisher
     precondition(requested > 0)
 
     var prev: Int64 = 1
-    while !CAtomicsInt64CAS(&prev, requested, &pending, .weak, .relaxed, .relaxed)
+    while !pending.loadCAS(&prev, requested, .weak, .relaxed, .relaxed)
     {
       if prev >= requested || prev == Int64.min { return 0 }
     }
