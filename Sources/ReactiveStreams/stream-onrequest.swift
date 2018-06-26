@@ -12,8 +12,8 @@ import CAtomics
 open class OnRequestStream: EventStream<Int>
 {
   private let source: DispatchSourceUserDataAdd
-  private var additional = CAtomicsInt64()
-  private var started = CAtomicsBoolean()
+  private var additional = AtomicInt64()
+  private var started = AtomicBool()
 
   public convenience init(qos: DispatchQoS? = nil, autostart: Bool = true)
   {
@@ -28,8 +28,8 @@ open class OnRequestStream: EventStream<Int>
 
   public init(validated queue: ValidatedQueue, autostart: Bool = true)
   {
-    CAtomicsInt64Init(0, &additional)
-    CAtomicsBooleanInit(autostart, &started)
+    additional.initialize(0)
+    started.initialize(autostart)
     source = DispatchSource.makeUserDataAddSource(queue: queue.queue)
 
     super.init(validated: queue)
@@ -39,7 +39,7 @@ open class OnRequestStream: EventStream<Int>
       self.dispatchValue(Event.value(counter))
       counter += 1
 
-      if CAtomicsInt64Add(-1, &self.additional, .relaxed) > 1
+      if self.additional.fetch_add(-1, .relaxed) > 1
       { // There are events remaining; nudge the data source.
         self.source.add(data: 1)
       }
@@ -53,8 +53,7 @@ open class OnRequestStream: EventStream<Int>
 
   open func start()
   {
-    var s = false
-    if CAtomicsBooleanCAS(&s, true, &started, .strong, .relaxed, .relaxed)
+    if started.CAS(false, true, .strong, .relaxed)
     {
       source.resume()
     }
@@ -66,7 +65,7 @@ open class OnRequestStream: EventStream<Int>
     let additional = super.updateRequest(requested)
     if additional > 0
     {
-      if CAtomicsInt64Add(additional, &self.additional, .relaxed) == 0
+      if self.additional.fetch_add(additional, .relaxed) == 0
       { // There were no events remaining; nudge the data source
         self.source.add(data: 1)
       }

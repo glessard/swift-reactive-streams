@@ -21,11 +21,10 @@
 		038EB3A51CDD35EC00F4B44B /* stream-merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038EB3A41CDD35EC00F4B44B /* stream-merge.swift */; };
 		038EB3A71CDD361A00F4B44B /* validated-queue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038EB3A61CDD361A00F4B44B /* validated-queue.swift */; };
 		038EB3A91CDD8B1200F4B44B /* mergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038EB3A81CDD8B1200F4B44B /* mergeTests.swift */; };
-		038FD3751F57454A00F4B44B /* CAtomics.c in Sources */ = {isa = PBXBuildFile; fileRef = 038FD3721F57453900F4B44B /* CAtomics.c */; };
-		038FD3761F57454D00F4B44B /* CAtomics.h in Headers */ = {isa = PBXBuildFile; fileRef = 038FD3731F57453900F4B44B /* CAtomics.h */; };
 		03A0D5BF1EB15ED000F4B44B /* stream-paused.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A0D5BE1EB15ED000F4B44B /* stream-paused.swift */; };
 		03A0D5C11EB31C0600F4B44B /* stream-limited.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A0D5C01EB31C0600F4B44B /* stream-limited.swift */; };
 		03A0D5C31EB5563700F4B44B /* subscriberTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A0D5C21EB5563700F4B44B /* subscriberTests.swift */; };
+		03CB533D20E1F67700F4B44B /* CAtomics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03B4C6C520E1F5C100F4B44B /* CAtomics.framework */; };
 		03D89FBE1CD46B4300F4B44B /* stream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FBD1CD46B4300F4B44B /* stream.swift */; };
 		03D89FC01CD46C0700F4B44B /* event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FBF1CD46C0700F4B44B /* event.swift */; };
 		03E1929B1CE4432000F4B44B /* subscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E1929A1CE4432000F4B44B /* subscription.swift */; };
@@ -45,6 +44,55 @@
 			proxyType = 1;
 			remoteGlobalIDString = 038527D11CD46A1500F4B44B;
 			remoteInfo = stream;
+		};
+		03B4C6C020E1F5C100F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 031CA33E20DBDC0400F4B44B;
+			remoteInfo = Atomics;
+		};
+		03B4C6C220E1F5C100F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 031CA34720DBDC0400F4B44B;
+			remoteInfo = AtomicsTests;
+		};
+		03B4C6C420E1F5C100F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 031CA35D20DBDCAD00F4B44B;
+			remoteInfo = CAtomics;
+		};
+		03B4C6C620E1F5C100F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 031CA36520DBDCAE00F4B44B;
+			remoteInfo = CAtomicsTests;
+		};
+		03B4C6C820E1F5C100F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0382B62620DC4A2B00F4B44B;
+			remoteInfo = AtomicsTestApp;
+		};
+		03B4C6CA20E1F5C100F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0382B63920DC4A2D00F4B44B;
+			remoteInfo = AtomicsTestAppTests;
+		};
+		03CB533E20E1F68400F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 031CA35C20DBDCAD00F4B44B;
+			remoteInfo = CAtomics;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -67,13 +115,11 @@
 		038EB3A61CDD361A00F4B44B /* validated-queue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "validated-queue.swift"; sourceTree = "<group>"; };
 		038EB3A81CDD8B1200F4B44B /* mergeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = mergeTests.swift; path = ../../Tests/ReactiveStreamsTests/mergeTests.swift; sourceTree = "<group>"; };
 		038FD36F1F573C2D00F4B44B /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Package.swift; path = ../Package.swift; sourceTree = "<group>"; };
-		038FD3721F57453900F4B44B /* CAtomics.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = CAtomics.c; sourceTree = "<group>"; };
-		038FD3731F57453900F4B44B /* CAtomics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CAtomics.h; sourceTree = "<group>"; };
-		038FD3741F57453900F4B44B /* module.map */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.map; sourceTree = "<group>"; };
 		038FD3771F5782D700F4B44B /* LinuxMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LinuxMain.swift; path = ../../Tests/LinuxMain.swift; sourceTree = "<group>"; };
 		03A0D5BE1EB15ED000F4B44B /* stream-paused.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-paused.swift"; sourceTree = "<group>"; };
 		03A0D5C01EB31C0600F4B44B /* stream-limited.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-limited.swift"; sourceTree = "<group>"; };
 		03A0D5C21EB5563700F4B44B /* subscriberTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = subscriberTests.swift; path = ../../Tests/ReactiveStreamsTests/subscriberTests.swift; sourceTree = "<group>"; };
+		03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Atomics.xcodeproj; path = dependencies/atomics/Xcode/Atomics.xcodeproj; sourceTree = "<group>"; };
 		03D89FBD1CD46B4300F4B44B /* stream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.swift; sourceTree = "<group>"; };
 		03D89FBF1CD46C0700F4B44B /* event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = event.swift; sourceTree = "<group>"; };
 		03D89FC31CD4702400F4B44B /* subscriber.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = subscriber.swift; sourceTree = "<group>"; };
@@ -91,6 +137,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03CB533D20E1F67700F4B44B /* CAtomics.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,6 +166,14 @@
 			name = "stream operations";
 			sourceTree = "<group>";
 		};
+		036346AA20E1F58700F4B44B /* dependencies */ = {
+			isa = PBXGroup;
+			children = (
+				03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */,
+			);
+			name = dependencies;
+			sourceTree = "<group>";
+		};
 		038527C81CD46A1500F4B44B = {
 			isa = PBXGroup;
 			children = (
@@ -126,7 +181,9 @@
 				03D89FBC1CD46B4300F4B44B /* Sources */,
 				038527D41CD46A1500F4B44B /* stream */,
 				038527E01CD46A1500F4B44B /* streamTests */,
+				036346AA20E1F58700F4B44B /* dependencies */,
 				038527D31CD46A1500F4B44B /* Products */,
+				03CB533620E1F67700F4B44B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -164,22 +221,24 @@
 			path = streamTests;
 			sourceTree = "<group>";
 		};
-		038FD3701F57453900F4B44B /* utilities */ = {
+		03B4C6B820E1F5C100F4B44B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				038FD3711F57453900F4B44B /* CAtomics */,
+				03B4C6C120E1F5C100F4B44B /* Atomics.framework */,
+				03B4C6C320E1F5C100F4B44B /* AtomicsTests.xctest */,
+				03B4C6C520E1F5C100F4B44B /* CAtomics.framework */,
+				03B4C6C720E1F5C100F4B44B /* CAtomicsTests.xctest */,
+				03B4C6C920E1F5C100F4B44B /* AtomicsTestApp.app */,
+				03B4C6CB20E1F5C100F4B44B /* AtomicsTestAppTests.xctest */,
 			);
-			path = utilities;
-			sourceTree = SOURCE_ROOT;
+			name = Products;
+			sourceTree = "<group>";
 		};
-		038FD3711F57453900F4B44B /* CAtomics */ = {
+		03CB533620E1F67700F4B44B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				038FD3721F57453900F4B44B /* CAtomics.c */,
-				038FD3731F57453900F4B44B /* CAtomics.h */,
-				038FD3741F57453900F4B44B /* module.map */,
 			);
-			path = CAtomics;
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		03D89FBC1CD46B4300F4B44B /* Sources */ = {
@@ -197,7 +256,6 @@
 				03D89FC31CD4702400F4B44B /* subscriber.swift */,
 				038EB3A61CDD361A00F4B44B /* validated-queue.swift */,
 				03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */,
-				038FD3701F57453900F4B44B /* utilities */,
 			);
 			name = Sources;
 			path = ../Sources/ReactiveStreams;
@@ -211,7 +269,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				038527D61CD46A1500F4B44B /* stream.h in Headers */,
-				038FD3761F57454D00F4B44B /* CAtomics.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,6 +287,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				03CB533F20E1F68400F4B44B /* PBXTargetDependency */,
 			);
 			name = ReactiveStreams;
 			productName = stream;
@@ -284,6 +342,12 @@
 			mainGroup = 038527C81CD46A1500F4B44B;
 			productRefGroup = 038527D31CD46A1500F4B44B /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 03B4C6B820E1F5C100F4B44B /* Products */;
+					ProjectRef = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				038527D11CD46A1500F4B44B /* ReactiveStreams */,
@@ -291,6 +355,51 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		03B4C6C120E1F5C100F4B44B /* Atomics.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Atomics.framework;
+			remoteRef = 03B4C6C020E1F5C100F4B44B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		03B4C6C320E1F5C100F4B44B /* AtomicsTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = AtomicsTests.xctest;
+			remoteRef = 03B4C6C220E1F5C100F4B44B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		03B4C6C520E1F5C100F4B44B /* CAtomics.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = CAtomics.framework;
+			remoteRef = 03B4C6C420E1F5C100F4B44B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		03B4C6C720E1F5C100F4B44B /* CAtomicsTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = CAtomicsTests.xctest;
+			remoteRef = 03B4C6C620E1F5C100F4B44B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		03B4C6C920E1F5C100F4B44B /* AtomicsTestApp.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = AtomicsTestApp.app;
+			remoteRef = 03B4C6C820E1F5C100F4B44B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		03B4C6CB20E1F5C100F4B44B /* AtomicsTestAppTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = AtomicsTestAppTests.xctest;
+			remoteRef = 03B4C6CA20E1F5C100F4B44B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		038527D01CD46A1500F4B44B /* Resources */ = {
@@ -326,7 +435,6 @@
 				03A0D5BF1EB15ED000F4B44B /* stream-paused.swift in Sources */,
 				03A0D5C11EB31C0600F4B44B /* stream-limited.swift in Sources */,
 				03D89FBE1CD46B4300F4B44B /* stream.swift in Sources */,
-				038FD3751F57454A00F4B44B /* CAtomics.c in Sources */,
 				031C42651CFE4B9B00F4B44B /* stream-post.swift in Sources */,
 				038EB3A51CDD35EC00F4B44B /* stream-merge.swift in Sources */,
 				038EB3A71CDD361A00F4B44B /* validated-queue.swift in Sources */,
@@ -357,6 +465,11 @@
 			isa = PBXTargetDependency;
 			target = 038527D11CD46A1500F4B44B /* ReactiveStreams */;
 			targetProxy = 038527DE1CD46A1500F4B44B /* PBXContainerItemProxy */;
+		};
+		03CB533F20E1F68400F4B44B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = CAtomics;
+			targetProxy = 03CB533E20E1F68400F4B44B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

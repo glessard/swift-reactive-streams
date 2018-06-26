@@ -10,7 +10,7 @@ let package = Package(
     .library(name: name, targets: [name]),
   ],
   dependencies: [
-    .package(url: "https://github.com/glessard/swift-atomics.git", from: "3.6.0")
+    .package(url: "https://github.com/glessard/swift-atomics.git", from: "4.0.0")
   ],
   targets: [
     .target(name: name, dependencies: ["CAtomics"]),
