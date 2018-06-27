@@ -12,13 +12,13 @@ import Dispatch
 
 extension DispatchQoS
 {
-  public static var current: DispatchQoS?
+  static public var current: DispatchQoS
   {
     if let qosClass = DispatchQoS.QoSClass.current
     {
       return DispatchQoS(qosClass: qosClass, relativePriority: 0)
     }
-    return nil
+    return .default
   }
 }
 
@@ -26,10 +26,10 @@ extension DispatchQoS.QoSClass
 {
   static var current: DispatchQoS.QoSClass?
   {
-    #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-      return DispatchQoS.QoSClass(rawValue: qos_class_self())
-    #else // platforms that rely on swift-corelibs-libdispatch
-      return nil
-    #endif
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+    return DispatchQoS.QoSClass(rawValue: qos_class_self())
+#else // platforms that rely on swift-corelibs-libdispatch
+    return nil
+#endif
   }
 }

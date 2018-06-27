@@ -111,10 +111,9 @@ extension EventStream
 
 extension EventStream
 {
-  public func onError(qos: DispatchQoS? = nil, task: @escaping (Error) -> Void)
+  public func onError(qos: DispatchQoS = DispatchQoS.current, task: @escaping (Error) -> Void)
   {
-    let qos = qos?.qosClass ?? DispatchQoS.QoSClass.current ?? .utility
-    onError(DispatchQueue.global(qos: qos), task: task)
+    onError(DispatchQueue.global(qos: qos.qosClass), task: task)
   }
 
   public func onError(_ queue: DispatchQueue, task: @escaping (Error) -> Void)
@@ -127,10 +126,9 @@ extension EventStream
 
 extension EventStream
 {
-  public func onCompletion(qos: DispatchQoS? = nil, task: @escaping (StreamCompleted) -> Void)
+  public func onCompletion(qos: DispatchQoS = DispatchQoS.current, task: @escaping (StreamCompleted) -> Void)
   {
-    let qos = qos?.qosClass ?? DispatchQoS.QoSClass.current ?? .utility
-    onCompletion(DispatchQueue.global(qos: qos), task: task)
+    onCompletion(DispatchQueue.global(qos: qos.qosClass), task: task)
   }
 
   public func onCompletion(_ queue: DispatchQueue, task: @escaping (StreamCompleted) -> Void)

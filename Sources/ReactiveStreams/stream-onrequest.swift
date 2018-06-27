@@ -15,9 +15,8 @@ open class OnRequestStream: EventStream<Int>
   private var additional = AtomicInt64()
   private var started = AtomicBool()
 
-  public convenience init(qos: DispatchQoS? = nil, autostart: Bool = true)
+  public convenience init(qos: DispatchQoS = DispatchQoS.current, autostart: Bool = true)
   {
-    let qos = qos ?? DispatchQoS.current ?? .utility
     self.init(validated: ValidatedQueue(label: "onrequeststream", qos: qos), autostart: autostart)
   }
 
