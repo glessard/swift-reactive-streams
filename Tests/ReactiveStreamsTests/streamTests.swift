@@ -90,7 +90,7 @@ class streamTests: XCTestCase
     p.deinitialize(count: 1)
 
     waitForExpectations(timeout: 1.0, handler: nil)
-#if swift(>=4.2)
+#if swift(>=4.1)
     p.deallocate()
 #else
     p.deallocate(capacity: 1)
