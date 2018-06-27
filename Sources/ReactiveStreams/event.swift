@@ -6,119 +6,63 @@
 //  Copyright © 2015 Guillaume Lessard. All rights reserved.
 //
 
-public enum Event<Value>
+public struct Event<Value>
 {
-  case value(Value)
-  // The error case does not encode type beyond the Error protocol.
-  // This way there is no need to map between error types, which mostly cannot make sense.
-  case error(Error)
-
-  public init(task: () throws -> Value)
-  {
-    do {
-      let value = try task()
-      self = .value(value)
-    }
-    catch {
-      self = .error(error)
-    }
-  }
+  fileprivate let state: State<Value>
 
   public init(value: Value)
   {
-    self = .value(value)
+    state = .value(value)
   }
 
   public init(final: StreamCompleted)
   {
-    self = .error(final)
+    state = .error(final)
   }
 
   public init(error: Error)
   {
-    self = .error(error)
+    state = .error(error)
   }
 
-  public init(_ optional: Value?, or error: Error)
+  public func get() throws -> Value
   {
-    switch optional
-    {
-    case .some(let value): self = .value(value)
-    case .none:            self = .error(error)
-    }
-  }
-
-  public var value: Value? {
-    switch self
-    {
-    case .value(let value): return value
-    case .error:            return nil
-    }
-  }
-
-  public var isValue: Bool {
-    switch self
-    {
-    case .value: return true
-    case .error: return false
-    }
-  }
-
-  public var final: StreamCompleted? {
-    if case .error(let final as StreamCompleted) = self
-    { return final }
-    else
-    { return nil }
-  }
-
-  public var error: Error? {
-    if case .error(let error) = self, !(error is StreamCompleted)
-    { return error }
-    else
-    { return nil }
-  }
-
-  public func getValue() throws -> Value
-  {
-    switch self
+    switch state
     {
     case .value(let value): return value
     case .error(let error): throw error
     }
   }
 
-  public func map<Other>(_ transform: (Value) throws -> Other) -> Event<Other>
-  {
-    switch self
-    {
-    case .value(let value): return Event<Other> { try transform(value) }
-    case .error(let error): return .error(error)
-    }
+  public var value: Value? {
+    if case .value(let value) = state { return value }
+    return nil
   }
 
-  public func flatMap<Other>(_ transform: (Value) -> Event<Other>) -> Event<Other>
-  {
-    switch self
-    {
-    case .value(let value): return transform(value)
-    case .error(let error): return .error(error)
-    }
+  public var isValue: Bool {
+    if case .value = state { return true }
+    return false
   }
 
-  public func recover(_ transform: (Error) -> Event) -> Event
-  {
-    switch self
-    {
-    case .value:            return self
-    case .error(let error): return transform(error)
-    }
+  public var final: StreamCompleted? {
+    if case .error(let final as StreamCompleted) = state
+    { return final }
+
+    return nil
+  }
+
+  public var error: Error? {
+    if case .error(let error) = state, !(error is StreamCompleted)
+    { return error }
+
+    return nil
   }
 }
 
 extension Event: CustomStringConvertible
 {
   public var description: String {
-    switch self
+    switch state
     {
     case .value(let value): return String(describing: value)
     case .error(let final as StreamCompleted): return "\(final)"
@@ -127,11 +71,35 @@ extension Event: CustomStringConvertible
   }
 }
 
-public func ?? <Value> (possible: Event<Value>, alternate: @autoclosure () -> Value) -> Value
+#if swift (>=4.1)
+extension Event: Equatable where Value: Equatable
 {
-  switch possible
+  public static func ==(lhs: Event, rhs: Event) -> Bool
   {
-  case .value(let value): return value
-  case .error:            return alternate()
+    switch (lhs.state, rhs.state)
+    {
+    case (.value(let lhv), .value(let rhv)):
+      return lhv == rhv
+    case (.error(let lhe), .error(let rhe)):
+      return String(describing: lhe) == String(describing: rhe)
+    default:
+      return false
+    }
   }
 }
+#endif
+
+#if swift (>=4.2)
+@usableFromInline
+enum State<Value>
+{
+  case value(Value)
+  case error(Error)
+}
+#else
+enum State<Value>
+{
+  case value(Value)
+  case error(Error)
+}
+#endif

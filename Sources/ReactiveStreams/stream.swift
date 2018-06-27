@@ -94,10 +94,12 @@ open class EventStream<Value>: Publisher
   {
     guard !completed else { return }
 
-    switch event
-    {
-    case .value: dispatchValue(event)
-    case .error: dispatchError(event)
+    do {
+      _ = try event.get()
+      dispatchValue(event)
+    }
+    catch {
+      dispatchError(event)
     }
   }
 
@@ -147,7 +149,7 @@ open class EventStream<Value>: Publisher
   {
     guard !completed else { return }
     self.queue.async {
-      self.dispatchError(Event.error(StreamCompleted.normally))
+      self.dispatchError(Event(final: .normally))
     }
   }
 
@@ -205,7 +207,7 @@ open class EventStream<Value>: Publisher
       }
       else
       {
-        notificationHandler(Event.error(StreamError.subscriptionFailed))
+        notificationHandler(Event(error: StreamError.subscriptionFailed))
       }
     }
 
@@ -259,7 +261,7 @@ open class EventStream<Value>: Publisher
     guard let notificationHandler = observers.removeValue(forKey: key)
       else { fatalError("Tried to cancel an inactive subscription") }
 
-    notificationHandler(Event.error(StreamCompleted.subscriberCancelled))
+    notificationHandler(Event(final: .subscriberCancelled))
     return observers.isEmpty
   }
 }

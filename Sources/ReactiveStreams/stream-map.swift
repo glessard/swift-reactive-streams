@@ -14,7 +14,15 @@ extension EventStream
   {
     self.subscribe(substream: stream) {
       mapped, event in
-      mapped.queue.async { mapped.dispatch(event.map(transform)) }
+      mapped.queue.async {
+        do {
+          let transformed = try transform(event.get())
+          mapped.dispatch(Event(value: transformed))
+        }
+        catch {
+          mapped.dispatch(Event(error: error))
+        }
+      }
     }
     return stream
   }
@@ -36,7 +44,15 @@ extension EventStream
   {
     self.subscribe(substream: stream) {
       mapped, event in
-      mapped.queue.async { mapped.dispatch(event.flatMap(transform)) }
+      mapped.queue.async {
+        do {
+          let transformed = try transform(event.get())
+          mapped.dispatch(transformed)
+        }
+        catch {
+          mapped.dispatch(Event(error: error))
+        }
+      }
     }
     return stream
   }

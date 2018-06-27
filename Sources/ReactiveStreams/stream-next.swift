@@ -27,7 +27,7 @@ extension EventStream
           case limit:
             mapped.count = limit
             mapped.dispatch(event)
-            if case .value = event { mapped.close() }
+            if event.isValue { mapped.close() }
           default:
             break
           }
@@ -64,11 +64,11 @@ extension EventStream
       notificationHandler: {
         mapped, event in
         mapped.queue.async {
-          switch event
-          {
-          case .value:
+          do {
+            _ = try event.get()
             latest = event
-          case .error:
+          }
+          catch {
             if let latest = latest { mapped.dispatchValue(latest) }
             mapped.dispatchError(event)
           }

@@ -27,7 +27,7 @@ class onRequestTests: XCTestCase
     o.next(count: 10).reduce(0, +).notify {
       event in
       do {
-        let value = try event.getValue()
+        let value = try event.get()
         if value == 45 { e.fulfill() }
         else { XCTFail() }
       }
@@ -81,7 +81,7 @@ class onRequestTests: XCTestCase
     p0.next(count: 10).reduce(0, +).notify {
       event in
       do {
-        let value = try event.getValue()
+        let value = try event.get()
         if value == 45 { e0.fulfill() }
         else { XCTFail() }
       }
@@ -98,7 +98,7 @@ class onRequestTests: XCTestCase
     p1.next(count: 10).reduce(0, +).notify {
       event in
       do {
-        let value = try event.getValue()
+        let value = try event.get()
         if value == 145 { e1.fulfill() }
         else { XCTFail() }
       }

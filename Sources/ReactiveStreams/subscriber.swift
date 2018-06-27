@@ -21,7 +21,7 @@ extension Subscriber
   func notify(_ event: Event<Value>)
   {
     do {
-      self.onValue(try event.getValue())
+      self.onValue(try event.get())
     }
     catch let final as StreamCompleted {
       self.onCompletion(final)
