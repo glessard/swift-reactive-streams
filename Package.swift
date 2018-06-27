@@ -4,6 +4,8 @@ import PackageDescription
 
 let name = "ReactiveStreams"
 
+#if swift(>=4.0)
+
 let package = Package(
   name: name,
   products: [
@@ -18,3 +20,19 @@ let package = Package(
   ],
   swiftLanguageVersions: [3,4]
 )
+
+#else
+
+
+let package = Package(
+  name: name,
+  targets: [
+    Target(name: name),
+  ],
+  dependencies: [
+    .Package(url: "https://github.com/glessard/swift-atomics.git", majorVersion: 4, minor: 0),
+  ]
+)
+
+#endif
+
