@@ -17,9 +17,12 @@ open class PostBox<Value>: EventStream<Value>
   {
     guard !completed else { return }
     self.queue.async {
-      switch event {
-      case .value: self.dispatchValue(event)
-      case .error: self.dispatchError(event)
+      do {
+        _ = try event.get()
+        self.dispatchValue(event)
+      }
+      catch {
+        self.dispatchError(event)
       }
     }
   }
@@ -28,7 +31,7 @@ open class PostBox<Value>: EventStream<Value>
   {
     guard !completed else { return }
     self.queue.async {
-      self.dispatchValue(Event.value(value))
+      self.dispatchValue(Event(value: value))
     }
   }
 
@@ -36,7 +39,7 @@ open class PostBox<Value>: EventStream<Value>
   {
     guard !completed else { return }
     self.queue.async {
-      self.dispatchError(Event.error(error))
+      self.dispatchError(Event(error: error))
     }
   }
 }

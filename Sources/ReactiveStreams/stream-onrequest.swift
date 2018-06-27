@@ -35,7 +35,7 @@ open class OnRequestStream: EventStream<Int>
 
     var counter = 0
     source.setEventHandler {
-      self.dispatchValue(Event.value(counter))
+      self.dispatchValue(Event(value :counter))
       counter += 1
 
       if self.additional.fetch_add(-1, .relaxed) > 1

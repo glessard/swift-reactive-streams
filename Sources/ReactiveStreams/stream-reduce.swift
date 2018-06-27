@@ -29,11 +29,11 @@ extension EventStream
         mapped, event in
         mapped.queue.async {
           do {
-            try combine(&current, event.getValue())
+            try combine(&current, event.get())
           }
           catch {
-            mapped.dispatchValue(Event.value(current))
-            mapped.dispatchError(Event.error(error))
+            mapped.dispatchValue(Event(value: current))
+            mapped.dispatchError(Event(error: error))
           }
         }
       }

@@ -70,10 +70,10 @@ extension EventStream
   private func performNotify(_ validated: ValidatedQueue, task: @escaping (Event<Value>) -> Void)
   {
     let notifier = NotificationSubscriber<Value>(validated.queue)
-    notifier.eventHandler = { value in withExtendedLifetime(notifier) { task(Event.value(value)) } }
+    notifier.eventHandler = { value in withExtendedLifetime(notifier) { task(Event(value: value)) } }
     // making Subscriber.notify overrideable might be better, but not problem-free
-    notifier.errorHandler = { task(Event.error($0)) }
-    notifier.completionHandler = { task(Event.error($0)) }
+    notifier.errorHandler = { task(Event(error: $0)) }
+    notifier.completionHandler = { task(Event(error: $0)) }
 
     self.subscribe(notifier)
   }

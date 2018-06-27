@@ -42,17 +42,18 @@ public class MergeStream<Value>: SubStream<Value, Value>
       notificationHandler: {
         merged, event in
         merged.queue.async {
-          switch event
-          {
-          case .value:
+          do {
+            _ = try event.get()
             merged.dispatchValue(event)
-          case .error(_ as StreamCompleted):
+          }
+          catch is StreamCompleted {
             merged.sources.remove(subscription)
             if merged.closed && merged.sources.isEmpty
             {
               merged.dispatchError(event)
             }
-          case .error:
+          }
+          catch {
             merged.sources.remove(subscription)
             merged.dispatchError(event)
           }
@@ -80,7 +81,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
       self.closed = true
       if self.sources.isEmpty
       {
-        self.dispatchError(Event.error(StreamCompleted.normally))
+        self.dispatchError(Event(final: .normally))
       }
     }
   }
@@ -111,13 +112,13 @@ extension EventStream
         merged, event in
         merged.queue.async {
           do {
-            merged.performMerge(transform(try event.getValue()))
+            merged.performMerge(transform(try event.get()))
           }
           catch is StreamCompleted {
             merged.close()
           }
           catch {
-            merged.dispatchError(Event.error(error))
+            merged.dispatchError(Event(error: error))
           }
         }
     }
