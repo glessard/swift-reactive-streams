@@ -1,0 +1,30 @@
+language: swift
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      language: generic
+      sudo: required
+      env: SWIFT_VERSION=3.2 CLANG_VERSION=3.6
+
+    - os: linux
+      dist: trusty
+      language: generic
+      sudo: required
+      env: SWIFT_VERSION=4.1.1
+
+    - os: osx
+      osx_image: xcode9
+      env: SWIFT_VERSION=3.2
+
+    - os: osx
+      osx_image: xcode9.4
+
+before_install:
+  - sudo /bin/bash Tests/install-clang.sh
+  - chmod u+x Tests/install-swift.sh
+  - . Tests/install-swift.sh
+
+script:
+  - /bin/bash Tests/test-script.sh
