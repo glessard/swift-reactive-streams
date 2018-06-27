@@ -10,17 +10,6 @@ public struct Event<Value>
 {
   fileprivate let state: State<Value>
 
-  private init(task: () throws -> Value)
-  {
-    do {
-      let value = try task()
-      state = .value(value)
-    }
-    catch {
-      state = .error(error)
-    }
-  }
-
   public init(value: Value)
   {
     state = .value(value)
@@ -58,42 +47,15 @@ public struct Event<Value>
   public var final: StreamCompleted? {
     if case .error(let final as StreamCompleted) = state
     { return final }
-    else
-    { return nil }
+
+    return nil
   }
 
   public var error: Error? {
     if case .error(let error) = state, !(error is StreamCompleted)
     { return error }
-    else
-    { return nil }
-  }
 
-  public func map<Other>(_ transform: (Value) throws -> Other) -> Event<Other>
-  {
-    switch state
-    {
-    case .value(let value): return Event<Other> { try transform(value) }
-    case .error(let error): return Event<Other>(error: error)
-    }
-  }
-
-  public func flatMap<Other>(_ transform: (Value) -> Event<Other>) -> Event<Other>
-  {
-    switch state
-    {
-    case .value(let value): return transform(value)
-    case .error(let error): return Event<Other>(error: error)
-    }
-  }
-
-  public func recover(_ transform: (Error) -> Event) -> Event
-  {
-    switch state
-    {
-    case .value:            return self
-    case .error(let error): return transform(error)
-    }
+    return nil
   }
 }
 

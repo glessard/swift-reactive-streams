@@ -227,11 +227,14 @@ class mergeTests: XCTestCase
     {
       for i in 0..<count
       {
-        stream.post(Event(value: (n+1)*i).map({
-          v throws -> Int in
-          if v < count { return v }
-          throw TestError(v)
-        }))
+        do {
+          let v = (n+1)*i
+          if v >= count { throw TestError(v) }
+          stream.post(Event(value: v))
+        }
+        catch {
+          stream.post(Event(error: error))
+        }
       }
       stream.close()
       stream.queue.sync(execute: {})
