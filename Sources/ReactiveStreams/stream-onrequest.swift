@@ -11,9 +11,10 @@ import CAtomics
 
 open class OnRequestStream: EventStream<Int>
 {
-  private let source: DispatchSourceUserDataAdd
   private var additional = AtomicInt64()
   private var started = AtomicBool()
+
+  private var counter = 0
 
   public convenience init(qos: DispatchQoS = DispatchQoS.current, autostart: Bool = true)
   {
@@ -29,24 +30,25 @@ open class OnRequestStream: EventStream<Int>
   {
     additional.initialize(0)
     started.initialize(autostart)
-    source = DispatchSource.makeUserDataAddSource(queue: queue.queue)
 
     super.init(validated: queue)
+  }
 
-    var counter = 0
-    source.setEventHandler {
-      self.dispatchValue(Event(value :counter))
-      counter += 1
+  private func processNext()
+  {
+    queue.async {
+      var remaining = self.additional.load(.relaxed)
+      repeat {
+        if remaining == 0 { return }
+      } while !self.additional.loadCAS(&remaining, remaining-1, .weak, .relaxed, .relaxed)
 
-      if self.additional.fetch_add(-1, .relaxed) > 1
-      { // There are events remaining; nudge the data source.
-        self.source.add(data: 1)
+      self.dispatchValue(Event(value: self.counter))
+      self.counter += 1
+
+      if remaining > 0
+      { // There are events remaining; enqueue another event
+        self.processNext()
       }
-    }
-
-    if autostart
-    {
-      source.resume()
     }
   }
 
@@ -54,33 +56,22 @@ open class OnRequestStream: EventStream<Int>
   {
     if started.CAS(false, true, .strong, .relaxed)
     {
-      source.resume()
+      processNext()
     }
   }
 
   @discardableResult
   override open func updateRequest(_ requested: Int64) -> Int64
   {
-    let additional = super.updateRequest(requested)
-    if additional > 0
+    let additionalRequest = super.updateRequest(requested)
+    if additionalRequest > 0
     {
-      if self.additional.fetch_add(additional, .relaxed) == 0
-      { // There were no events remaining; nudge the data source
-        self.source.add(data: 1)
+      if additional.fetch_add(additionalRequest, .relaxed) == 0 &&
+         started.load(.relaxed) == true
+      { // There were no events remaining; enqueue another event
+        processNext()
       }
     }
-    return additional
-  }
-
-  /// precondition: must run on a barrier block or a serial queue
-
-  override func performCancellation(_ subscription: Subscription) -> Bool
-  {
-    if super.performCancellation(subscription)
-    { // the event handler holds a strong reference to self; cancel it.
-      source.setEventHandler(handler: nil)
-      return true
-    }
-    return false
+    return additionalRequest
   }
 }
