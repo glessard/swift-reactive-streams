@@ -64,11 +64,12 @@ extension EventStream
       notificationHandler: {
         mapped, event in
         mapped.queue.async {
-          do {
-            _ = try event.get()
+          if event.isValue
+          {
             latest = event
           }
-          catch {
+          else
+          {
             if let latest = latest { mapped.dispatchValue(latest) }
             mapped.dispatchError(event)
           }

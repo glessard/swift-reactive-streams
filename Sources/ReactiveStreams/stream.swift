@@ -94,11 +94,12 @@ open class EventStream<Value>: Publisher
   {
     guard !completed else { return }
 
-    do {
-      _ = try event.get()
+    if event.isValue
+    {
       dispatchValue(event)
     }
-    catch {
+    else
+    {
       dispatchError(event)
     }
   }

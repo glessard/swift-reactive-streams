@@ -17,13 +17,7 @@ open class PostBox<Value>: EventStream<Value>
   {
     guard !completed else { return }
     self.queue.async {
-      do {
-        _ = try event.get()
-        self.dispatchValue(event)
-      }
-      catch {
-        self.dispatchError(event)
-      }
+      self.dispatch(event)
     }
   }
 
