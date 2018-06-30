@@ -106,6 +106,7 @@
 		031C426F1CFE666600F4B44B /* stream-split.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-split.swift"; sourceTree = "<group>"; };
 		031CFBB81CEFB6CD00F4B44B /* stream-onrequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-onrequest.swift"; sourceTree = "<group>"; };
 		031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = onRequestTests.swift; path = ../../Tests/ReactiveStreamsTests/onRequestTests.swift; sourceTree = "<group>"; };
+		036A8C4B20E7066F00F4B44B /* XCTestManifests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = XCTestManifests.swift; path = ../../Tests/ReactiveStreamsTests/XCTestManifests.swift; sourceTree = "<group>"; };
 		038527D21CD46A1500F4B44B /* ReactiveStreams.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReactiveStreams.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		038527D51CD46A1500F4B44B /* stream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stream.h; sourceTree = "<group>"; };
 		038527D71CD46A1500F4B44B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -222,6 +223,7 @@
 				03A0D5C21EB5563700F4B44B /* subscriberTests.swift */,
 				03F768B31F5787DF00F4B44B /* nzRandom.swift */,
 				03F768B51F5789F300F4B44B /* TestError.swift */,
+				036A8C4B20E7066F00F4B44B /* XCTestManifests.swift */,
 			);
 			path = streamTests;
 			sourceTree = "<group>";
@@ -306,6 +308,7 @@
 				038527D81CD46A1500F4B44B /* Sources */,
 				038527D91CD46A1500F4B44B /* Frameworks */,
 				038527DA1CD46A1500F4B44B /* Resources */,
+				036A8C4520E7059600F4B44B /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -422,6 +425,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		036A8C4520E7059600F4B44B /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/bash ${PROJECT_DIR}/../Utilities/generate-linuxmain.sh\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		038527CD1CD46A1500F4B44B /* Sources */ = {

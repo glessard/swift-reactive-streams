@@ -57,11 +57,6 @@ class TestSubscriber: Subscriber
 
 class subscriberTests: XCTestCase
 {
-  static let allTests = [
-    ("testSubscriber1", testSubscriber1),
-    ("testSubscriber2", testSubscriber2),
-  ]
-
   func testSubscriber1()
   {
     let e = expectation(description: #function)

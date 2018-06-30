@@ -12,12 +12,6 @@ import ReactiveStreams
 
 class onRequestTests: XCTestCase
 {
-  static let allTests = [
-    ("testOnRequest1", testOnRequest1),
-    ("testOnRequest2", testOnRequest2),
-    ("testOnRequest3", testOnRequest3),
-  ]
-
   func testOnRequest1()
   {
     let e = expectation(description: "on-request")
