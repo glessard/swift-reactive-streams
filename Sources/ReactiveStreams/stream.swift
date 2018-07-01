@@ -198,8 +198,18 @@ open class EventStream<Value>: Publisher
   {
     let subscription = Subscription(source: self)
 
-    func processSubscription()
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
     {
+      if started
+      {
+        dispatchPrecondition(condition: .notOnQueue(queue))
+      }
+    }
+#endif
+
+    queue.sync {
+      begun.store(true, .relaxed)
       subscriptionHandler(subscription)
       if !completed
       {
@@ -209,19 +219,6 @@ open class EventStream<Value>: Publisher
       {
         notificationHandler(Event(error: StreamError.subscriptionFailed))
       }
-    }
-
-    if !started
-    { // the queue isn't running yet, no observers
-      queue.sync {
-        begun.store(true, .relaxed)
-        processSubscription()
-      }
-      return
-    }
-
-    queue.async {
-      processSubscription()
     }
   }
 

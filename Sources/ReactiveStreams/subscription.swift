@@ -27,7 +27,7 @@ final public class Subscription
   func shouldNotify() -> Bool
   {
     var p: Int64 = 1
-    while requested.loadCAS(&p, p-1, .weak, .relaxed, .relaxed)
+    while !requested.loadCAS(&p, p-1, .weak, .relaxed, .relaxed)
     {
       if p == Int64.max { break }
       if p <= 0 { return false }
