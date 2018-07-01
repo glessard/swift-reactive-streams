@@ -198,6 +198,16 @@ open class EventStream<Value>: Publisher
   {
     let subscription = Subscription(source: self)
 
+#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+    {
+      if started
+      {
+        dispatchPrecondition(condition: .notOnQueue(queue))
+      }
+    }
+#endif
+
     queue.sync {
       begun.store(true, .relaxed)
       subscriptionHandler(subscription)
