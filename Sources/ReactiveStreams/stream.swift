@@ -110,12 +110,11 @@ open class EventStream<Value>: Publisher
   {
     assert(value.isValue)
 
-    var prev: Int64 = 1
-    while !pending.loadCAS(&prev, prev-1, .weak, .relaxed, .relaxed)
-    {
+    var prev = pending.load(.relaxed)
+    repeat {
       if prev == Int64.max { break }
       if prev <= 0 { return }
-    }
+    } while !pending.loadCAS(&prev, prev-1, .weak, .relaxed, .relaxed)
 
     for (ws, notificationHandler) in self.observers
     {
@@ -136,11 +135,8 @@ open class EventStream<Value>: Publisher
   {
     assert(!error.isValue)
 
-    var prev: Int64 = 1
-    while !pending.loadCAS(&prev, Int64.min, .weak, .relaxed, .relaxed)
-    {
-      if prev == Int64.min { return }
-    }
+    let prev = pending.swap(Int64.min, .relaxed)
+    if prev == Int64.min { return }
 
     for notificationHandler in self.observers.values { notificationHandler(error) }
     self.finalizeStream()
@@ -230,11 +226,10 @@ open class EventStream<Value>: Publisher
   {
     precondition(requested > 0)
 
-    var prev: Int64 = 1
-    while !pending.loadCAS(&prev, requested, .weak, .relaxed, .relaxed)
-    {
+    var prev = pending.load(.relaxed)
+    repeat {
       if prev >= requested || prev == Int64.min { return 0 }
-    }
+    } while !pending.loadCAS(&prev, requested, .weak, .relaxed, .relaxed)
 
     return (requested-prev)
   }
