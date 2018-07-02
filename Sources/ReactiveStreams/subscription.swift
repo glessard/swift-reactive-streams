@@ -56,8 +56,8 @@ final public class Subscription
     var current = requested.load(.relaxed)
     repeat {
       if current == Int64.min || current == Int64.max { return }
-      let tentatively = current &+ count // could overflow; avoid trapping
-      updated = tentatively > 0 ? tentatively : Int64.max
+      updated = current &+ count // could overflow; avoid trapping
+      if updated < 0 { updated = Int64.max } // check and correct for overflow
     } while !requested.loadCAS(&current, updated, .weak, .relaxed, .relaxed)
 
     source?.updateRequest(updated)

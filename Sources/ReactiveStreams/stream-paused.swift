@@ -43,8 +43,8 @@ open class Paused<Value>: SubStream<Value, Value>
     var current = torequest.load(.relaxed)
     repeat {
       if current == Int64.max { return Int64.max }
-      let tentatively = current &+ requested  // could overflow; avoid trapping
-      updated = tentatively > 0 ? tentatively : Int64.max
+      updated = current &+ requested // could overflow; avoid trapping
+      if updated < 0 { updated = Int64.max } // check and correct for overflow
     } while !torequest.loadCAS(&current, updated, .weak, .relaxed, .relaxed)
 
     return updated
