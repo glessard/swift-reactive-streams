@@ -42,9 +42,9 @@ open class Paused<Value>: SubStream<Value, Value>
     var updated: Int64
     var current = torequest.load(.relaxed)
     repeat {
-      if current == Int64.max { return Int64.max }
+      if current == .max { return .max }
       updated = current &+ requested // could overflow; avoid trapping
-      if updated < 0 { updated = Int64.max } // check and correct for overflow
+      if updated < 0 { updated = .max } // check and correct for overflow
     } while !torequest.loadCAS(&current, updated, .weak, .relaxed, .relaxed)
 
     return updated
