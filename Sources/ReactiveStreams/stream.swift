@@ -23,18 +23,9 @@ public enum StreamState: CustomStringConvertible
   }
 }
 
-public enum StreamCompleted: Error, CustomStringConvertible
+public enum StreamCompleted: Error
 {
-  case normally              // normal completion
-  case subscriberCancelled
-
-  public var description: String {
-    switch self
-    {
-    case .normally:            return "Stream ended by producer"
-    case .subscriberCancelled: return "Stream cancelled by subscriber"
-    }
-  }
+  case normally
 }
 
 public enum StreamError: Error
@@ -146,7 +137,7 @@ open class EventStream<Value>: Publisher
   {
     guard !completed else { return }
     self.queue.async {
-      self.dispatchError(Event(final: .normally))
+      self.dispatchError(Event.streamCompleted)
     }
   }
 
@@ -254,7 +245,7 @@ open class EventStream<Value>: Publisher
     guard let notificationHandler = observers.removeValue(forKey: key)
       else { fatalError("Tried to cancel an inactive subscription") }
 
-    notificationHandler(Event(final: .subscriberCancelled))
+    notificationHandler(Event.streamCompleted)
     return observers.isEmpty
   }
 }

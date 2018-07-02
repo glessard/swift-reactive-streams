@@ -15,9 +15,13 @@ public struct Event<Value>
     state = .value(value)
   }
 
-  public init(final: StreamCompleted)
+  init(final: StreamCompleted)
   {
     state = .error(final)
+  }
+
+  public static var streamCompleted: Event {
+    return Event(final: StreamCompleted.normally)
   }
 
   public init(error: Error)
