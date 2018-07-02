@@ -726,4 +726,47 @@ class streamTests: XCTestCase
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
+
+  func testPaused3() throws
+  {
+    let q = DispatchQueue(label: "serial")
+    let stream = PostBox<DispatchSemaphore>()
+    let paused = stream.paused()
+
+    func postAndWait()
+    {
+      let s = DispatchSemaphore(value: 0)
+      stream.post(s)
+      s.wait()
+    }
+
+    XCTAssertEqual(stream.requested, 0)
+    XCTAssertEqual(paused.requested, 0)
+
+    let signaler = stream.next(count: 5).map(q, transform: { s -> Void in s.signal() })
+    signaler.onValue {}
+    q.sync {}
+
+    postAndWait()
+
+    XCTAssertEqual(stream.requested, 4)
+    XCTAssertEqual(paused.requested, 0)
+
+    paused.next(count: 10).onValue() { _ in }
+    postAndWait()
+
+    XCTAssertEqual(stream.requested, 3)
+    XCTAssertEqual(paused.requested, 0)
+
+    paused.start()
+
+    XCTAssertEqual(paused.requested, 10)
+    XCTAssertEqual(stream.requested, 10)
+
+    _ = paused.countEvents()
+    postAndWait()
+
+    XCTAssertEqual(stream.requested, Int64.max)
+    paused.close()
+  }
 }
