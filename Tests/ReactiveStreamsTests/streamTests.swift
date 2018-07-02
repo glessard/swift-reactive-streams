@@ -147,6 +147,34 @@ class streamTests: XCTestCase
     stream.post(TestError(-1))
   }
 
+  func testStreamState()
+  {
+    let s = PostBox<Int>()
+
+    XCTAssert(s.state == .waiting)
+    XCTAssert(String(describing: s.state) == "EventStream waiting to begin processing events")
+
+    let n = s.next(count: 2)
+    n.notify {
+      event in
+    }
+
+    s.post(0)
+    XCTAssert(s.state == .streaming)
+    XCTAssert(String(describing: s.state) == "EventStream active")
+
+    let e2 = expectation(description: "second value")
+    let n2 = n.next()
+    n2.onCompletion { e2.fulfill() }
+
+    s.post(0)
+    waitForExpectations(timeout: 0.1)
+    XCTAssert(s.state == .waiting)
+    XCTAssert(String(describing: s.state) == "EventStream waiting to begin processing events")
+    XCTAssert(n.state == .ended)
+    XCTAssert(String(describing: n.state) == "EventStream has completed")
+  }
+
   func testOnValue()
   {
     let events = 10
