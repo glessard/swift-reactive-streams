@@ -42,21 +42,15 @@ public class MergeStream<Value>: SubStream<Value, Value>
       notificationHandler: {
         merged, event in
         merged.queue.async {
-          do {
-            _ = try event.get()
-            merged.dispatchValue(event)
-          }
-          catch is StreamCompleted {
+          if event.isValue == false
+          { // event terminates the stream, remove from sources
             merged.sources.remove(subscription)
-            if merged.closed && merged.sources.isEmpty
-            {
-              merged.dispatchError(event)
+            if let _ = event.final, !(merged.closed && merged.sources.isEmpty)
+            { // merged stream completed normally, don't dispatch the event
+              return
             }
           }
-          catch {
-            merged.sources.remove(subscription)
-            merged.dispatchError(event)
-          }
+          merged.dispatch(event)
         }
       }
     )

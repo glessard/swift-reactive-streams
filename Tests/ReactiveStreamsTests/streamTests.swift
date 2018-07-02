@@ -571,9 +571,9 @@ class streamTests: XCTestCase
       catch StreamCompleted.normally { e2.fulfill() }
       catch { XCTFail() }
     }
-    XCTAssert(split.0.requested == Int64.max)
+    XCTAssert(split.0.requested == .max)
     XCTAssert(split.1.requested == 0)
-    XCTAssert(stream.requested == Int64.max, "stream.requested should have been updated synchronously")
+    XCTAssert(stream.requested == .max, "stream.requested should have been updated synchronously")
 
     let e3 = expectation(description: "split.1 onValue")
     let e4 = expectation(description: "split.1 onError")
@@ -587,7 +587,7 @@ class streamTests: XCTestCase
       else { print("a1 has \(a1.count) elements") }
     }
     s1.onCompletion { _ in e4.fulfill() }
-    XCTAssert(split.1.requested == Int64.max)
+    XCTAssert(split.1.requested == .max)
     XCTAssert(s1.requested == 1)
 
     for i in 0..<events { stream.post(i+1) }
@@ -618,7 +618,7 @@ class streamTests: XCTestCase
       else { print(count) }
     }
 
-    XCTAssert(stream.requested == Int64.max, "stream.requested has an unexpected value; probable race condition")
+    XCTAssert(stream.requested == .max, "stream.requested has an unexpected value; probable race condition")
     for i in 0..<events { stream.post(i+1) }
     stream.close()
     merged.close()
@@ -644,8 +644,8 @@ class streamTests: XCTestCase
       count == events ? e1.fulfill() : XCTFail("split.0 expected \(events) events, got \(count)")
     }
 
-    XCTAssert(split.0.requested == Int64.max)
-    XCTAssert(stream.requested == Int64.max)
+    XCTAssert(split.0.requested == .max)
+    XCTAssert(stream.requested == .max)
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
@@ -655,7 +655,7 @@ class streamTests: XCTestCase
     let e3 = expectation(description: "split.1 onCompletion")
 
     XCTAssert(split.1.state == .waiting)
-    XCTAssert(split.1.requested == Int64.min)
+    XCTAssert(split.1.requested == .min)
     // any subscription attempt will fail
 
     split.1.onValue { _ in XCTFail("split.1 never had a non-zero request") }

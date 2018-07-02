@@ -14,7 +14,7 @@ final public class Subscription
 
   private var requested = AtomicInt64()
 
-  public var cancelled: Bool { return requested.load(.relaxed) == Int64.min }
+  public var cancelled: Bool { return requested.load(.relaxed) == .min }
 
   init(source: EventSource)
   {
@@ -26,12 +26,11 @@ final public class Subscription
 
   func shouldNotify() -> Bool
   {
-    var p: Int64 = 1
-    while !requested.loadCAS(&p, p-1, .weak, .relaxed, .relaxed)
-    {
-      if p == Int64.max { break }
+    var p = requested.load(.relaxed)
+    repeat {
+      if p == .max { break }
       if p <= 0 { return false }
-    }
+    } while !requested.loadCAS(&p, p-1, .weak, .relaxed, .relaxed)
     return true
   }
 
@@ -56,9 +55,9 @@ final public class Subscription
     var updated: Int64
     var current = requested.load(.relaxed)
     repeat {
-      if current == Int64.min || current == Int64.max { return }
-      let tentatively = current &+ count // could overflow; avoid trapping
-      updated = tentatively > 0 ? tentatively : Int64.max
+      if current == .min || current == .max { return }
+      updated = current &+ count // could overflow; avoid trapping
+      if updated < 0 { updated = .max } // check and correct for overflow
     } while !requested.loadCAS(&current, updated, .weak, .relaxed, .relaxed)
 
     source?.updateRequest(updated)
@@ -68,8 +67,8 @@ final public class Subscription
 
   public func cancel()
   {
-    let prev = requested.swap(Int64.min, .relaxed)
-    if prev == Int64.min { return }
+    let prev = requested.swap(.min, .relaxed)
+    if prev == .min { return }
 
     source?.cancel(subscription: self)
     source = nil
