@@ -13,7 +13,7 @@ public protocol Subscriber: class
   func onSubscribe(_ subscription: Subscription)
   func onValue(_ value: Value)
   func onError(_ error: Error)
-  func onCompletion(_ status: StreamCompleted)
+  func onCompletion()
 }
 
 extension Subscriber
@@ -23,8 +23,8 @@ extension Subscriber
     do {
       self.onValue(try event.get())
     }
-    catch let final as StreamCompleted {
-      self.onCompletion(final)
+    catch StreamCompleted.normally {
+      self.onCompletion()
     }
     catch {
       self.onError(error)

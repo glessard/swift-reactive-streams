@@ -61,6 +61,7 @@ extension streamTests {
         ("testOnValue", testOnValue),
         ("testPaused1", testPaused1),
         ("testPaused2", testPaused2),
+        ("testPaused3", testPaused3),
         ("testPost", testPost),
         ("testReduce1", testReduce1),
         ("testReduce2", testReduce2),

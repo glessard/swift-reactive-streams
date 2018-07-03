@@ -75,7 +75,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
       self.closed = true
       if self.sources.isEmpty
       {
-        self.dispatchError(Event(final: .normally))
+        self.dispatchError(Event.streamCompleted)
       }
     }
   }
@@ -108,7 +108,7 @@ extension EventStream
           do {
             merged.performMerge(transform(try event.get()))
           }
-          catch is StreamCompleted {
+          catch StreamCompleted.normally {
             merged.close()
           }
           catch {
