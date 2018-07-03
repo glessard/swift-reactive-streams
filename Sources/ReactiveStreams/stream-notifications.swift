@@ -17,7 +17,7 @@ private class NotificationSubscriber<T>: Subscriber
 
   var eventHandler: ((T) -> Void)? = nil
   var errorHandler: ((Error) -> Void)? = nil
-  var completionHandler: ((StreamCompleted) -> Void)? = nil
+  var completionHandler: (() -> Void)? = nil
 
   init(_ queue: DispatchQueue)
   {
@@ -49,10 +49,10 @@ private class NotificationSubscriber<T>: Subscriber
     }
   }
 
-  func onCompletion(_ status: StreamCompleted)
+  func onCompletion()
   {
     queue.async {
-      if let handler = self.completionHandler { handler(status) }
+      if let handler = self.completionHandler { handler() }
       self.cleanup()
     }
   }
@@ -70,10 +70,10 @@ extension EventStream
   private func performNotify(_ validated: ValidatedQueue, task: @escaping (Event<Value>) -> Void)
   {
     let notifier = NotificationSubscriber<Value>(validated.queue)
-    notifier.eventHandler = { value in withExtendedLifetime(notifier) { task(Event(value: value)) } }
+    notifier.eventHandler = { task(Event(value: $0)) }
     // making Subscriber.notify overrideable might be better, but not problem-free
     notifier.errorHandler = { task(Event(error: $0)) }
-    notifier.completionHandler = { task(Event(error: $0)) }
+    notifier.completionHandler = { withExtendedLifetime(notifier) { task(Event.streamCompleted) } }
 
     self.subscribe(notifier)
   }
@@ -126,15 +126,15 @@ extension EventStream
 
 extension EventStream
 {
-  public func onCompletion(qos: DispatchQoS = DispatchQoS.current, task: @escaping (StreamCompleted) -> Void)
+  public func onCompletion(qos: DispatchQoS = DispatchQoS.current, task: @escaping () -> Void)
   {
     onCompletion(DispatchQueue.global(qos: qos.qosClass), task: task)
   }
 
-  public func onCompletion(_ queue: DispatchQueue, task: @escaping (StreamCompleted) -> Void)
+  public func onCompletion(_ queue: DispatchQueue, task: @escaping () -> Void)
   {
     let notifier = NotificationSubscriber<Value>(queue)
-    notifier.completionHandler = { status in withExtendedLifetime(notifier) { task(status) } }
+    notifier.completionHandler = { withExtendedLifetime(notifier) { task() } }
     self.subscribe(notifier)
   }
 }
