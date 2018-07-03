@@ -59,7 +59,7 @@ class onRequestTests: XCTestCase
     let t = Test(expectation: e).paused()
     let s = t.next(count: 5).countEvents()
     s.onValue { if $0 == 5 { g.fulfill() } }
-    s.onCompletion { _ in f.fulfill() }
+    s.onCompletion { f.fulfill() }
     s.onError { _ in XCTFail() }
     t.start()
 

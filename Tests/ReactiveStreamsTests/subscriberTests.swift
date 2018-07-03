@@ -48,7 +48,7 @@ class TestSubscriber: Subscriber
     e.fulfill()
   }
 
-  func onCompletion(_ status: StreamCompleted)
+  func onCompletion()
   {
     XCTAssert(received <= limit)
     e.fulfill()

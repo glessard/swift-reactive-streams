@@ -98,7 +98,7 @@ class streamTests: XCTestCase
 
     let e = expectation(description: "completion")
     f = stream.map { i throws in i }
-    f.onCompletion { _ in e.fulfill() }
+    f.onCompletion { e.fulfill() }
 
     stream.post(2)
     stream.close()
@@ -134,7 +134,7 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "closed")
     let stream = PostBox<Int>()
 
-    stream.onCompletion { _ in e1.fulfill() }
+    stream.onCompletion { e1.fulfill() }
 
     stream.post(0)
     stream.post(Event(value: 1))
@@ -184,17 +184,13 @@ class streamTests: XCTestCase
   func testOnComplete()
   {
     let s1 = PostBox<Int>()
-    s1.onCompletion {
-      _ in XCTFail()
-    }
+    s1.onCompletion { XCTFail() }
 
     s1.post(TestError(-1))
 
     let e2 = expectation(description: "observation onCompletion")
     let s2 = EventStream<Int>()
-    s2.onCompletion {
-      _ in e2.fulfill()
-    }
+    s2.onCompletion { e2.fulfill() }
     s2.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
@@ -210,12 +206,8 @@ class streamTests: XCTestCase
     var d = Array<Double>()
     let m = stream.map(transform: { 2.0*Double($0) }).map(transform: { d.append($0) }).finalValue()
     m.onCompletion {
-      completed in
-      if case .normally = completed
-      {
-        XCTAssert(d.count == events)
-        e2.fulfill()
-      }
+      XCTAssert(d.count == events)
+      e2.fulfill()
     }
 
     for i in 0..<events { stream.post(i+1) }
@@ -586,7 +578,7 @@ class streamTests: XCTestCase
       if value.count == events { e3.fulfill() }
       else { print("a1 has \(a1.count) elements") }
     }
-    s1.onCompletion { _ in e4.fulfill() }
+    s1.onCompletion { e4.fulfill() }
     XCTAssert(split.1.requested == .max)
     XCTAssert(s1.requested == 1)
 

@@ -153,14 +153,14 @@ class mergeTests: XCTestCase
 
     let f = expectation(description: "observation ends \(#function) #2")
 
-    s.onCompletion { _ in f.fulfill() }
+    s.onCompletion { f.fulfill() }
     s.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
 
     let g = expectation(description: "observation ends \(#function) #3")
 
-    merged.onCompletion { _ in g.fulfill() }
+    merged.onCompletion { g.fulfill() }
     merged.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
@@ -183,7 +183,7 @@ class mergeTests: XCTestCase
 
     let g = expectation(description: "observation ends \(#function)")
 
-    merged.onCompletion { _ in g.fulfill() }
+    merged.onCompletion { g.fulfill() }
     merged.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
@@ -236,11 +236,11 @@ class mergeTests: XCTestCase
   {
     let s1 = PostBox<Int>()
     let e1 = expectation(description: "s1")
-    s1.onCompletion { _ in e1.fulfill() }
+    s1.onCompletion { e1.fulfill() }
 
     let merged = MergeStream<Int>()
     let e2 = expectation(description: "merged")
-    merged.onCompletion { _ in e2.fulfill() }
+    merged.onCompletion { e2.fulfill() }
 
     merged.close()
     merged.merge(s1)
