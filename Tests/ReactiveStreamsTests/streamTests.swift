@@ -718,6 +718,28 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
+  func testSplit5()
+  {
+    let stream = PostBox<Int>()
+    let split = stream.next(count: 2).split()
+
+    split.0.next(count: 3).onValue { _ in }
+
+    XCTAssert(stream.requested == 2)
+    XCTAssert(split.0.requested == 3)
+    XCTAssert(split.1.requested == 0)
+
+    stream.post(0)
+    let ne = expectation(description: "second value")
+    stream.next().onValue { _ in ne.fulfill() }
+    stream.post(1)
+    waitForExpectations(timeout: 0.1)
+    XCTAssert(stream.requested == 0)
+
+    split.1.next(count: 5).notify { _ in }
+    XCTAssert(stream.requested == 0)
+  }
+
   func testPaused1()
   {
     let postbox = PostBox<Int>()
