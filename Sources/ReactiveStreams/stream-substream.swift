@@ -22,7 +22,7 @@ open class SubStream<InputValue, OutputValue>: EventStream<OutputValue>
 
   open func setSubscription(_ subscription: Subscription)
   {
-    assert(self.subscription == nil, "SubStream cannot support multiple subscriptions")
+    assert(self.subscription == nil, "SubStream cannot subscribe to multiple streams")
     self.subscription = subscription
   }
 

@@ -147,6 +147,34 @@ class streamTests: XCTestCase
     stream.post(TestError(-1))
   }
 
+  func testStreamState()
+  {
+    let s = PostBox<Int>()
+
+    XCTAssert(s.state == .waiting)
+    XCTAssert(String(describing: s.state) == "EventStream waiting to begin processing events")
+
+    let n = s.next(count: 2)
+    n.notify {
+      event in
+    }
+
+    s.post(0)
+    XCTAssert(s.state == .streaming)
+    XCTAssert(String(describing: s.state) == "EventStream active")
+
+    let e2 = expectation(description: "second value")
+    let n2 = n.next()
+    n2.onCompletion { e2.fulfill() }
+
+    s.post(0)
+    waitForExpectations(timeout: 0.1)
+    XCTAssert(s.state == .waiting)
+    XCTAssert(String(describing: s.state) == "EventStream waiting to begin processing events")
+    XCTAssert(n.state == .ended)
+    XCTAssert(String(describing: n.state) == "EventStream has completed")
+  }
+
   func testOnValue()
   {
     let events = 10
@@ -688,6 +716,28 @@ class streamTests: XCTestCase
     stream.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testSplit5()
+  {
+    let stream = PostBox<Int>()
+    let split = stream.next(count: 2).split()
+
+    split.0.next(count: 3).onValue { _ in }
+
+    XCTAssert(stream.requested == 2)
+    XCTAssert(split.0.requested == 3)
+    XCTAssert(split.1.requested == 0)
+
+    stream.post(0)
+    let ne = expectation(description: "second value")
+    stream.next().onValue { _ in ne.fulfill() }
+    stream.post(1)
+    waitForExpectations(timeout: 0.1)
+    XCTAssert(stream.requested == 0)
+
+    split.1.next(count: 5).notify { _ in }
+    XCTAssert(stream.requested == 0)
   }
 
   func testPaused1()

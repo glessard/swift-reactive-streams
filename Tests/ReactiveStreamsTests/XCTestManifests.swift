@@ -70,6 +70,8 @@ extension streamTests {
         ("testSplit2", testSplit2),
         ("testSplit3", testSplit3),
         ("testSplit4", testSplit4),
+        ("testSplit5", testSplit5),
+        ("testStreamState", testStreamState),
     ]
 }
 
