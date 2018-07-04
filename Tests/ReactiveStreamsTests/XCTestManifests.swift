@@ -82,6 +82,14 @@ extension subscriberTests {
     ]
 }
 
+extension timerTests {
+    static let __allTests = [
+        ("testTimerCreation", testTimerCreation),
+        ("testTimerTiming", testTimerTiming),
+        ("testUnusedTimer", testUnusedTimer),
+    ]
+}
+
 #if !os(macOS)
 public func __allTests() -> [XCTestCaseEntry] {
     return [
@@ -91,6 +99,7 @@ public func __allTests() -> [XCTestCaseEntry] {
         testCase(onRequestTests.__allTests),
         testCase(streamTests.__allTests),
         testCase(subscriberTests.__allTests),
+        testCase(timerTests.__allTests),
     ]
 }
 #endif
