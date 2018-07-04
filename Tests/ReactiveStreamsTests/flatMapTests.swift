@@ -83,7 +83,7 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssert(value == 0)
       }
-      catch StreamError.subscriptionFailed { e.fulfill() }
+      catch StreamCompleted.normally { e.fulfill() }
       catch { XCTFail() }
     }
 
@@ -184,5 +184,38 @@ class flatMapTests: XCTestCase
     stream.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testFlatMap7()
+  {
+    let stream = PostBox<EventStream<Int>>()
+    let events = 10
+    let streams = 4
+
+    let e = expectation(description: "observation ends \(#function)")
+
+    let m = stream.flatMap { $0 }
+
+    m.countEvents().notify {
+      event in
+      do {
+        let value = try event.get()
+        XCTAssert(value == events*(streams/2))
+      }
+      catch StreamCompleted.normally {
+        e.fulfill()
+      }
+      catch { XCTFail() }
+    }
+
+    for i in 1..<streams
+    {
+      let s = OnRequestStream().next(count: events)
+      if i%2 == 0 { s.close() }
+      stream.post(s)
+    }
+    stream.close()
+
+    waitForExpectations(timeout: 0.1)
   }
 }

@@ -43,10 +43,14 @@ public class MergeStream<Value>: SubStream<Value, Value>
         merged, event in
         merged.queue.async {
           if event.isValue == false
-          { // event terminates the stream, remove from sources
+          { // event terminates merged stream; remove it from sources
             merged.sources.remove(subscription)
-            if let _ = event.final, !(merged.closed && merged.sources.isEmpty)
-            { // merged stream completed normally, don't dispatch the event
+            if event.final != nil
+            { // merged stream completed normally
+              if merged.closed && merged.sources.isEmpty
+              { // no other event is forthcoming from any stream
+                merged.dispatchError(Event.streamCompleted)
+              }
               return
             }
           }
