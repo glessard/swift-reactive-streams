@@ -665,6 +665,7 @@ class streamTests: XCTestCase
     }
 
     XCTAssert(split.0.requested == .max)
+    XCTAssert(split.1.requested == 0)
     XCTAssert(stream.requested == .max)
 
     for i in 0..<events { stream.post(i+1) }
@@ -674,7 +675,6 @@ class streamTests: XCTestCase
 
     let e3 = expectation(description: "split.1 onCompletion")
 
-    XCTAssert(split.1.state == .waiting)
     XCTAssert(split.1.requested == .min)
     // any subscription attempt will fail
 

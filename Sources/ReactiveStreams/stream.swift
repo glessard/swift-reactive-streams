@@ -65,11 +65,10 @@ open class EventStream<Value>: Publisher
   }
 
   public var state: StreamState {
-    if !started { return .waiting }
     switch requested
     {
     case Int64.min:         return .ended
-    case let n where n > 0: return .streaming
+    case let n where n > 0: return started ? .streaming : .waiting
     case 0:                 return .waiting
     default: /* n < 0 */    fatalError()
     }
