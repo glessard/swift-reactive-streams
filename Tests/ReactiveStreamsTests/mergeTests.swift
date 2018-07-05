@@ -236,14 +236,19 @@ class mergeTests: XCTestCase
   {
     let s1 = PostBox<Int>()
     let e1 = expectation(description: "s1")
-    s1.onCompletion { e1.fulfill() }
+    let c1 = s1.countEvents()
+    c1.onValue { XCTAssert($0 == 1) }
+    c1.onCompletion { e1.fulfill() }
 
     let merged = MergeStream<Int>()
     let e2 = expectation(description: "merged")
-    merged.onCompletion { e2.fulfill() }
+    let c2 = merged.countEvents()
+    c2.onValue { XCTAssert($0 == 0) }
+    c2.onCompletion { e2.fulfill() }
 
     merged.close()
     merged.merge(s1)
+    s1.post(0)
     s1.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
