@@ -23,7 +23,7 @@ extension Subscriber
     do {
       self.onValue(try event.get())
     }
-    catch StreamCompleted.normally {
+    catch is StreamCompleted {
       self.onCompletion()
     }
     catch {

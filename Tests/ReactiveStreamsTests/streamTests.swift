@@ -204,7 +204,7 @@ class streamTests: XCTestCase
     }
 
     s.post(1)
-    s.post(StreamError.subscriptionFailed)
+    s.post(TestError(42))
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
@@ -679,7 +679,7 @@ class streamTests: XCTestCase
     // any subscription attempt will fail
 
     split.1.onValue { _ in XCTFail("split.1 never had a non-zero request") }
-    split.1.onError { _ in e3.fulfill() }
+    split.1.onCompletion { e3.fulfill() }
 
     XCTAssert(split.1.state == .ended)
 

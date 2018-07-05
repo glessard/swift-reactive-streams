@@ -15,6 +15,7 @@ extension flatMapTests {
         ("testFlatMap4", testFlatMap4),
         ("testFlatMap5", testFlatMap5),
         ("testFlatMap6", testFlatMap6),
+        ("testFlatMap7", testFlatMap7),
     ]
 }
 
