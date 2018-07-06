@@ -78,8 +78,6 @@ open class EventStream<Value>: Publisher
 
   open func dispatch(_ event: Event<Value>)
   {
-    guard !completed else { return }
-
     if event.isValue
     {
       dispatchValue(event)
