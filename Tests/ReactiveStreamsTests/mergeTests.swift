@@ -13,7 +13,7 @@ import Dispatch
 class mergeTests: XCTestCase
 {
   func testMerge1()
-  {
+  { // "merge" a single stream, ensure event count is correct
     let s = PostBox<Int>()
 
     let count = 10
@@ -21,7 +21,7 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectation(description: "observation ends \(#function)")
+    let e1 = expectation(description: "observation ends \(#function)")
 
     merged.countEvents().notify {
       event in
@@ -29,20 +29,24 @@ class mergeTests: XCTestCase
         let value = try event.get()
         XCTAssert(value == count)
       }
-      catch is StreamCompleted { e.fulfill() }
+      catch is StreamCompleted { e1.fulfill() }
       catch {}
     }
 
+    XCTAssert(merged.requested == .max)
+    XCTAssert(s.requested == .max)
+
+    let e2 = expectation(description: "posting ends")
+    s.onCompletion { e2.fulfill() }
+
     for i in 0..<count { s.post(i+1) }
     s.close()
-
-    merged.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testMerge2()
-  {
+  { // close merged stream before any events come through
     let s = PostBox<Int>()
 
     let count = 10
@@ -50,19 +54,24 @@ class mergeTests: XCTestCase
     let merged = MergeStream<Int>()
     merged.merge(s)
 
-    let e = expectation(description: "observation ends \(#function)")
+    let e1 = expectation(description: "observation ends \(#function)")
 
     merged.countEvents().notify {
       event in
       do {
         let value = try event.get()
-        XCTAssert(value == count)
+        XCTAssert(value == 0)
       }
-      catch is StreamCompleted { e.fulfill() }
+      catch is StreamCompleted { e1.fulfill() }
       catch { print(error) }
     }
 
+    // merged stream is closed before any events come through,
+    // therefore event count will be zero
     merged.close()
+
+    let e2 = expectation(description: "posting ends")
+    s.onCompletion { e2.fulfill() }
 
     for i in 0..<count { s.post(i+1) }
     s.close()
@@ -71,7 +80,7 @@ class mergeTests: XCTestCase
   }
 
   func testMerge3()
-  {
+  { // make merged stream error before any events come through
     let s = PostBox<Int>()
 
     let count = 0
@@ -105,69 +114,40 @@ class mergeTests: XCTestCase
   }
 
   func testMerge4()
-  {
-    let s = [PostBox<Int>(), PostBox<Int>()]
-    let e = expectation(description: "observation ends \(#function)")
+  { // let two input streams complete
+    let streams = [PostBox<Int>(), PostBox<Int>()]
 
     let count = 10
 
     let merged = MergeStream<Int>()
-    s.forEach(merged.merge)
+    streams.forEach(merged.merge)
 
-    merged.countEvents().notify {
-      event in
-      do {
-        let value = try event.get()
-        XCTAssert(value == count*s.count)
-      }
-      catch is StreamCompleted { e.fulfill() }
-      catch { XCTFail() }
-    }
-    merged.close()
+    XCTAssert(merged.requested == 0)
+    XCTAssert(streams[0].requested == 0)
 
-    let q = DispatchQueue.global(qos: .utility)
-    for stream in s
+    let c = merged.countEvents()
+    let e = expectation(description: "merged stream ends \(#function)")
+    c.onValue { XCTAssert($0 == count*streams.count) }
+    c.onCompletion { e.fulfill() }
+
+    XCTAssert(merged.requested == .max)
+    XCTAssert(streams[0].requested == .max)
+    XCTAssert(c.requested == 1)
+
+    for stream in streams
     {
-      q.async {
-        for i in 0..<count { stream.post(i+1) }
-        stream.close()
-      }
+      for i in 0..<count { stream.post(i+1) }
+      let e = expectation(description: "posts end \(ObjectIdentifier(stream)) \(#function)")
+      stream.onCompletion { e.fulfill() }
     }
+
+    streams.forEach { $0.close() }
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
   func testMerge5()
-  {
-    let s = PostBox<Int>()
-    let e = expectation(description: "observation ends \(#function) #1")
-    let count = 10
-
-    let merged = MergeStream<Int>()
-    merged.merge(s)
-    merged.onValue { if $0 == count { e.fulfill() } }
-
-    for i in 0..<count { s.post(i+1) }
-
-    waitForExpectations(timeout: 1.0, handler: nil)
-
-    let f = expectation(description: "observation ends \(#function) #2")
-
-    s.onCompletion { f.fulfill() }
-    s.close()
-
-    waitForExpectations(timeout: 1.0, handler: nil)
-
-    let g = expectation(description: "observation ends \(#function) #3")
-
-    merged.onCompletion { g.fulfill() }
-    merged.close()
-
-    waitForExpectations(timeout: 1.0, handler: nil)
-  }
-
-  func testMerge6()
-  {
+  { // merged stream states, stage-managed
     let s = PostBox<Int>()
     let e = expectation(description: "observation ends \(#function)")
     let count = 10
@@ -177,20 +157,19 @@ class mergeTests: XCTestCase
     merged.onValue { if $0 == count { e.fulfill() } }
 
     for i in 0..<count { s.post(i+1) }
-    s.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
 
     let g = expectation(description: "observation ends \(#function)")
 
     merged.onCompletion { g.fulfill() }
-    merged.close()
+    s.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
-  func testMerge7()
-  {
+  func testMerge6()
+  { // check propagation of error states
     let s = [PostBox<Int>(), PostBox<Int>()]
     let e = expectation(description: "observation ends \(#function)")
 
@@ -198,7 +177,6 @@ class mergeTests: XCTestCase
 
     let merged = MergeStream<Int>()
     s.forEach(merged.merge)
-    merged.close()
 
     merged.countEvents().notify {
       event in
@@ -232,8 +210,8 @@ class mergeTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
-  func testMerge8()
-  {
+  func testMerge7()
+  { // more stage-managed merged stream states
     let s1 = PostBox<Int>()
     let e1 = expectation(description: "s1")
     let c1 = s1.countEvents()
