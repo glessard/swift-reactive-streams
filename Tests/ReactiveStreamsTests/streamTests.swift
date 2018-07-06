@@ -632,18 +632,15 @@ class streamTests: XCTestCase
     let merged = MergeStream<Int>()
     split.forEach(merged.merge)
 
-    merged.countEvents().onValue {
-      count in
-      if count == splits*events { e.fulfill() }
-      else { print(count) }
-    }
+    merged.countEvents().onValue { XCTAssert($0 == splits*events) }
+    stream.onCompletion { e.fulfill() }
 
-    XCTAssert(stream.requested == .max, "stream.requested has an unexpected value; probable race condition")
+    XCTAssert(stream.requested == .max)
     for i in 0..<events { stream.post(i+1) }
     stream.close()
-    merged.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
+    merged.close()
   }
 
   func testSplit3()

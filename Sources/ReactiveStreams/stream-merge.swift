@@ -10,11 +10,19 @@ import Dispatch
 
 public class MergeStream<Value>: SubStream<Value, Value>
 {
-  private var sources = Set<Subscription>()
-  private var closed = false
+  fileprivate var sources = Set<Subscription>()
+  fileprivate var closed = false
+  fileprivate let closeAfterLastSourceCloses: Bool
 
   override init(validated: ValidatedQueue)
   {
+    closeAfterLastSourceCloses = true
+    super.init(validated: validated)
+  }
+
+  fileprivate init(validated: ValidatedQueue, flatMap: Bool = false)
+  {
+    closeAfterLastSourceCloses = !flatMap
     super.init(validated: validated)
   }
 
@@ -47,7 +55,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
             merged.sources.remove(subscription)
             if event.final != nil
             { // merged stream completed normally
-              if merged.closed && merged.sources.isEmpty
+              if (merged.closeAfterLastSourceCloses || merged.closed), merged.sources.isEmpty
               { // no other event is forthcoming from any stream
                 merged.dispatch(Event.streamCompleted)
               }
@@ -75,12 +83,10 @@ public class MergeStream<Value>: SubStream<Value, Value>
 
   public override func close()
   {
+    guard !completed else { return }
     queue.async {
       self.closed = true
-      if self.sources.isEmpty
-      {
-        self.dispatch(Event.streamCompleted)
-      }
+      self.dispatch(Event.streamCompleted)
     }
   }
 
@@ -99,9 +105,38 @@ public class MergeStream<Value>: SubStream<Value, Value>
   }
 }
 
+internal class FlatMapStream<Value>: MergeStream<Value>
+{
+  convenience init(qos: DispatchQoS = DispatchQoS.current)
+  {
+    self.init(validated: ValidatedQueue(label: "eventstream", qos: qos))
+  }
+
+  convenience init(_ queue: DispatchQueue)
+  {
+    self.init(validated: ValidatedQueue(label: "eventstream", target: queue))
+  }
+
+  override init(validated: ValidatedQueue)
+  {
+    super.init(validated: validated, flatMap: true)
+  }
+
+  public override func close()
+  {
+    queue.async {
+      self.closed = true
+      if self.sources.isEmpty
+      {
+        self.dispatch(Event.streamCompleted)
+      }
+    }
+  }
+}
+
 extension EventStream
 {
-  private func flatMap<U>(_ stream: MergeStream<U>, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
+  private func flatMap<U>(_ stream: FlatMapStream<U>, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
   {
     self.subscribe(
       subscriber: stream,
@@ -126,11 +161,26 @@ extension EventStream
 
   public func flatMap<U>(qos: DispatchQoS? = nil, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
   {
-    return flatMap(MergeStream(qos: qos ?? self.qos), transform: transform)
+    return flatMap(FlatMapStream(qos: qos ?? self.qos), transform: transform)
   }
 
   public func flatMap<U>(_ queue: DispatchQueue, transform: @escaping (Value) -> EventStream<U>) -> EventStream<U>
   {
-    return flatMap(MergeStream(queue), transform: transform)
+    return flatMap(FlatMapStream(queue), transform: transform)
+  }
+}
+
+extension EventStream
+{
+  public func merge(with other: EventStream<Value>) -> EventStream<Value>
+  {
+    let merged = MergeStream<Value>(qos: self.queue.qos)
+
+    merged.queue.async {
+      merged.performMerge(self)
+      merged.performMerge(other)
+    }
+
+    return merged
   }
 }
