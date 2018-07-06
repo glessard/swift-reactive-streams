@@ -14,10 +14,14 @@ public class MergeStream<Value>: SubStream<Value, Value>
   fileprivate var closed = false
   fileprivate let closeAfterLastSourceCloses: Bool
 
-  override init(validated: ValidatedQueue)
+  convenience init(qos: DispatchQoS = DispatchQoS.current)
   {
-    closeAfterLastSourceCloses = true
-    super.init(validated: validated)
+    self.init(validated: ValidatedQueue(label: "eventstream", qos: qos))
+  }
+
+  convenience init(_ queue: DispatchQueue)
+  {
+    self.init(validated: ValidatedQueue(label: "eventstream", target: queue))
   }
 
   fileprivate init(validated: ValidatedQueue, flatMap: Bool = false)
@@ -117,7 +121,7 @@ internal class FlatMapStream<Value>: MergeStream<Value>
     self.init(validated: ValidatedQueue(label: "eventstream", target: queue))
   }
 
-  override init(validated: ValidatedQueue)
+  init(validated: ValidatedQueue)
   {
     super.init(validated: validated, flatMap: true)
   }
@@ -172,15 +176,50 @@ extension EventStream
 
 extension EventStream
 {
+  static public func merge(_ stream1: EventStream<Value>, _ stream2: EventStream<Value>) -> EventStream<Value>
+  {
+    return merge(streams: [stream1, stream2])
+  }
+
+  static private func merge<S: Sequence>(streams: S, into merged: MergeStream<Value>)
+    where S.Iterator.Element: EventStream<Value>
+  {
+    merged.queue.async {
+      streams.forEach {
+        merged.performMerge($0)
+      }
+    }
+  }
+
+  static public func merge<S: Sequence>(qos: DispatchQoS = DispatchQoS.current, streams: S) -> EventStream<Value>
+    where S.Iterator.Element: EventStream<Value>
+  {
+    let merged = MergeStream<Value>(qos: qos)
+    merge(streams: streams, into: merged)
+    return merged
+  }
+
+  static public func merge<S: Sequence>(_ queue: DispatchQueue, streams: S) -> EventStream<Value>
+    where S.Iterator.Element: EventStream<Value>
+  {
+    let merged = MergeStream<Value>(queue)
+    merge(streams: streams, into: merged)
+    return merged
+  }
+
   public func merge(with other: EventStream<Value>) -> EventStream<Value>
   {
-    let merged = MergeStream<Value>(qos: self.queue.qos)
+    return EventStream.merge(qos: qos, streams: [self, other])
+  }
 
+  public func merge<S: Sequence>(with others: S) -> EventStream<Value>
+    where S.Iterator.Element: EventStream<Value>
+  {
+    let merged = MergeStream<Value>(qos: qos)
     merged.queue.async {
       merged.performMerge(self)
-      merged.performMerge(other)
+      others.forEach { merged.performMerge($0) }
     }
-
     return merged
   }
 }
