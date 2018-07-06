@@ -42,7 +42,7 @@ open class OnRequestStream: EventStream<Int>
         if remaining == 0 { return }
       } while !self.additional.loadCAS(&remaining, remaining-1, .weak, .relaxed, .relaxed)
 
-      self.dispatchValue(Event(value: self.counter))
+      self.dispatch(Event(value: self.counter))
       self.counter += 1
 
       if remaining > 0

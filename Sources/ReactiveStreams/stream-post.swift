@@ -23,17 +23,11 @@ open class PostBox<Value>: EventStream<Value>
 
   final public func post(_ value: Value)
   {
-    guard !completed else { return }
-    self.queue.async {
-      self.dispatchValue(Event(value: value))
-    }
+    post(Event(value: value))
   }
 
   final public func post(_ error: Error)
   {
-    guard !completed else { return }
-    self.queue.async {
-      self.dispatchError(Event(error: error))
-    }
+    post(Event(error: error))
   }
 }

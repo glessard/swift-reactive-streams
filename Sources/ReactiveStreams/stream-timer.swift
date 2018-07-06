@@ -50,7 +50,7 @@ open class TimerStream: EventStream<Date>
       [weak stream = self] in
       if let stream = stream
       {
-        stream.dispatchValue(Event(value: Date()))
+        stream.dispatch(Event(value: Date()))
       }
     }
 #if swift(>=4.0)

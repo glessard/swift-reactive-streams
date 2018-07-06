@@ -32,8 +32,8 @@ extension EventStream
             try combine(&current, event.get())
           }
           catch {
-            mapped.dispatchValue(Event(value: current))
-            mapped.dispatchError(Event(error: error))
+            mapped.dispatch(Event(value: current))
+            mapped.dispatch(Event(error: error))
           }
         }
       }

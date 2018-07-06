@@ -49,7 +49,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
             { // merged stream completed normally
               if merged.closed && merged.sources.isEmpty
               { // no other event is forthcoming from any stream
-                merged.dispatchError(Event.streamCompleted)
+                merged.dispatch(Event.streamCompleted)
               }
               return
             }
@@ -79,7 +79,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
       self.closed = true
       if self.sources.isEmpty
       {
-        self.dispatchError(Event.streamCompleted)
+        self.dispatch(Event.streamCompleted)
       }
     }
   }
@@ -116,7 +116,7 @@ extension EventStream
             merged.close()
           }
           catch {
-            merged.dispatchError(Event(error: error))
+            merged.dispatch(Event(error: error))
           }
         }
     }

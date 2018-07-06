@@ -95,7 +95,7 @@ class mergeTests: XCTestCase
     }
 
     merged.queue.async {
-      merged.dispatchError(Event(error: TestError(id)))
+      merged.dispatch(Event(error: TestError(id)))
     }
 
     for i in 0..<count { s.post(i+1) }

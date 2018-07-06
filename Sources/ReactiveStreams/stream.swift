@@ -90,7 +90,7 @@ open class EventStream<Value>: Publisher
 
   /// precondition: must run on this Stream's serial queue
 
-  final func dispatchValue(_ value: Event<Value>)
+  private func dispatchValue(_ value: Event<Value>)
   {
     assert(value.isValue)
 
@@ -115,7 +115,7 @@ open class EventStream<Value>: Publisher
 
   /// precondition: must run on a barrier block or a serial queue
 
-  final func dispatchError(_ error: Event<Value>)
+  private func dispatchError(_ error: Event<Value>)
   {
     assert(!error.isValue)
 
@@ -130,7 +130,7 @@ open class EventStream<Value>: Publisher
   {
     guard !completed else { return }
     self.queue.async {
-      self.dispatchError(Event.streamCompleted)
+      self.dispatch(Event.streamCompleted)
     }
   }
 

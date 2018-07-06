@@ -70,8 +70,8 @@ extension EventStream
           }
           else
           {
-            if let latest = latest { mapped.dispatchValue(latest) }
-            mapped.dispatchError(event)
+            if let latest = latest { mapped.dispatch(latest) }
+            mapped.dispatch(event)
           }
         }
       }
