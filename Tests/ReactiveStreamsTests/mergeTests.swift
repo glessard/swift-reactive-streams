@@ -231,4 +231,67 @@ class mergeTests: XCTestCase
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
+
+  func testMerge8()
+  { // test the merge method
+    let s1 = PostBox<Int>()
+    let e1 = expectation(description: "s1")
+    let c1 = s1.countEvents()
+    c1.onValue { XCTAssert($0 == 1) }
+    c1.onCompletion { e1.fulfill() }
+
+    let s2 = PostBox<Int>()
+    let e2 = expectation(description: "s2")
+    let c2 = s2.countEvents()
+    c2.onValue { XCTAssert($0 == 2) }
+    c2.onCompletion { e2.fulfill() }
+
+    let s3 = PostBox<Int>()
+    let e3 = expectation(description: "s3")
+    let c3 = s3.countEvents()
+    c3.onValue { XCTAssert($0 == 3) }
+    c3.onCompletion { e3.fulfill() }
+
+    let m4 = s1.merge(with: s2)
+    let e4 = expectation(description: "m4")
+    let c4 = m4.countEvents()
+    c4.notify {
+      event in
+      do {
+        let count = try event.get()
+        XCTAssert(count == 2, String(count))
+      }
+      catch StreamCompleted.normally { e4.fulfill() }
+      catch { XCTFail() }
+    }
+
+    let m5 = m4.merge(with: s3)
+    let e5 = expectation(description: "m5")
+    let c5 = m5.countEvents()
+    c5.notify {
+      event in
+      do {
+        let count = try event.get()
+        XCTAssert(count == 5, String(count))
+      }
+      catch StreamCompleted.normally { e5.fulfill() }
+      catch { XCTFail() }
+    }
+
+    s1.post(1)
+    s1.close()
+    s1.queue.sync {}
+    s2.post(2)
+    s2.queue.sync {}
+    m4.close()
+
+    s2.post(2)
+    s2.close()
+    s3.post(3)
+    s3.post(3)
+    s3.post(3)
+    s3.close()
+
+    waitForExpectations(timeout: 0.1)
+  }
 }

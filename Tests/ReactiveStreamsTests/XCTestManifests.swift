@@ -28,6 +28,7 @@ extension mergeTests {
         ("testMerge5", testMerge5),
         ("testMerge6", testMerge6),
         ("testMerge7", testMerge7),
+        ("testMerge8", testMerge8),
     ]
 }
 
