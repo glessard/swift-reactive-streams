@@ -8,7 +8,7 @@
 
 import XCTest
 
-@testable import ReactiveStreams
+import ReactiveStreams
 
 class eventTests: XCTestCase
 {
@@ -32,7 +32,7 @@ class eventTests: XCTestCase
 
     let value = Event<Int>(value: v1)
     let error = Event<Int>(error: TestError(v2))
-    let final = Event<Int>(final: .normally)
+    let final = Event<Int>.streamCompleted
 
     do {
       let v = try value.get()
