@@ -12,21 +12,25 @@ public class MergeStream<Value>: SubStream<Value, Value>
 {
   fileprivate var sources = Set<Subscription>()
   fileprivate var closed = false
-  fileprivate let closeAfterLastSourceCloses: Bool
 
-  convenience init(qos: DispatchQoS = DispatchQoS.current)
+  fileprivate let closeWhenLastSourceCloses: Bool
+  fileprivate let delayErrorReporting: Bool
+  private var delayedError: Error?
+
+  fileprivate convenience init(qos: DispatchQoS = DispatchQoS.current, delayingErrors delay: Bool)
   {
-    self.init(validated: ValidatedQueue(label: "eventstream", qos: qos))
+    self.init(validated: ValidatedQueue(label: "eventstream", qos: qos), delayingErrors: delay)
   }
 
-  convenience init(_ queue: DispatchQueue)
+  fileprivate convenience init(_ queue: DispatchQueue, delayingErrors delay: Bool)
   {
-    self.init(validated: ValidatedQueue(label: "eventstream", target: queue))
+    self.init(validated: ValidatedQueue(label: "eventstream", target: queue), delayingErrors: delay)
   }
 
-  fileprivate init(validated: ValidatedQueue, flatMap: Bool = false)
+  fileprivate init(validated: ValidatedQueue, flatMap: Bool = false, delayingErrors delay: Bool)
   {
-    closeAfterLastSourceCloses = !flatMap
+    closeWhenLastSourceCloses = !flatMap
+    delayErrorReporting = delay
     super.init(validated: validated)
   }
 
@@ -59,9 +63,20 @@ public class MergeStream<Value>: SubStream<Value, Value>
             merged.sources.remove(subscription)
             if event.final != nil
             { // merged stream completed normally
-              if (merged.closeAfterLastSourceCloses || merged.closed), merged.sources.isEmpty
+              if (merged.closeWhenLastSourceCloses || merged.closed), merged.sources.isEmpty
               { // no other event is forthcoming from any stream
-                merged.dispatch(Event.streamCompleted)
+                let errorEvent = merged.delayedError.map(Event<Value>.init(error:))
+                merged.dispatch(errorEvent ?? Event.streamCompleted)
+              }
+              return
+            }
+            else if merged.delayErrorReporting
+            {
+              let error = merged.delayedError ?? event.error!
+              merged.delayedError = error
+              if merged.sources.isEmpty
+              {
+                merged.dispatch(Event(error: error))
               }
               return
             }
@@ -123,7 +138,7 @@ internal class FlatMapStream<Value>: MergeStream<Value>
 
   init(validated: ValidatedQueue)
   {
-    super.init(validated: validated, flatMap: true)
+    super.init(validated: validated, flatMap: true, delayingErrors: false)
   }
 
   public override func close()
@@ -176,9 +191,9 @@ extension EventStream
 
 extension EventStream
 {
-  static public func merge(_ stream1: EventStream<Value>, _ stream2: EventStream<Value>) -> EventStream<Value>
+  static public func merge(_ stream1: EventStream<Value>, _ stream2: EventStream<Value>, delayingErrors delay: Bool = false) -> EventStream<Value>
   {
-    return merge(streams: [stream1, stream2])
+    return merge(streams: [stream1, stream2], delayingErrors: delay)
   }
 
   static private func merge<S: Sequence>(streams: S, into merged: MergeStream<Value>)
@@ -191,31 +206,31 @@ extension EventStream
     }
   }
 
-  static public func merge<S: Sequence>(qos: DispatchQoS = DispatchQoS.current, streams: S) -> EventStream<Value>
+  static public func merge<S: Sequence>(qos: DispatchQoS = DispatchQoS.current, streams: S, delayingErrors delay: Bool = false) -> EventStream<Value>
     where S.Iterator.Element: EventStream<Value>
   {
-    let merged = MergeStream<Value>(qos: qos)
+    let merged = MergeStream<Value>(qos: qos, delayingErrors: delay)
     merge(streams: streams, into: merged)
     return merged
   }
 
-  static public func merge<S: Sequence>(_ queue: DispatchQueue, streams: S) -> EventStream<Value>
+  static public func merge<S: Sequence>(_ queue: DispatchQueue, streams: S, delayingErrors delay: Bool = false) -> EventStream<Value>
     where S.Iterator.Element: EventStream<Value>
   {
-    let merged = MergeStream<Value>(queue)
+    let merged = MergeStream<Value>(queue, delayingErrors: delay)
     merge(streams: streams, into: merged)
     return merged
   }
 
   public func merge(with other: EventStream<Value>) -> EventStream<Value>
   {
-    return EventStream.merge(qos: qos, streams: [self, other])
+    return EventStream.merge(qos: qos, streams: [self, other], delayingErrors: false)
   }
 
   public func merge<S: Sequence>(with others: S) -> EventStream<Value>
     where S.Iterator.Element: EventStream<Value>
   {
-    let merged = MergeStream<Value>(qos: qos)
+    let merged = MergeStream<Value>(qos: qos, delayingErrors: false)
     merged.queue.async {
       merged.performMerge(self)
       others.forEach { merged.performMerge($0) }
