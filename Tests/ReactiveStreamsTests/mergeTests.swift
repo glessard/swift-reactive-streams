@@ -267,4 +267,68 @@ class mergeTests: XCTestCase
     waitForExpectations(timeout: 0.1)
     m4.close()
   }
+
+  func testMergeDelayingError1()
+  {
+    let posted = 1000
+    let id = nzRandom()
+
+    let s1 = PostBox<Int>(qos: .utility)
+    let e1 = expectation(description: "postbox 1")
+    s1.onCompletion { e1.fulfill() }
+
+    let s2 = PostBox<Int>(qos: .utility)
+    let e2 = expectation(description: "postbox 2")
+    s2.notify { e in if !e.isValue { e2.fulfill() } }
+
+    let m3 = EventStream.merge(streams: [s2, s1], delayingErrors: true)
+    let e3 = expectation(description: "merge delaying errors")
+    m3.countEvents().notify {
+      e in
+      do {
+        let countedEvents = try e.get()
+        XCTAssert(countedEvents == posted)
+      }
+      catch let error as TestError {
+        XCTAssert(error.error == id)
+        e3.fulfill()
+      }
+      catch { XCTFail() }
+    }
+
+    s1.post(0)
+    s2.post(0)
+    s2.post(TestError(id))
+    for i in 2..<posted { s1.post(i) }
+    s1.close()
+
+    waitForExpectations(timeout: 0.1)
+  }
+
+  func testMergeDelayingError2()
+  {
+    let id = nzRandom()
+
+    let q = DispatchQueue(label: "delaying error test")
+    let streams = (0..<10).map { _ in PostBox<Int>(q) }
+
+    let merged = EventStream.merge(streams: streams, delayingErrors: true)
+    let x = expectation(description: "correct delayed error")
+    merged.onError {
+      error in
+      XCTAssert(error is TestError)
+      if let e = error as? TestError
+      {
+        XCTAssert(e.error == id)
+        x.fulfill()
+      }
+    }
+
+    streams.first?.post(TestError(id))
+    streams.dropFirst().forEach {
+      $0.post(TestError(nzRandom()))
+    }
+
+    waitForExpectations(timeout: 0.1)
+  }
 }
