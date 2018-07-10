@@ -29,6 +29,8 @@ extension mergeTests {
         ("testMerge6", testMerge6),
         ("testMerge7", testMerge7),
         ("testMerge8", testMerge8),
+        ("testMergeDelayingError1", testMergeDelayingError1),
+        ("testMergeDelayingError2", testMergeDelayingError2),
     ]
 }
 
