@@ -8,7 +8,7 @@
 
 import XCTest
 import Dispatch
-@testable import ReactiveStreams
+import ReactiveStreams
 
 class mergeTests: XCTestCase
 {
@@ -18,8 +18,7 @@ class mergeTests: XCTestCase
 
     let count = 10
 
-    let merged = MergeStream<Int>()
-    merged.merge(s)
+    let merged = MergeStream.merge(streams: [s])
 
     let e1 = expectation(description: "observation ends \(#function)")
 
@@ -51,8 +50,7 @@ class mergeTests: XCTestCase
 
     let count = 10
 
-    let merged = MergeStream<Int>()
-    merged.merge(s)
+    let merged = s.merge(with: [])
 
     let e1 = expectation(description: "observation ends \(#function)")
 
@@ -80,47 +78,12 @@ class mergeTests: XCTestCase
   }
 
   func testMerge3()
-  { // make merged stream error before any events come through
-    let s = PostBox<Int>()
-
-    let count = 0
-    let id = nzRandom()
-
-    let merged = MergeStream<Int>()
-    merged.merge(s)
-
-    let e = expectation(description: "observation ends \(#function)")
-
-    merged.countEvents().notify {
-      event in
-      do {
-        let value = try event.get()
-        XCTAssert(value == count)
-      }
-      catch let error as TestError {
-        if error.error == id { e.fulfill() }
-      }
-      catch { XCTFail() }
-    }
-
-    merged.queue.async {
-      merged.dispatch(Event(error: TestError(id)))
-    }
-
-    for i in 0..<count { s.post(i+1) }
-    s.close()
-
-    waitForExpectations(timeout: 1.0, handler: nil)
-  }
-
-  func testMerge4()
   { // let two input streams complete
     let streams = [PostBox<Int>(), PostBox<Int>()]
 
     let count = 10
 
-    let merged = MergeStream<Int>()
-    streams.forEach(merged.merge)
+    let merged = MergeStream.merge(streams[0], streams[1])
 
     XCTAssert(merged.requested == 0)
     XCTAssert(streams[0].requested == 0)
@@ -146,14 +109,47 @@ class mergeTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
+  func testMerge4()
+  { // make merged stream error before all posted events come through
+    let s = PostBox<Int>(qos: .utility)
+    let t = PostBox<Int>(qos: .userInitiated)
+
+    let posted = 10000
+    let id = nzRandom()
+
+    let merged = s.merge(with: [t])
+
+    let e1 = expectation(description: "observation ends \(#function)")
+    merged.countEvents().notify {
+      event in
+      do {
+        let counted = try event.get()
+        XCTAssert(counted < posted)
+      }
+      catch let error as TestError {
+        if error.error == id { e1.fulfill() }
+      }
+      catch { XCTFail() }
+    }
+
+    let e2 = expectation(description: "posting ends")
+    s.onCompletion { e2.fulfill() }
+
+    s.post(0)
+    t.post(TestError(id))
+    for i in 1..<posted { s.post(i+1) }
+    s.close()
+
+    waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
   func testMerge5()
   { // merged stream states, stage-managed
     let s = PostBox<Int>()
     let e = expectation(description: "observation ends \(#function)")
     let count = 10
 
-    let merged = MergeStream<Int>()
-    merged.merge(s)
+    let merged = EventStream.merge(DispatchQueue.global(qos: .utility), streams: [s])
     merged.onValue { if $0 == count { e.fulfill() } }
 
     for i in 0..<count { s.post(i+1) }
@@ -175,14 +171,13 @@ class mergeTests: XCTestCase
 
     let count = 10
 
-    let merged = MergeStream<Int>()
-    s.forEach(merged.merge)
+    let merged = s[0].merge(with: s.dropFirst())
 
     merged.countEvents().notify {
       event in
       do {
         let value = try event.get()
-        XCTAssert(value == (count + count/2))
+        XCTAssert(value == (count + count/2), String(value))
       }
       catch let error as TestError {
         if error.error == count { e.fulfill() }
@@ -203,8 +198,10 @@ class mergeTests: XCTestCase
           stream.post(Event(error: error))
         }
       }
+
+      let x = expectation(description: "posting ends")
+      stream.notify { e in if !e.isValue { x.fulfill() } }
       stream.close()
-      stream.queue.sync(execute: {})
     }
 
     waitForExpectations(timeout: 1.0, handler: nil)
@@ -218,7 +215,7 @@ class mergeTests: XCTestCase
     c1.onValue { XCTAssert($0 == 1) }
     c1.onCompletion { e1.fulfill() }
 
-    let merged = MergeStream<Int>()
+    let merged = EventStream<Int>.merge(streams: []) as! MergeStream
     let e2 = expectation(description: "merged")
     let c2 = merged.countEvents()
     c2.onValue { XCTAssert($0 == 0) }
@@ -235,22 +232,17 @@ class mergeTests: XCTestCase
   func testMerge8()
   { // test the merge method
     let s1 = PostBox<Int>()
-    let e1 = expectation(description: "s1")
+    let g1 = DispatchGroup()
+    g1.enter()
     let c1 = s1.countEvents()
     c1.onValue { XCTAssert($0 == 1) }
-    c1.onCompletion { e1.fulfill() }
+    c1.onCompletion { g1.leave() }
 
     let s2 = PostBox<Int>()
     let e2 = expectation(description: "s2")
     let c2 = s2.countEvents()
     c2.onValue { XCTAssert($0 == 2) }
     c2.onCompletion { e2.fulfill() }
-
-    let s3 = PostBox<Int>()
-    let e3 = expectation(description: "s3")
-    let c3 = s3.countEvents()
-    c3.onValue { XCTAssert($0 == 3) }
-    c3.onCompletion { e3.fulfill() }
 
     let m4 = s1.merge(with: s2)
     let e4 = expectation(description: "m4")
@@ -259,39 +251,20 @@ class mergeTests: XCTestCase
       event in
       do {
         let count = try event.get()
-        XCTAssert(count == 2, String(count))
+        XCTAssert(count == 3, String(count))
       }
       catch StreamCompleted.normally { e4.fulfill() }
       catch { XCTFail() }
     }
 
-    let m5 = m4.merge(with: s3)
-    let e5 = expectation(description: "m5")
-    let c5 = m5.countEvents()
-    c5.notify {
-      event in
-      do {
-        let count = try event.get()
-        XCTAssert(count == 5, String(count))
-      }
-      catch StreamCompleted.normally { e5.fulfill() }
-      catch { XCTFail() }
-    }
-
     s1.post(1)
+    s2.post(1)
     s1.close()
-    s1.queue.sync {}
-    s2.post(2)
-    s2.queue.sync {}
-    m4.close()
-
+    g1.wait()
     s2.post(2)
     s2.close()
-    s3.post(3)
-    s3.post(3)
-    s3.post(3)
-    s3.close()
 
     waitForExpectations(timeout: 0.1)
+    m4.close()
   }
 }

@@ -629,8 +629,7 @@ class streamTests: XCTestCase
     let split = stream.split(count: splits)
     XCTAssert(stream.requested == 0)
 
-    let merged = MergeStream<Int>()
-    split.forEach(merged.merge)
+    let merged = EventStream.merge(streams: split)
 
     merged.countEvents().onValue { XCTAssert($0 == splits*events) }
     stream.onCompletion { e.fulfill() }
