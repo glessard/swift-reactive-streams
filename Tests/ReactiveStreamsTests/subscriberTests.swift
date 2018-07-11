@@ -23,7 +23,7 @@ class TestSubscriber: Subscriber
     e = expectation
   }
 
-  func onSubscribe(_ subscription: Subscription)
+  func onSubscription(_ subscription: Subscription)
   {
     self.subscription = subscription
     subscription.request(1)

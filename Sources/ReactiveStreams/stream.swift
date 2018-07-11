@@ -146,7 +146,7 @@ open class EventStream<Value>: Publisher
   final public func subscribe<S: Subscriber>(_ subscriber: S)
     where S.Value == Value
   {
-    addSubscription(subscriptionHandler: subscriber.onSubscribe,
+    addSubscription(subscriptionHandler: subscriber.onSubscription,
                     notificationHandler: {
                       [weak subscriber = subscriber] (event: Event<Value>) in
                       if let subscriber = subscriber { subscriber.notify(event) }

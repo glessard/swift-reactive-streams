@@ -24,7 +24,7 @@ private class NotificationSubscriber<T>: Subscriber
     self.queue = queue
   }
 
-  func onSubscribe(_ subscription: Subscription)
+  func onSubscription(_ subscription: Subscription)
   {
     precondition(self.subscription == nil, "received multiple calls to \(#function)")
 

@@ -10,7 +10,7 @@ public protocol Subscriber: class
 {
   associatedtype Value
 
-  func onSubscribe(_ subscription: Subscription)
+  func onSubscription(_ subscription: Subscription)
   func onValue(_ value: Value)
   func onError(_ error: Error)
   func onCompletion()
