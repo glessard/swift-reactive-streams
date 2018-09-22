@@ -2,37 +2,24 @@
 
 import PackageDescription
 
-let name = "ReactiveStreams"
-
-#if swift(>=4.0)
-
-let package = Package(
-  name: name,
-  products: [
-    .library(name: name, targets: [name]),
-  ],
-  dependencies: [
-    .package(url: "https://github.com/glessard/swift-atomics.git", from: "4.0.0")
-  ],
-  targets: [
-    .target(name: name, dependencies: ["CAtomics"]),
-    .testTarget(name: name+"Tests", dependencies: [Target.Dependency(stringLiteral: name)]),
-  ],
-  swiftLanguageVersions: [3,4]
-)
-
+#if !swift(>=4.2)
+let versions = [4]
 #else
-
-
-let package = Package(
-  name: name,
-  targets: [
-    Target(name: name),
-  ],
-  dependencies: [
-    .Package(url: "https://github.com/glessard/swift-atomics.git", majorVersion: 4, minor: 0),
-  ]
-)
-
+let versions = [SwiftVersion.v4, .v4_2]
 #endif
 
+let package = Package(
+  name: "ReactiveStreams",
+  products: [
+    .library(name: "ReactiveStreams", targets: ["ReactiveStreams"]),
+  ],
+  dependencies: [
+    .package(url: "https://github.com/glessard/swift-atomics.git", from: "4.1.0"),
+    .package(url: "https://github.com/glessard/outcome.git", from: "4.1.5")
+  ],
+  targets: [
+    .target(name: "ReactiveStreams", dependencies: ["CAtomics", "Outcome"]),
+    .testTarget(name: "ReactiveStreamsTests", dependencies: ["ReactiveStreams"]),
+  ],
+  swiftLanguageVersions: versions
+)
