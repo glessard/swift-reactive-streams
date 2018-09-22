@@ -48,19 +48,25 @@ public struct Event<Value>
     return false
   }
 
-  public var final: StreamCompleted? {
+  public var streamCompleted: StreamCompleted? {
     if case .error(let final as StreamCompleted) = state
     { return final }
 
     return nil
   }
 
-  public var error: Error? {
+  @available(*, unavailable, renamed: "streamCompleted")
+  public var final: StreamCompleted? { return streamCompleted }
+
+  public var streamError: Error? {
     if case .error(let error) = state, !(error is StreamCompleted)
     { return error }
 
     return nil
   }
+
+  @available(*, unavailable, renamed: "streamError")
+  public var error: Error? { return streamError}
 }
 
 extension Event: CustomStringConvertible

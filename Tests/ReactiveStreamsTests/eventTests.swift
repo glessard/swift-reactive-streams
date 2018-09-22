@@ -45,12 +45,12 @@ class eventTests: XCTestCase
     }
 
     XCTAssertNotNil(value.value)
-    XCTAssertNotNil(error.error)
-    XCTAssertNotNil(final.final)
+    XCTAssertNotNil(error.streamError)
+    XCTAssertNotNil(final.streamCompleted)
 
-    XCTAssertNil(value.error)
-    XCTAssertNil(value.final)
-    XCTAssertNil(error.final)
+    XCTAssertNil(value.streamError)
+    XCTAssertNil(value.streamCompleted)
+    XCTAssertNil(error.streamCompleted)
     XCTAssertNil(error.value)
 
     XCTAssertTrue(value.isValue)
