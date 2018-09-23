@@ -314,6 +314,35 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
+  func testSkipN()
+  {
+    let stream = PostBox<Int>()
+    let count = 5
+
+    let e = expectation(description: "observation onCompletion")
+
+    let m = stream.skip(count: count)
+    XCTAssert(stream.requested == count)
+
+    let n = m.next(count: count).finalValue()
+    XCTAssert(stream.requested == 2*count)
+
+    n.notify {
+      event in
+      do {
+        let value = try event.get()
+        XCTAssert(value == 2*count, "\(value)")
+      }
+      catch StreamCompleted.normally { e.fulfill() }
+      catch { XCTFail() }
+    }
+
+    for i in 1...2*count { stream.post(i) }
+    stream.close()
+
+    waitForExpectations(timeout: 1.0)
+  }
+
   func testNextN()
   {
     let stream = PostBox<Int>()

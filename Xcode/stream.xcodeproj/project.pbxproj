@@ -39,6 +39,7 @@
 		03F768B61F5789F300F4B44B /* TestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F768B51F5789F300F4B44B /* TestError.swift */; };
 		03FCE9D21CD8F93D00F4B44B /* stream-map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FCE9D11CD8F93D00F4B44B /* stream-map.swift */; };
 		03FD4DAD21581BFC00F4B44B /* stream-final.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FD4DAC21581BFC00F4B44B /* stream-final.swift */; };
+		03FD4DB821581E4D00F4B44B /* stream-skip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FD4DB721581E4D00F4B44B /* stream-skip.swift */; };
 		03FE12DD1EA8802800F4B44B /* dispatch-utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */; };
 /* End PBXBuildFile section */
 
@@ -155,6 +156,7 @@
 		03F768B51F5789F300F4B44B /* TestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestError.swift; path = ../../Tests/ReactiveStreamsTests/TestError.swift; sourceTree = "<group>"; };
 		03FCE9D11CD8F93D00F4B44B /* stream-map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-map.swift"; sourceTree = "<group>"; };
 		03FD4DAC21581BFC00F4B44B /* stream-final.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "stream-final.swift"; sourceTree = "<group>"; };
+		03FD4DB721581E4D00F4B44B /* stream-skip.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-skip.swift"; sourceTree = "<group>"; };
 		03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "dispatch-utilities.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -187,6 +189,7 @@
 				031C42691CFE651700F4B44B /* stream-notifications.swift */,
 				031C426B1CFE65C900F4B44B /* stream-reduce.swift */,
 				031C426D1CFE660900F4B44B /* stream-next.swift */,
+				03FD4DB721581E4D00F4B44B /* stream-skip.swift */,
 				031C426F1CFE666600F4B44B /* stream-split.swift */,
 				03A0D5BE1EB15ED000F4B44B /* stream-paused.swift */,
 				03FD4DAC21581BFC00F4B44B /* stream-final.swift */,
@@ -522,6 +525,7 @@
 				03D89FBE1CD46B4300F4B44B /* stream.swift in Sources */,
 				031C42651CFE4B9B00F4B44B /* stream-post.swift in Sources */,
 				038EB3A51CDD35EC00F4B44B /* stream-merge.swift in Sources */,
+				03FD4DB821581E4D00F4B44B /* stream-skip.swift in Sources */,
 				038EB3A71CDD361A00F4B44B /* validated-queue.swift in Sources */,
 				031C426A1CFE651700F4B44B /* stream-notifications.swift in Sources */,
 				03F6666A1CE0145100F4B44B /* subscriber.swift in Sources */,
