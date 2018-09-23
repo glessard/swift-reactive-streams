@@ -1,5 +1,11 @@
 import XCTest
 
+extension deferredTests {
+    static let __allTests = [
+        ("testNext", testNext),
+    ]
+}
+
 extension eventTests {
     static let __allTests = [
         ("testGetters", testGetters),
@@ -97,6 +103,7 @@ extension timerTests {
 #if !os(macOS)
 public func __allTests() -> [XCTestCaseEntry] {
     return [
+        testCase(deferredTests.__allTests),
         testCase(eventTests.__allTests),
         testCase(flatMapTests.__allTests),
         testCase(mergeTests.__allTests),

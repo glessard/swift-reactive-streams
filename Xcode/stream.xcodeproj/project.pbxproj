@@ -16,6 +16,8 @@
 		031BCE5F217A8C5100F4B44B /* deferred.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE40217A8B6400F4B44B /* deferred.framework */; };
 		031BCE60217A8C5100F4B44B /* Outcome.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE59217A8C3500F4B44B /* Outcome.framework */; };
 		031BCE74217A931200F4B44B /* deferred-subscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE73217A931200F4B44B /* deferred-subscriber.swift */; };
+		031BCE81217A94F900F4B44B /* deferred-next.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE79217A945500F4B44B /* deferred-next.swift */; };
+		031BCE82217A94FF00F4B44B /* deferredTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE7E217A94CD00F4B44B /* deferredTests.swift */; };
 		031C42651CFE4B9B00F4B44B /* stream-post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42641CFE4B9B00F4B44B /* stream-post.swift */; };
 		031C42671CFE632D00F4B44B /* stream-substream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42661CFE632D00F4B44B /* stream-substream.swift */; };
 		031C426A1CFE651700F4B44B /* stream-notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42691CFE651700F4B44B /* stream-notifications.swift */; };
@@ -107,6 +109,8 @@
 		031BCE58217A8C3500F4B44B /* CurrentQoS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CurrentQoS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		031BCE59217A8C3500F4B44B /* Outcome.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Outcome.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		031BCE73217A931200F4B44B /* deferred-subscriber.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "deferred-subscriber.swift"; sourceTree = "<group>"; };
+		031BCE79217A945500F4B44B /* deferred-next.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "deferred-next.swift"; sourceTree = "<group>"; };
+		031BCE7E217A94CD00F4B44B /* deferredTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = deferredTests.swift; path = ../../Tests/ReactiveStreamsTests/deferredTests.swift; sourceTree = "<group>"; };
 		031C42641CFE4B9B00F4B44B /* stream-post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-post.swift"; sourceTree = "<group>"; };
 		031C42661CFE632D00F4B44B /* stream-substream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-substream.swift"; sourceTree = "<group>"; };
 		031C42691CFE651700F4B44B /* stream-notifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-notifications.swift"; sourceTree = "<group>"; };
@@ -191,6 +195,7 @@
 			isa = PBXGroup;
 			children = (
 				031BCE73217A931200F4B44B /* deferred-subscriber.swift */,
+				031BCE79217A945500F4B44B /* deferred-next.swift */,
 			);
 			name = "deferred operations";
 			sourceTree = "<group>";
@@ -265,6 +270,7 @@
 				031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */,
 				036941DB20EC586B00F4B44B /* timerTests.swift */,
 				03A0D5C21EB5563700F4B44B /* subscriberTests.swift */,
+				031BCE7E217A94CD00F4B44B /* deferredTests.swift */,
 				03F768B31F5787DF00F4B44B /* nzRandom.swift */,
 				03F768B51F5789F300F4B44B /* TestError.swift */,
 				036A8C4B20E7066F00F4B44B /* XCTestManifests.swift */,
@@ -475,6 +481,7 @@
 				031CFBB91CEFB6CD00F4B44B /* stream-onrequest.swift in Sources */,
 				036941D520EC4E5600F4B44B /* stream-timer.swift in Sources */,
 				031C42701CFE666600F4B44B /* stream-split.swift in Sources */,
+				031BCE81217A94F900F4B44B /* deferred-next.swift in Sources */,
 				03E1929D1CE4474500F4B44B /* publisher.swift in Sources */,
 				03FCE9D21CD8F93D00F4B44B /* stream-map.swift in Sources */,
 				03D89FC01CD46C0700F4B44B /* event.swift in Sources */,
@@ -506,6 +513,7 @@
 				03F6666C1CE054FA00F4B44B /* flatMapTests.swift in Sources */,
 				03A0D5C31EB5563700F4B44B /* subscriberTests.swift in Sources */,
 				03F768B61F5789F300F4B44B /* TestError.swift in Sources */,
+				031BCE82217A94FF00F4B44B /* deferredTests.swift in Sources */,
 				038527E21CD46A1500F4B44B /* streamTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
