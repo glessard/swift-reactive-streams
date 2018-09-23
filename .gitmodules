@@ -7,3 +7,6 @@
 [submodule "Xcode/dependencies/current-qos"]
 	path = Xcode/dependencies/current-qos
 	url = https://github.com/glessard/CurrentQoS.git
+[submodule "Xcode/dependencies/deferred"]
+	path = Xcode/dependencies/deferred
+	url = https://github.com/glessard/deferred.git
