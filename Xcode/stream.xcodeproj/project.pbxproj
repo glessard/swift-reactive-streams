@@ -38,6 +38,7 @@
 		03F768B41F5787E000F4B44B /* nzRandom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F768B31F5787DF00F4B44B /* nzRandom.swift */; };
 		03F768B61F5789F300F4B44B /* TestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F768B51F5789F300F4B44B /* TestError.swift */; };
 		03FCE9D21CD8F93D00F4B44B /* stream-map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FCE9D11CD8F93D00F4B44B /* stream-map.swift */; };
+		03FD4DAD21581BFC00F4B44B /* stream-final.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FD4DAC21581BFC00F4B44B /* stream-final.swift */; };
 		03FE12DD1EA8802800F4B44B /* dispatch-utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */; };
 /* End PBXBuildFile section */
 
@@ -153,6 +154,7 @@
 		03F768B31F5787DF00F4B44B /* nzRandom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = nzRandom.swift; path = ../../Tests/ReactiveStreamsTests/nzRandom.swift; sourceTree = "<group>"; };
 		03F768B51F5789F300F4B44B /* TestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TestError.swift; path = ../../Tests/ReactiveStreamsTests/TestError.swift; sourceTree = "<group>"; };
 		03FCE9D11CD8F93D00F4B44B /* stream-map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-map.swift"; sourceTree = "<group>"; };
+		03FD4DAC21581BFC00F4B44B /* stream-final.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "stream-final.swift"; sourceTree = "<group>"; };
 		03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "dispatch-utilities.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -187,6 +189,7 @@
 				031C426D1CFE660900F4B44B /* stream-next.swift */,
 				031C426F1CFE666600F4B44B /* stream-split.swift */,
 				03A0D5BE1EB15ED000F4B44B /* stream-paused.swift */,
+				03FD4DAC21581BFC00F4B44B /* stream-final.swift */,
 			);
 			name = "stream operations";
 			sourceTree = "<group>";
@@ -503,6 +506,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03FD4DAD21581BFC00F4B44B /* stream-final.swift in Sources */,
 				031C42671CFE632D00F4B44B /* stream-substream.swift in Sources */,
 				031CFBB91CEFB6CD00F4B44B /* stream-onrequest.swift in Sources */,
 				036941D520EC4E5600F4B44B /* stream-timer.swift in Sources */,
