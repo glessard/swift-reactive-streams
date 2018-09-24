@@ -25,7 +25,7 @@ open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputV
 
   init(validated: ValidatedQueue, count: Int64)
   {
-    precondition(count >= 0)
+    assert(count >= 0)
     self.limit = count
     super.init(validated: validated)
   }
