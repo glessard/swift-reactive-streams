@@ -1,12 +1,3 @@
-[submodule "Xcode/dependencies/atomics"]
-	path = Xcode/dependencies/atomics
-	url = https://github.com/glessard/swift-atomics.git
-[submodule "Xcode/dependencies/outcome"]
-	path = Xcode/dependencies/outcome
-	url = https://github.com/glessard/outcome.git
-[submodule "Xcode/dependencies/current-qos"]
-	path = Xcode/dependencies/current-qos
-	url = https://github.com/glessard/CurrentQoS.git
 [submodule "Xcode/dependencies/deferred"]
 	path = Xcode/dependencies/deferred
 	url = https://github.com/glessard/deferred.git
