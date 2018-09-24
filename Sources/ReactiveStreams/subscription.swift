@@ -26,11 +26,11 @@ final public class Subscription
 
   func shouldNotify() -> Bool
   {
-    var p = requested.load(.relaxed)
+    var remaining = requested.load(.relaxed)
     repeat {
-      if p == .max { break }
-      if p <= 0 { return false }
-    } while !requested.loadCAS(&p, p-1, .weak, .relaxed, .relaxed)
+      if remaining == .max { break }
+      if remaining <= 0 { return false }
+    } while !requested.loadCAS(&remaining, remaining-1, .weak, .relaxed, .relaxed)
     return true
   }
 
