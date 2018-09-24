@@ -3,6 +3,8 @@ import XCTest
 extension deferredTests {
     static let __allTests = [
         ("testNext", testNext),
+        ("testSingleValueStreamWithError", testSingleValueStreamWithError),
+        ("testSingleValueStreamWithValue", testSingleValueStreamWithValue),
     ]
 }
 

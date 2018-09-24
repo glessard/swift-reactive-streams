@@ -18,6 +18,7 @@
 		031BCE74217A931200F4B44B /* deferred-subscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE73217A931200F4B44B /* deferred-subscriber.swift */; };
 		031BCE81217A94F900F4B44B /* deferred-next.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE79217A945500F4B44B /* deferred-next.swift */; };
 		031BCE82217A94FF00F4B44B /* deferredTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE7E217A94CD00F4B44B /* deferredTests.swift */; };
+		031BCE8B217A95B300F4B44B /* deferred-stream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE87217A95B300F4B44B /* deferred-stream.swift */; };
 		031C42651CFE4B9B00F4B44B /* stream-post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42641CFE4B9B00F4B44B /* stream-post.swift */; };
 		031C42671CFE632D00F4B44B /* stream-substream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42661CFE632D00F4B44B /* stream-substream.swift */; };
 		031C426A1CFE651700F4B44B /* stream-notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42691CFE651700F4B44B /* stream-notifications.swift */; };
@@ -111,6 +112,7 @@
 		031BCE73217A931200F4B44B /* deferred-subscriber.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "deferred-subscriber.swift"; sourceTree = "<group>"; };
 		031BCE79217A945500F4B44B /* deferred-next.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "deferred-next.swift"; sourceTree = "<group>"; };
 		031BCE7E217A94CD00F4B44B /* deferredTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = deferredTests.swift; path = ../../Tests/ReactiveStreamsTests/deferredTests.swift; sourceTree = "<group>"; };
+		031BCE87217A95B300F4B44B /* deferred-stream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "deferred-stream.swift"; sourceTree = "<group>"; };
 		031C42641CFE4B9B00F4B44B /* stream-post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-post.swift"; sourceTree = "<group>"; };
 		031C42661CFE632D00F4B44B /* stream-substream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-substream.swift"; sourceTree = "<group>"; };
 		031C42691CFE651700F4B44B /* stream-notifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-notifications.swift"; sourceTree = "<group>"; };
@@ -196,6 +198,7 @@
 			children = (
 				031BCE73217A931200F4B44B /* deferred-subscriber.swift */,
 				031BCE79217A945500F4B44B /* deferred-next.swift */,
+				031BCE87217A95B300F4B44B /* deferred-stream.swift */,
 			);
 			name = "deferred operations";
 			sourceTree = "<group>";
@@ -487,6 +490,7 @@
 				03D89FC01CD46C0700F4B44B /* event.swift in Sources */,
 				031BCE74217A931200F4B44B /* deferred-subscriber.swift in Sources */,
 				031C426E1CFE660900F4B44B /* stream-next.swift in Sources */,
+				031BCE8B217A95B300F4B44B /* deferred-stream.swift in Sources */,
 				031C426C1CFE65C900F4B44B /* stream-reduce.swift in Sources */,
 				03A0D5BF1EB15ED000F4B44B /* stream-paused.swift in Sources */,
 				03A0D5C11EB31C0600F4B44B /* stream-limited.swift in Sources */,
