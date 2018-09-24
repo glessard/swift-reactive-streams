@@ -38,12 +38,12 @@ extension EventStream
     return stream
   }
 
-  public func next(qos: DispatchQoS? = nil, count: Int = 1) -> EventStream<Value>
+  public func next(qos: DispatchQoS? = nil, count: Int) -> EventStream<Value>
   {
     return next(LimitedStream<Value, Value>(qos: qos ?? self.qos, count: Int64(count)))
   }
 
-  public func next(_ queue: DispatchQueue, count: Int = 1) -> EventStream<Value>
+  public func next(_ queue: DispatchQueue, count: Int) -> EventStream<Value>
   {
     return next(LimitedStream<Value, Value>(queue, count: Int64(count)))
   }

@@ -18,7 +18,7 @@ class timerTests: XCTestCase
 
     let now = Date()
     let e = expectation(description: "timer creation")
-    s.next().onValue {
+    s.next(count: 1).onValue {
       d in
       if d > now { e.fulfill() }
     }
