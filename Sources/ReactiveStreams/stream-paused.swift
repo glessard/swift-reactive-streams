@@ -23,8 +23,7 @@ open class Paused<Value>: SubStream<Value, Value>
       substream: self,
       notificationHandler: {
         substream, event in
-        // already running on substream.queue
-        substream.dispatch(event)
+        substream.queue.async { substream.dispatch(event) }
       }
     )
   }

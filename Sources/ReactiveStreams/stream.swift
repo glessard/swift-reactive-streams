@@ -78,6 +78,13 @@ open class EventStream<Value>: Publisher
 
   open func dispatch(_ event: Event<Value>)
   {
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+    {
+      dispatchPrecondition(condition: .onQueue(queue))
+    }
+#endif
+
     if event.isValue
     {
       dispatchValue(event)
@@ -88,7 +95,7 @@ open class EventStream<Value>: Publisher
     }
   }
 
-  /// precondition: must run on this Stream's serial queue
+  /// precondition: must run on this stream's serial queue
 
   private func dispatchValue(_ value: Event<Value>)
   {
@@ -113,7 +120,7 @@ open class EventStream<Value>: Publisher
     }
   }
 
-  /// precondition: must run on a barrier block or a serial queue
+  /// precondition: must run on this stream's serial queue
 
   private func dispatchError(_ error: Event<Value>)
   {
@@ -134,7 +141,7 @@ open class EventStream<Value>: Publisher
     }
   }
 
-  /// precondition: must run on a barrier block or a serial queue
+  /// precondition: must run on this stream's serial queue
 
   func finalizeStream()
   {
@@ -179,7 +186,7 @@ open class EventStream<Value>: Publisher
   {
     let subscription = Subscription(source: self)
 
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
     if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
     {
       if started
@@ -229,7 +236,7 @@ open class EventStream<Value>: Publisher
     }
   }
 
-  /// precondition: must run on a barrier block or a serial queue
+  /// precondition: must run on this stream's serial queue
 
   @discardableResult
   func performCancellation(_ subscription: Subscription) -> Bool
