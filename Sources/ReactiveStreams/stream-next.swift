@@ -40,11 +40,11 @@ extension EventStream
 
   public func next(qos: DispatchQoS? = nil, count: Int = 1) -> EventStream<Value>
   {
-    return next(LimitedStream<Value, Value>(qos: qos ?? self.qos, count: Int64(max(count, 0))))
+    return next(LimitedStream<Value, Value>(qos: qos ?? self.qos, count: Int64(count)))
   }
 
   public func next(_ queue: DispatchQueue, count: Int = 1) -> EventStream<Value>
   {
-    return next(LimitedStream<Value, Value>(queue, count: Int64(max(count, 0))))
+    return next(LimitedStream<Value, Value>(queue, count: Int64(count)))
   }
 }
