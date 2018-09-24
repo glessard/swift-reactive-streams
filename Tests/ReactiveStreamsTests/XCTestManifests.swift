@@ -2,7 +2,6 @@ import XCTest
 
 extension eventTests {
     static let __allTests = [
-        ("testEquals", testEquals),
         ("testGetters", testGetters),
     ]
 }

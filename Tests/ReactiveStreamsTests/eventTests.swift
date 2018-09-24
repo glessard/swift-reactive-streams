@@ -12,57 +12,25 @@ import ReactiveStreams
 
 class eventTests: XCTestCase
 {
-  func testEquals() throws
-  {
-#if swift (>=4.1)
-    let e1 = Event(value: nzRandom())
-    let e2 = try Event(value: e1.get())
-    XCTAssert(e1 == e2)
-
-    let e3 = try Event<Int>(error: TestError(e1.get()))
-    XCTAssert(e1 != e3)
-    XCTAssert(e3 != Event(error: TestError(0)))
-#endif
-  }
-
   func testGetters() throws
   {
-    let v1 = nzRandom()
-    let v2 = nzRandom()
-
-    let value = Event<Int>(value: v1)
-    let error = Event<Int>(error: TestError(v2))
+    let value = Event<Int>(value: .max)
+    let error = Event<Int>(error: TestError.value(.min))
     let final = Event<Int>.streamCompleted
 
-    do {
-      let v = try value.get()
-      XCTAssert(v1 == v)
-
-      let _ = try error.get()
-    }
-    catch let error as TestError {
-      XCTAssert(v2 == error.error)
-    }
-
     XCTAssertNotNil(value.value)
-    XCTAssertNotNil(error.streamError)
-    XCTAssertNotNil(final.streamCompleted)
-
     XCTAssertNil(value.streamError)
     XCTAssertNil(value.streamCompleted)
-    XCTAssertNil(error.streamCompleted)
+    XCTAssertNil(value.error)
+
     XCTAssertNil(error.value)
+    XCTAssertNotNil(error.streamError)
+    XCTAssertNil(error.streamCompleted)
+    XCTAssertNotNil(error.error)
 
-    XCTAssertTrue(value.isValue)
-    XCTAssertFalse(error.isValue)
-
-    let v = String(describing: value)
-    let e = String(describing: error)
-    let f = String(describing: final)
-    // print(v, e, f, terminator: "\n")
-
-    XCTAssert(v != e)
-    XCTAssert(v != f)
-    XCTAssert(e != f)
+    XCTAssertNil(final.value)
+    XCTAssertNil(final.streamError)
+    XCTAssertNotNil(final.streamCompleted)
+    XCTAssertNotNil(final.error)
   }
 }
