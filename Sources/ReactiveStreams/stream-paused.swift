@@ -19,13 +19,7 @@ open class Paused<Value>: SubStream<Value, Value>
     started.initialize(false)
     super.init(validated: ValidatedQueue(label: "pausedrequests", target: stream.queue))
 
-    stream.subscribe(
-      substream: self,
-      notificationHandler: {
-        substream, event in
-        substream.queue.async { substream.dispatch(event) }
-      }
-    )
+    stream.subscribe(substream: self)
   }
 
   @discardableResult

@@ -160,6 +160,14 @@ open class EventStream<Value>: Publisher
     })
   }
 
+  final public func subscribe<S>(substream: S) where S: SubStream<Value, Value>
+  {
+    addSubscription(subscriptionHandler: substream.setSubscription) {
+      [weak sub = substream] (event: Event<Value>) in
+      if let sub = sub { sub.queue.async { sub.dispatch(event) } }
+    }
+  }
+
   final public func subscribe<U, S>(substream: S,
                                     notificationHandler: @escaping (S, Event<Value>) -> Void)
     where S: SubStream<Value, U>
