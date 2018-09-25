@@ -143,8 +143,15 @@ open class EventStream<Value>: Publisher
 
   /// precondition: must run on this stream's serial queue
 
-  func finalizeStream()
+  open func finalizeStream()
   {
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+    {
+      dispatchPrecondition(condition: .onQueue(queue))
+    }
+#endif
+
     self.observers.removeAll()
   }
 
