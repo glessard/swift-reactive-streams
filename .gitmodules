@@ -1,3 +1,6 @@
 [submodule "Xcode/dependencies/atomics"]
 	path = Xcode/dependencies/atomics
 	url = https://github.com/glessard/swift-atomics.git
+[submodule "Xcode/dependencies/outcome"]
+	path = Xcode/dependencies/outcome
+	url = https://github.com/glessard/outcome.git

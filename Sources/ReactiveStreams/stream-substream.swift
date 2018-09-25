@@ -28,23 +28,11 @@ open class SubStream<InputValue, OutputValue>: EventStream<OutputValue>
 
   /// precondition: must run on a barrier block or a serial queue
 
-  override func finalizeStream()
+  override open func finalizeStream()
   {
-    self.subscription = nil
+    subscription?.cancel()
+    subscription = nil
     super.finalizeStream()
-  }
-
-  /// precondition: must run on a barrier block or a serial queue
-
-  override func performCancellation(_ subscription: Subscription) -> Bool
-  {
-    if super.performCancellation(subscription)
-    { // we have no observers anymore: cancel subscription.
-      self.subscription?.cancel()
-      self.subscription = nil
-      return true
-    }
-    return false
   }
 
   @discardableResult
@@ -53,12 +41,5 @@ open class SubStream<InputValue, OutputValue>: EventStream<OutputValue>
     let additional = super.updateRequest(requested)
     subscription?.request(additional)
     return additional
-  }
-
-  open override func close()
-  {
-    subscription?.cancel()
-    subscription = nil
-    super.close()
   }
 }

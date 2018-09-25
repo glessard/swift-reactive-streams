@@ -16,9 +16,9 @@ final public class Subscription
 
   public var cancelled: Bool { return requested.load(.relaxed) == .min }
 
-  init(source: EventSource)
+  init<P: Publisher>(publisher: P)
   {
-    self.source = source
+    source = publisher as EventSource
     requested.initialize(0)
   }
 
@@ -26,11 +26,11 @@ final public class Subscription
 
   func shouldNotify() -> Bool
   {
-    var p = requested.load(.relaxed)
+    var remaining = requested.load(.relaxed)
     repeat {
-      if p == .max { break }
-      if p <= 0 { return false }
-    } while !requested.loadCAS(&p, p-1, .weak, .relaxed, .relaxed)
+      if remaining == .max { break }
+      if remaining <= 0 { return false }
+    } while !requested.loadCAS(&remaining, remaining-1, .weak, .relaxed, .relaxed)
     return true
   }
 
@@ -67,11 +67,19 @@ final public class Subscription
 
   public func cancel()
   {
-    let prev = requested.swap(.min, .relaxed)
-    if prev == .min { return }
+    if requested.swap(.min, .relaxed) != .min,
+       let publisher = source
+    {
+      publisher.cancel(subscription: self)
+      source = nil
+    }
+  }
 
-    source?.cancel(subscription: self)
+  internal func cancel<P: Publisher>(_ publisher: P)
+  {
+    guard source === publisher else { return }
     source = nil
+    cancel()
   }
 }
 

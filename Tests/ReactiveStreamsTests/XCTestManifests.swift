@@ -2,7 +2,6 @@ import XCTest
 
 extension eventTests {
     static let __allTests = [
-        ("testEquals", testEquals),
         ("testGetters", testGetters),
     ]
 }
@@ -68,6 +67,7 @@ extension streamTests {
         ("testPost", testPost),
         ("testReduce1", testReduce1),
         ("testReduce2", testReduce2),
+        ("testSkipN", testSkipN),
         ("testSplit0", testSplit0),
         ("testSplit1", testSplit1),
         ("testSplit2", testSplit2),

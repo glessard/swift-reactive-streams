@@ -78,6 +78,13 @@ open class EventStream<Value>: Publisher
 
   open func dispatch(_ event: Event<Value>)
   {
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+    {
+      dispatchPrecondition(condition: .onQueue(queue))
+    }
+#endif
+
     if event.isValue
     {
       dispatchValue(event)
@@ -88,7 +95,7 @@ open class EventStream<Value>: Publisher
     }
   }
 
-  /// precondition: must run on this Stream's serial queue
+  /// precondition: must run on this stream's serial queue
 
   private func dispatchValue(_ value: Event<Value>)
   {
@@ -113,7 +120,7 @@ open class EventStream<Value>: Publisher
     }
   }
 
-  /// precondition: must run on a barrier block or a serial queue
+  /// precondition: must run on this stream's serial queue
 
   private func dispatchError(_ error: Event<Value>)
   {
@@ -122,7 +129,11 @@ open class EventStream<Value>: Publisher
     let prev = pending.swap(.min, .relaxed)
     if prev == .min { return }
 
-    for notificationHandler in self.observers.values { notificationHandler(error) }
+    for (ws, notificationHandler) in self.observers
+    {
+      ws.reference?.cancel(self)
+      notificationHandler(error)
+    }
     self.finalizeStream()
   }
 
@@ -134,10 +145,17 @@ open class EventStream<Value>: Publisher
     }
   }
 
-  /// precondition: must run on a barrier block or a serial queue
+  /// precondition: must run on this stream's serial queue
 
-  func finalizeStream()
+  open func finalizeStream()
   {
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+    {
+      dispatchPrecondition(condition: .onQueue(queue))
+    }
+#endif
+
     self.observers.removeAll()
   }
 
@@ -146,40 +164,58 @@ open class EventStream<Value>: Publisher
   final public func subscribe<S: Subscriber>(_ subscriber: S)
     where S.Value == Value
   {
-    addSubscription(subscriptionHandler: subscriber.onSubscription,
-                    notificationHandler: {
-                      [weak subscriber = subscriber] (event: Event<Value>) in
-                      if let subscriber = subscriber { subscriber.notify(event) }
-    })
+    addSubscription(subscriber.onSubscription) {
+      [weak subscriber = subscriber] (event: Event<Value>) in
+      if let subscriber = subscriber { subscriber.notify(event) }
+    }
   }
 
-  final public func subscribe<U>(substream: SubStream<Value, U>,
-                                 notificationHandler: @escaping (SubStream<Value, U>, Event<Value>) -> Void)
+  final public func subscribe<S>(substream: S) where S: SubStream<Value, Value>
   {
-    addSubscription(subscriptionHandler: substream.setSubscription,
-                    notificationHandler: {
-                      [weak subscriber = substream] (event: Event<Value>) in
-                      if let substream = subscriber { notificationHandler(substream, event) }
-    })
+    addSubscription(substream.setSubscription) {
+      [weak sub = substream] (event: Event<Value>) in
+      if let sub = sub { sub.queue.async { sub.dispatch(event) } }
+    }
   }
 
+  final public func subscribe<U, S>(substream: S,
+                                    notificationHandler: @escaping (S, Event<Value>) -> Void)
+    where S: SubStream<Value, U>
+  {
+    addSubscription(substream.setSubscription) {
+      [weak subscriber = substream] (event: Event<Value>) in
+      if let substream = subscriber { notificationHandler(substream, event) }
+    }
+  }
+
+#if swift(>=4.1.50)
+  final public func subscribe<T: AnyObject>(subscriber: T,
+                                            subscriptionHandler: (Subscription) -> Void,
+                                            notificationHandler: @escaping (T, Event<Value>) -> Void)
+  {
+    addSubscription(subscriptionHandler) {
+      [weak subscriber = subscriber] (event: Event<Value>) in
+      if let subscriber = subscriber { notificationHandler(subscriber, event) }
+    }
+  }
+#else
   final public func subscribe<T: AnyObject>(subscriber: T,
                                             subscriptionHandler: @escaping (Subscription) -> Void,
                                             notificationHandler: @escaping (T, Event<Value>) -> Void)
   {
-    addSubscription(subscriptionHandler: subscriptionHandler,
-                    notificationHandler: {
-                      [weak subscriber = subscriber] (event: Event<Value>) in
-                      if let subscriber = subscriber { notificationHandler(subscriber, event) }
-    })
+    addSubscription(subscriptionHandler) {
+      [weak subscriber = subscriber] (event: Event<Value>) in
+      if let subscriber = subscriber { notificationHandler(subscriber, event) }
+    }
   }
+#endif
 
-  private func addSubscription(subscriptionHandler: @escaping (Subscription) -> Void,
-                               notificationHandler: @escaping (Event<Value>) -> Void)
+  private func addSubscription(_ subscriptionHandler: (Subscription) -> Void,
+                               _ notificationHandler: @escaping (Event<Value>) -> Void)
   {
-    let subscription = Subscription(source: self)
+    let subscription = Subscription(publisher: self)
 
-#if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
     if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
     {
       if started
@@ -224,22 +260,14 @@ open class EventStream<Value>: Publisher
     {
       queue.async {
         guard !self.completed else { return }
-        self.performCancellation(subscription)
+
+        let key = WeakSubscription(subscription)
+        guard let notificationHandler = self.observers.removeValue(forKey: key)
+          else { fatalError("Tried to cancel an inactive subscription") }
+
+        notificationHandler(Event.streamCompleted)
       }
     }
-  }
-
-  /// precondition: must run on a barrier block or a serial queue
-
-  @discardableResult
-  func performCancellation(_ subscription: Subscription) -> Bool
-  {
-    let key = WeakSubscription(subscription)
-    guard let notificationHandler = observers.removeValue(forKey: key)
-      else { fatalError("Tried to cancel an inactive subscription") }
-
-    notificationHandler(Event.streamCompleted)
-    return observers.isEmpty
   }
 }
 

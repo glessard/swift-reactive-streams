@@ -164,7 +164,7 @@ class streamTests: XCTestCase
     XCTAssert(String(describing: s.state) == "EventStream active")
 
     let e2 = expectation(description: "second value")
-    let n2 = n.next()
+    let n2 = n.next(count: 1)
     n2.onCompletion { e2.fulfill() }
 
     s.post(0)
@@ -312,6 +312,32 @@ class streamTests: XCTestCase
     stream.close()
 
     waitForExpectations(timeout: 1.0, handler: nil)
+  }
+
+  func testSkipN()
+  {
+    let stream = PostBox<Int>()
+    let count = 5
+
+    let e = expectation(description: "observation onCompletion")
+
+    let m = stream.skip(count: count)
+    XCTAssert(stream.requested == count)
+
+    let n = m.next(count: count).skip(DispatchQueue.global(), count: count)
+    XCTAssert(stream.requested == 2*count)
+
+    n.notify {
+      event in
+      if event.streamCompleted == .normally
+      { e.fulfill() }
+      else { XCTFail() }
+    }
+
+    for i in 0...2*count { stream.post(i) }
+    stream.close()
+
+    waitForExpectations(timeout: 1.0)
   }
 
   func testNextN()
@@ -727,7 +753,7 @@ class streamTests: XCTestCase
 
     stream.post(0)
     let ne = expectation(description: "second value")
-    stream.next().onValue { _ in ne.fulfill() }
+    stream.next(count: 1).onValue { _ in ne.fulfill() }
     stream.post(1)
     waitForExpectations(timeout: 0.1)
     XCTAssert(stream.requested == 0)
