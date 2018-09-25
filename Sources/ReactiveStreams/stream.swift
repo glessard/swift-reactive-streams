@@ -153,16 +153,15 @@ open class EventStream<Value>: Publisher
   final public func subscribe<S: Subscriber>(_ subscriber: S)
     where S.Value == Value
   {
-    addSubscription(subscriptionHandler: subscriber.onSubscription,
-                    notificationHandler: {
-                      [weak subscriber = subscriber] (event: Event<Value>) in
-                      if let subscriber = subscriber { subscriber.notify(event) }
-    })
+    addSubscription(subscriber.onSubscription) {
+      [weak subscriber = subscriber] (event: Event<Value>) in
+      if let subscriber = subscriber { subscriber.notify(event) }
+    }
   }
 
   final public func subscribe<S>(substream: S) where S: SubStream<Value, Value>
   {
-    addSubscription(subscriptionHandler: substream.setSubscription) {
+    addSubscription(substream.setSubscription) {
       [weak sub = substream] (event: Event<Value>) in
       if let sub = sub { sub.queue.async { sub.dispatch(event) } }
     }
@@ -172,26 +171,24 @@ open class EventStream<Value>: Publisher
                                     notificationHandler: @escaping (S, Event<Value>) -> Void)
     where S: SubStream<Value, U>
   {
-    addSubscription(subscriptionHandler: substream.setSubscription,
-                    notificationHandler: {
-                      [weak subscriber = substream] (event: Event<Value>) in
-                      if let substream = subscriber { notificationHandler(substream, event) }
-    })
+    addSubscription(substream.setSubscription) {
+      [weak subscriber = substream] (event: Event<Value>) in
+      if let substream = subscriber { notificationHandler(substream, event) }
+    }
   }
 
   final public func subscribe<T: AnyObject>(subscriber: T,
                                             subscriptionHandler: @escaping (Subscription) -> Void,
                                             notificationHandler: @escaping (T, Event<Value>) -> Void)
   {
-    addSubscription(subscriptionHandler: subscriptionHandler,
-                    notificationHandler: {
-                      [weak subscriber = subscriber] (event: Event<Value>) in
-                      if let subscriber = subscriber { notificationHandler(subscriber, event) }
-    })
+    addSubscription(subscriptionHandler) {
+      [weak subscriber = subscriber] (event: Event<Value>) in
+      if let subscriber = subscriber { notificationHandler(subscriber, event) }
+    }
   }
 
-  private func addSubscription(subscriptionHandler: @escaping (Subscription) -> Void,
-                               notificationHandler: @escaping (Event<Value>) -> Void)
+  private func addSubscription(_ subscriptionHandler: @escaping (Subscription) -> Void,
+                               _ notificationHandler: @escaping (Event<Value>) -> Void)
   {
     let subscription = Subscription(source: self)
 
