@@ -50,12 +50,7 @@ class ReducingStream<InputValue, OutputValue>: SubStream<InputValue, OutputValue
   override func updateRequest(_ requested: Int64) -> Int64
   { // only pass on requested updates up to and including our remaining number of events
     precondition(requested > 0)
-
-    if !completed
-    {
-      return super.updateRequest(1)
-    }
-    return 0
+    return super.updateRequest(1)
   }
 }
 

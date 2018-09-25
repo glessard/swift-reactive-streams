@@ -59,11 +59,7 @@ open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputV
     precondition(requested > 0)
 
     let remaining = (limit-count)
-    let adjusted = min(requested, remaining)
-    if adjusted > 0
-    {
-      return super.updateRequest(adjusted)
-    }
-    return 0
+    let adjusted = min(requested, max(remaining, 1))
+    return super.updateRequest(adjusted)
   }
 }
