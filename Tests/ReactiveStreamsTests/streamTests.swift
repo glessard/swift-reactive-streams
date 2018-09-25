@@ -324,20 +324,17 @@ class streamTests: XCTestCase
     let m = stream.skip(count: count)
     XCTAssert(stream.requested == count)
 
-    let n = m.next(count: count).finalValue()
+    let n = m.next(count: count).skip(DispatchQueue.global(), count: count)
     XCTAssert(stream.requested == 2*count)
 
     n.notify {
       event in
-      do {
-        let value = try event.get()
-        XCTAssert(value == 2*count, "\(value)")
-      }
-      catch StreamCompleted.normally { e.fulfill() }
-      catch { XCTFail() }
+      if event.streamCompleted == .normally
+      { e.fulfill() }
+      else { XCTFail() }
     }
 
-    for i in 1...2*count { stream.post(i) }
+    for i in 0...2*count { stream.post(i) }
     stream.close()
 
     waitForExpectations(timeout: 1.0)
