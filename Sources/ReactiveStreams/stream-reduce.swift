@@ -8,57 +8,87 @@
 
 import Dispatch
 
+class ReducingStream<InputValue, OutputValue>: SubStream<InputValue, OutputValue>
+{
+  private var current: OutputValue
+  private let combiner: (inout OutputValue, InputValue) throws -> Void
+
+  init(_ validated: ValidatedQueue, initial: OutputValue, combiner: @escaping (inout OutputValue, InputValue) throws -> Void)
+  {
+    self.current = initial
+    self.combiner = combiner
+    super.init(validated: validated)
+  }
+
+  init(_ validated: ValidatedQueue, initial: OutputValue, combiner: @escaping (OutputValue, InputValue) throws -> OutputValue)
+  {
+    self.current = initial
+    self.combiner = { $0 = try combiner ($0, $1) }
+    super.init(validated: validated)
+  }
+
+  override func setSubscription(_ subscription: Subscription)
+  {
+    super.setSubscription(subscription)
+    subscription.requestAll()
+  }
+
+  func processEvent(_ event: Event<InputValue>)
+  {
+    queue.async {
+      do {
+        try self.combiner(&self.current, event.get())
+      }
+      catch {
+        self.dispatch(Event(value: self.current))
+        self.dispatch(Event(error: error))
+      }
+    }
+  }
+
+  @discardableResult
+  override func updateRequest(_ requested: Int64) -> Int64
+  { // only pass on requested updates up to and including our remaining number of events
+    precondition(requested > 0)
+
+    if !completed
+    {
+      return super.updateRequest(1)
+    }
+    return 0
+  }
+}
+
 extension EventStream
 {
-  private func reduce<U>(_ stream: LimitedStream<Value, U>, initial: U, combine: @escaping (U, Value) throws -> U) -> EventStream<U>
+  private func reduce<U>(_ reducer: ReducingStream<Value, U>) -> EventStream<U>
   {
-    return reduce(stream, into: initial) { $0 = try combine($0, $1) }
+    self.subscribe(substream: reducer) { $0.processEvent($1) }
+    return reducer
   }
 
-  private func reduce<U>(_ stream: LimitedStream<Value, U>, into initial: U, combine: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
+  public func reduce<U>(qos: DispatchQoS? = nil, _ initial: U, _ combiner: @escaping (U, Value) throws -> U) -> EventStream<U>
   {
-    var current = initial
-    self.subscribe(
-      subscriber: stream,
-      subscriptionHandler: {
-        subscription in
-        subscription.requestAll()
-        stream.setSubscription(subscription)
-      },
-      notificationHandler: {
-        mapped, event in
-        mapped.queue.async {
-          do {
-            try combine(&current, event.get())
-          }
-          catch {
-            mapped.dispatch(Event(value: current))
-            mapped.dispatch(Event(error: error))
-          }
-        }
-      }
-    )
-    return stream
+    let queue = ValidatedQueue(label: "reducing-queue", qos: qos ?? self.qos)
+    return reduce(ReducingStream(queue, initial: initial, combiner: combiner))
   }
 
-  public func reduce<U>(qos: DispatchQoS? = nil, _ initial: U, _ combine: @escaping (U, Value) throws -> U) -> EventStream<U>
+  public func reduce<U>(_ queue: DispatchQueue, _ initial: U, _ combiner: @escaping (U, Value) throws -> U) -> EventStream<U>
   {
-    return reduce(LimitedStream<Value, U>(qos: qos ?? self.qos, count: 1), initial: initial, combine: combine)
+    let queue = ValidatedQueue(label: "reducing-queue", target: queue)
+    return reduce(ReducingStream(queue, initial: initial, combiner: combiner))
   }
 
-  public func reduce<U>(_ queue: DispatchQueue, _ initial: U, _ combine: @escaping (U, Value) throws -> U) -> EventStream<U>
+  public func reduce<U>(qos: DispatchQoS? = nil, into initial: U, _ combiner: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
   {
-    return reduce(LimitedStream<Value, U>(queue, count: 1), initial: initial, combine: combine)
+    let queue = ValidatedQueue(label: "reducing-queue", qos: qos ?? self.qos)
+    return reduce(ReducingStream(queue, initial: initial, combiner: combiner))
   }
 
-  public func reduce<U>(qos: DispatchQoS? = nil, into: U, _ combine: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
+  public func reduce<U>(_ queue: DispatchQueue, into initial: U, _ combiner: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
   {
-    return reduce(LimitedStream<Value, U>(qos: qos ?? self.qos, count: 1), into: into, combine: combine)
-  }
-
-  public func reduce<U>(_ queue: DispatchQueue, into: U, _ combine: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
-  {
-    return reduce(LimitedStream<Value, U>(queue, count: 1), into: into, combine: combine)
+    let queue = ValidatedQueue(label: "reducing-queue", target: queue)
+    return reduce(ReducingStream(queue, initial: initial, combiner: combiner))
   }
 }
 

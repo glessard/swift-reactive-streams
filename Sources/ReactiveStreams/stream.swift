@@ -160,8 +160,9 @@ open class EventStream<Value>: Publisher
     })
   }
 
-  final public func subscribe<U>(substream: SubStream<Value, U>,
-                                 notificationHandler: @escaping (SubStream<Value, U>, Event<Value>) -> Void)
+  final public func subscribe<U, S>(substream: S,
+                                    notificationHandler: @escaping (S, Event<Value>) -> Void)
+    where S: SubStream<Value, U>
   {
     addSubscription(subscriptionHandler: substream.setSubscription,
                     notificationHandler: {
