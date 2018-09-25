@@ -16,9 +16,9 @@ final public class Subscription
 
   public var cancelled: Bool { return requested.load(.relaxed) == .min }
 
-  init(source: EventSource)
+  init<P: Publisher>(publisher: P)
   {
-    self.source = source
+    source = publisher as EventSource
     requested.initialize(0)
   }
 

@@ -209,7 +209,7 @@ open class EventStream<Value>: Publisher
   private func addSubscription(_ subscriptionHandler: (Subscription) -> Void,
                                _ notificationHandler: @escaping (Event<Value>) -> Void)
   {
-    let subscription = Subscription(source: self)
+    let subscription = Subscription(publisher: self)
 
 #if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
     if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
