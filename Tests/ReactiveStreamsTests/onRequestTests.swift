@@ -60,6 +60,8 @@ class onRequestTests: XCTestCase
     let s = t.next(count: 5).map(transform: { if $0 == 4 { throw TestError($0) }}).countEvents()
     s.onValue { if $0 == 4 { g.fulfill() } }
     s.onError { e in if (e as? TestError) == TestError.value(4) { f.fulfill() } }
+    s.onError { _ in t.close() }
+    s.onCompletion { XCTFail() }
     t.start()
 
     waitForExpectations(timeout: 1.0, handler: nil)

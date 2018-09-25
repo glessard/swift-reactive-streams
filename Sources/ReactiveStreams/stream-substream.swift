@@ -35,19 +35,6 @@ open class SubStream<InputValue, OutputValue>: EventStream<OutputValue>
     super.finalizeStream()
   }
 
-  /// precondition: must run on a barrier block or a serial queue
-
-  override func performCancellation(_ subscription: Subscription) -> Bool
-  {
-    if super.performCancellation(subscription)
-    { // we have no observers anymore: cancel subscription.
-      self.subscription?.cancel()
-      self.subscription = nil
-      return true
-    }
-    return false
-  }
-
   @discardableResult
   open override func updateRequest(_ requested: Int64) -> Int64
   {

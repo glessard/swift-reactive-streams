@@ -260,22 +260,14 @@ open class EventStream<Value>: Publisher
     {
       queue.async {
         guard !self.completed else { return }
-        self.performCancellation(subscription)
+
+        let key = WeakSubscription(subscription)
+        guard let notificationHandler = self.observers.removeValue(forKey: key)
+          else { fatalError("Tried to cancel an inactive subscription") }
+
+        notificationHandler(Event.streamCompleted)
       }
     }
-  }
-
-  /// precondition: must run on this stream's serial queue
-
-  @discardableResult
-  func performCancellation(_ subscription: Subscription) -> Bool
-  {
-    let key = WeakSubscription(subscription)
-    guard let notificationHandler = observers.removeValue(forKey: key)
-      else { fatalError("Tried to cancel an inactive subscription") }
-
-    notificationHandler(Event.streamCompleted)
-    return observers.isEmpty
   }
 }
 
