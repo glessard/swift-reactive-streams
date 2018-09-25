@@ -40,7 +40,7 @@ extension EventStream
 
 extension EventStream
 {
-  private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) -> Event<U>) -> EventStream<U>
+  private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) throws -> Event<U>) -> EventStream<U>
   {
     self.subscribe(substream: stream) {
       mapped, event in
@@ -57,12 +57,12 @@ extension EventStream
     return stream
   }
 
-  public func map<U>(qos: DispatchQoS? = nil, transform: @escaping (Value) -> Event<U>) -> EventStream<U>
+  public func map<U>(qos: DispatchQoS? = nil, transform: @escaping (Value) throws -> Event<U>) -> EventStream<U>
   {
     return map(SubStream<Value, U>(qos: qos ?? self.qos), transform: transform)
   }
 
-  public func map<U>(_ queue: DispatchQueue, transform: @escaping (Value) -> Event<U>) -> EventStream<U>
+  public func map<U>(_ queue: DispatchQueue, transform: @escaping (Value) throws -> Event<U>) -> EventStream<U>
   {
     return map(SubStream<Value, U>(queue), transform: transform)
   }
