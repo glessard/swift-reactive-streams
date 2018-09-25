@@ -177,6 +177,17 @@ open class EventStream<Value>: Publisher
     }
   }
 
+#if swift(>=4.1.50)
+  final public func subscribe<T: AnyObject>(subscriber: T,
+                                            subscriptionHandler: (Subscription) -> Void,
+                                            notificationHandler: @escaping (T, Event<Value>) -> Void)
+  {
+    addSubscription(subscriptionHandler) {
+      [weak subscriber = subscriber] (event: Event<Value>) in
+      if let subscriber = subscriber { notificationHandler(subscriber, event) }
+    }
+  }
+#else
   final public func subscribe<T: AnyObject>(subscriber: T,
                                             subscriptionHandler: @escaping (Subscription) -> Void,
                                             notificationHandler: @escaping (T, Event<Value>) -> Void)
@@ -186,8 +197,9 @@ open class EventStream<Value>: Publisher
       if let subscriber = subscriber { notificationHandler(subscriber, event) }
     }
   }
+#endif
 
-  private func addSubscription(_ subscriptionHandler: @escaping (Subscription) -> Void,
+  private func addSubscription(_ subscriptionHandler: (Subscription) -> Void,
                                _ notificationHandler: @escaping (Event<Value>) -> Void)
   {
     let subscription = Subscription(source: self)
