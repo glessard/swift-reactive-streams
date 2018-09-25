@@ -129,7 +129,11 @@ open class EventStream<Value>: Publisher
     let prev = pending.swap(.min, .relaxed)
     if prev == .min { return }
 
-    for notificationHandler in self.observers.values { notificationHandler(error) }
+    for (ws, notificationHandler) in self.observers
+    {
+      ws.reference?.cancel(self)
+      notificationHandler(error)
+    }
     self.finalizeStream()
   }
 

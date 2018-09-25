@@ -67,11 +67,19 @@ final public class Subscription
 
   public func cancel()
   {
-    let prev = requested.swap(.min, .relaxed)
-    if prev == .min { return }
+    if requested.swap(.min, .relaxed) != .min,
+       let publisher = source
+    {
+      publisher.cancel(subscription: self)
+      source = nil
+    }
+  }
 
-    source?.cancel(subscription: self)
+  internal func cancel<P: Publisher>(_ publisher: P)
+  {
+    guard source === publisher else { return }
     source = nil
+    cancel()
   }
 }
 
