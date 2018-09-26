@@ -651,13 +651,14 @@ class streamTests: XCTestCase
     let splits = 3
 
     let e = expectation(description: "observation complete")
+    let f = expectation(description: "value observed")
 
     let split = stream.split(count: splits)
     XCTAssert(stream.requested == 0)
 
     let merged = EventStream.merge(streams: split)
 
-    merged.countEvents().onValue { XCTAssert($0 == splits*events) }
+    merged.countEvents().onValue { if $0 == splits*events { f.fulfill() } }
     stream.onCompletion { e.fulfill() }
 
     XCTAssert(stream.requested == .max)
