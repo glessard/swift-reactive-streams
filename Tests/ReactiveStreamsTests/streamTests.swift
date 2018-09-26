@@ -314,6 +314,63 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
+  func testCompactMap()
+  {
+    let stream = OnRequestStream()
+
+    let e = expectation(description: "obvervation complete")
+
+    let filtered = stream.compactMap(transform: { i -> Int? in ((i%2)==0 ? i : nil) })
+    let output = filtered.next(count: 5)
+
+    output.onValue { if $0 == 8 { stream.close() } }
+    stream.onCompletion { e.fulfill() }
+
+    waitForExpectations(timeout: 1.0)
+  }
+
+  func testCompacted()
+  {
+    let stream = OnRequestStream(autostart: false)
+    let transformed = stream.map(transform: { i -> Int? in ((i%2)==0 ? i : nil) }).next(count: 10)
+
+    let e = expectation(description: "compaction complete")
+
+    transformed.compacted().countEvents().onValue { XCTAssert($0 == 5) }
+    transformed.compacted(qos: .utility).countEvents().onValue { XCTAssert($0 == 5) }
+    transformed.onCompletion { e.fulfill() }
+
+    stream.start()
+    waitForExpectations(timeout: 0.1)
+  }
+
+  func testFilter()
+  {
+    let stream = OnRequestStream()
+
+    let e = expectation(description: "observation complete 1")
+
+    let filtered = stream.filter(predicate: { ($0%2)==0 }).next(count: 5)
+
+    filtered.onValue { if $0 == 8 { e.fulfill() } }
+
+    waitForExpectations(timeout: 1.0)
+
+    let f = expectation(description: "observation complete 2")
+
+    let filt2 = stream.filter(DispatchQueue(label: "")) { ($0%3)==1 }
+    filt2.onValue {
+      v in
+      if v > 99
+      {
+        stream.close()
+      }
+    }
+    filt2.onCompletion { f.fulfill() }
+
+    waitForExpectations(timeout: 1.0)
+  }
+
   func testSkipN()
   {
     let stream = PostBox<Int>()
