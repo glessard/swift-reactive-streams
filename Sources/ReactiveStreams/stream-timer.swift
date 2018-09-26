@@ -53,11 +53,7 @@ open class TimerStream: EventStream<Date>
         stream.dispatch(Event(value: Date()))
       }
     }
-#if swift(>=4.0)
     source.schedule(deadline: .now(), repeating: timingInterval, leeway: timingLeeway)
-#else
-    source.scheduleRepeating(deadline: .now(), interval: timingInterval, leeway: timingLeeway)
-#endif
 
     startDate = Date()
     source.resume()
