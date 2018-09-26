@@ -8,7 +8,6 @@
 
 import Dispatch
 import CAtomics
-import Outcome
 
 open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputValue>
 {
@@ -34,7 +33,7 @@ open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputV
     super.init(validated: validated)
   }
 
-  open override func dispatch(_ event: Outcome<OutputValue>)
+  open override func dispatch(_ event: Event<OutputValue>)
   {
 #if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
     if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
