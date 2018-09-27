@@ -10,7 +10,7 @@ import CAtomics
 
 final public class Subscription
 {
-  private var source: EventSource?
+  private let source: EventSource
 
   private var requested = AtomicInt64()
 
@@ -60,26 +60,25 @@ final public class Subscription
       if updated < 0 { updated = .max } // check and correct for overflow
     } while !requested.loadCAS(&current, updated, .weak, .relaxed, .relaxed)
 
-    source?.updateRequest(updated)
+    source.updateRequest(updated)
   }
 
   // called by our subscriber
 
   public func cancel()
   {
-    if requested.swap(.min, .relaxed) != .min,
-       let publisher = source
+    if requested.swap(.min, .relaxed) != .min
     {
-      publisher.cancel(subscription: self)
-      source = nil
+      source.cancel(subscription: self)
     }
   }
 
   internal func cancel<P: Publisher>(_ publisher: P)
   {
-    guard source === publisher else { return }
-    source = nil
-    cancel()
+    if (publisher as EventSource) === source
+    {
+      requested.store(.min, .relaxed)
+    }
   }
 }
 
