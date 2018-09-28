@@ -39,7 +39,10 @@ open class SubStream<InputValue, OutputValue>: EventStream<OutputValue>
   open override func updateRequest(_ requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
-    subscription?.request(additional)
+    if additional > 0
+    {
+      subscription?.request(additional)
+    }
     return additional
   }
 }
