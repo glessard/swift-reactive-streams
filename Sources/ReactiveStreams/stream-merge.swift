@@ -17,7 +17,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
   fileprivate let delayErrorReporting: Bool
   private var delayedError: Error?
 
-  fileprivate convenience init(qos: DispatchQoS = DispatchQoS.current, delayingErrors delay: Bool)
+  fileprivate convenience init(qos: DispatchQoS = .current, delayingErrors delay: Bool)
   {
     self.init(validated: ValidatedQueue(label: "eventstream", qos: qos), delayingErrors: delay)
   }
@@ -126,7 +126,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
 
 internal class FlatMapStream<Value>: MergeStream<Value>
 {
-  convenience init(qos: DispatchQoS = DispatchQoS.current)
+  convenience init(qos: DispatchQoS = .current)
   {
     self.init(validated: ValidatedQueue(label: "eventstream", qos: qos))
   }
@@ -206,7 +206,7 @@ extension EventStream
     }
   }
 
-  static public func merge<S: Sequence>(qos: DispatchQoS = DispatchQoS.current, streams: S, delayingErrors delay: Bool = false) -> EventStream<Value>
+  static public func merge<S: Sequence>(qos: DispatchQoS = .current, streams: S, delayingErrors delay: Bool = false) -> EventStream<Value>
     where S.Iterator.Element: EventStream<Value>
   {
     let merged = MergeStream<Value>(qos: qos, delayingErrors: delay)

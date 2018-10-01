@@ -43,7 +43,7 @@ open class EventStream<Value>: Publisher
   public  var requested: Int64 { return pending.load(.relaxed) }
   public  var completed: Bool  { return pending.load(.relaxed) == .min }
 
-  public convenience init(qos: DispatchQoS = DispatchQoS.current)
+  public convenience init(qos: DispatchQoS = .current)
   {
     self.init(validated: ValidatedQueue(label: "eventstream", qos: qos))
   }

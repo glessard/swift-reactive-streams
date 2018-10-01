@@ -20,7 +20,7 @@ open class TimerStream: EventStream<Date>
   private let timingInterval: TimeInterval
   private let timingLeeway: DispatchTimeInterval
 
-  public init(qos: DispatchQoS = DispatchQoS.current, interval: TimeInterval, tolerance: DispatchTimeInterval? = nil)
+  public init(qos: DispatchQoS = .current, interval: TimeInterval, tolerance: DispatchTimeInterval? = nil)
   {
     let queue = ValidatedQueue(label: "timerstream", qos: qos)
     timingInterval = interval

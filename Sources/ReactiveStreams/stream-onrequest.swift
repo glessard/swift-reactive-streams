@@ -16,7 +16,7 @@ open class OnRequestStream: EventStream<Int>
 
   private var counter = 0
 
-  public convenience init(qos: DispatchQoS = DispatchQoS.current, autostart: Bool = true)
+  public convenience init(qos: DispatchQoS = .current, autostart: Bool = true)
   {
     self.init(validated: ValidatedQueue(label: "onrequeststream", qos: qos), autostart: autostart)
   }
