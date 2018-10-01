@@ -258,14 +258,14 @@ open class EventStream<Value>: Publisher
   {
     if !completed
     {
+      let key = WeakSubscription(subscription)
       queue.async {
         guard !self.completed else { return }
 
-        let key = WeakSubscription(subscription)
-        guard let notificationHandler = self.observers.removeValue(forKey: key)
-          else { fatalError("Tried to cancel an inactive subscription") }
-
-        notificationHandler(Event.streamCompleted)
+        if let notificationHandler = self.observers.removeValue(forKey: key)
+        {
+          notificationHandler(Event.streamCompleted)
+        }
       }
     }
   }
