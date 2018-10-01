@@ -113,7 +113,8 @@ extension EventStream
 {
   public func onError(qos: DispatchQoS = .current, task: @escaping (Error) -> Void)
   {
-    onError(DispatchQueue.global(qos: qos.qosClass), task: task)
+    let queue = DispatchQueue(label: "concurrent", qos: qos, attributes: .concurrent)
+    onError(queue, task: task)
   }
 
   public func onError(_ queue: DispatchQueue, task: @escaping (Error) -> Void)

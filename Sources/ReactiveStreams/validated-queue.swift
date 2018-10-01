@@ -14,7 +14,7 @@ public struct ValidatedQueue
 
   public init(label: String, qos: DispatchQoS = .current)
   {
-    self.queue = DispatchQueue(label: label+"\(qos.qosClass)", qos: qos)
+    self.queue = DispatchQueue(label: label+"\(qos)", qos: qos)
   }
 
   public init(label: String, target: DispatchQueue)
