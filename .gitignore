@@ -1,4 +1,9 @@
+# Xcode
 Xcode/stream.xcodeproj/project.xcworkspace/xcuserdata
 Xcode/stream.xcodeproj/xcuserdata
-Package.resolved
+
+# swiftpm
 .build
+Package.pins
+Package.resolved
+/ReactiveStreams.xcodeproj
