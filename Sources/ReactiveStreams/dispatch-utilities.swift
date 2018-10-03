@@ -14,19 +14,12 @@ extension DispatchQoS
 {
   static public var current: DispatchQoS
   {
-    guard let qosClass = DispatchQoS.QoSClass.current else { return .default }
-    return DispatchQoS(qosClass: qosClass, relativePriority: 0)
-  }
-}
-
-extension DispatchQoS.QoSClass
-{
-  static var current: DispatchQoS.QoSClass?
-  {
 #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
-    return DispatchQoS.QoSClass(rawValue: qos_class_self())
+    guard let qosClass = DispatchQoS.QoSClass(rawValue: qos_class_self())
+      else { return .default }
+    return DispatchQoS(qosClass: qosClass, relativePriority: 0)
 #else // platforms that rely on swift-corelibs-libdispatch
-    return nil
+    return .default
 #endif
   }
 }

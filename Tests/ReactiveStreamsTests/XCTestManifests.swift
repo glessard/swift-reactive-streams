@@ -1,5 +1,11 @@
 import XCTest
 
+extension DispatchUtilitiesTests {
+    static let __allTests = [
+        ("testCurrent", testCurrent),
+    ]
+}
+
 extension eventTests {
     static let __allTests = [
         ("testGetters", testGetters),
@@ -96,6 +102,7 @@ extension timerTests {
 #if !os(macOS)
 public func __allTests() -> [XCTestCaseEntry] {
     return [
+        testCase(DispatchUtilitiesTests.__allTests),
         testCase(eventTests.__allTests),
         testCase(flatMapTests.__allTests),
         testCase(mergeTests.__allTests),
