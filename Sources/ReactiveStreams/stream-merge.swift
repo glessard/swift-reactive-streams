@@ -10,7 +10,7 @@ import Dispatch
 
 public class MergeStream<Value>: SubStream<Value, Value>
 {
-  fileprivate var sources = Set<Subscription>()
+  fileprivate var subscriptions = Set<Subscription>()
   fileprivate var closed = false
 
   fileprivate let closeWhenLastSourceCloses: Bool
@@ -65,7 +65,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
         }
 #endif
         subscription = sub
-        self.sources.insert(sub)
+        self.subscriptions.insert(sub)
         sub.request(self.requested)
       },
       notificationHandler: {
@@ -73,10 +73,10 @@ public class MergeStream<Value>: SubStream<Value, Value>
         merged.queue.async {
           if event.isValue == false
           { // event terminates merged stream; remove it from sources
-            merged.sources.remove(subscription)
+            merged.subscriptions.remove(subscription)
             if event.streamCompleted != nil
             { // merged stream completed normally
-              if (merged.closeWhenLastSourceCloses || merged.closed), merged.sources.isEmpty
+              if (merged.closeWhenLastSourceCloses || merged.closed), merged.subscriptions.isEmpty
               { // no other event is forthcoming from any stream
                 let errorEvent = merged.delayedError.map(Event<Value>.init(error:))
                 merged.dispatch(errorEvent ?? Event.streamCompleted)
@@ -87,7 +87,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
             {
               let error = merged.delayedError ?? event.streamError!
               merged.delayedError = error
-              if merged.sources.isEmpty
+              if merged.subscriptions.isEmpty
               {
                 merged.dispatch(Event(error: error))
               }
@@ -105,11 +105,11 @@ public class MergeStream<Value>: SubStream<Value, Value>
   public override func finalizeStream()
   {
     closed = true
-    for source in sources
+    for subscription in subscriptions
     { // sources may not be empty if we have an actual error as a terminating event
-      source.cancel()
+      subscription.cancel()
     }
-    sources.removeAll()
+    subscriptions.removeAll()
     super.finalizeStream()
   }
 
@@ -128,7 +128,7 @@ public class MergeStream<Value>: SubStream<Value, Value>
     let additional = super.updateRequest(requested)
     // copy sources so that a modification in the main queue doesn't interfere.
     // (optimistic? should this use dispatch_barrier_async instead?)
-    let s = sources
+    let s = subscriptions
     for subscription in s
     {
       subscription.request(additional)
@@ -158,7 +158,7 @@ internal class FlatMapStream<Value>: MergeStream<Value>
   {
     queue.async {
       self.closed = true
-      if self.sources.isEmpty
+      if self.subscriptions.isEmpty
       {
         self.dispatch(Event.streamCompleted)
       }
@@ -186,7 +186,7 @@ extension EventStream
             merged.dispatch(Event(error: error))
           }
         }
-    }
+      }
     )
     return stream
   }
