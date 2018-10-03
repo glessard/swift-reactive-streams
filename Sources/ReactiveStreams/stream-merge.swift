@@ -45,12 +45,25 @@ public class MergeStream<Value>: SubStream<Value, Value>
   {
     if closed { return }
 
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+    {
+      dispatchPrecondition(condition: .onQueue(queue))
+    }
+#endif
+
     var subscription: Subscription! = nil
 
     source.subscribe(
       subscriber: self,
       subscriptionHandler: {
         sub in
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+        if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+        {
+          dispatchPrecondition(condition: .onQueue(queue))
+        }
+#endif
         subscription = sub
         self.sources.insert(sub)
         sub.request(self.requested)
