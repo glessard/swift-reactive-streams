@@ -14,7 +14,12 @@ public struct ValidatedQueue
 
   public init(label: String, qos: DispatchQoS = .current)
   {
-    self.queue = DispatchQueue(label: label+"\(qos)", qos: qos)
+#if swift(>=4.2) && os(Linux)
+    // workaround for <https://bugs.swift.org/browse/SR-8906>
+    self.queue = DispatchQueue(label: label, qos: qos)
+#else
+    self.queue = DispatchQueue(label: label+"-\(qos.qosClass)", qos: qos)
+#endif
   }
 
   public init(label: String, target: DispatchQueue)
