@@ -157,11 +157,23 @@ internal class FlatMapStream<Value>: MergeStream<Value>
   public override func close()
   {
     queue.async {
-      self.closed = true
-      if self.subscriptions.isEmpty
-      {
-        self.dispatch(Event.streamCompleted)
-      }
+      self.closeFlatMap()
+    }
+  }
+
+  fileprivate func closeFlatMap()
+  {
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+    {
+      dispatchPrecondition(condition: .onQueue(queue))
+    }
+#endif
+
+    closed = true
+    if subscriptions.isEmpty
+    {
+      dispatch(Event.streamCompleted)
     }
   }
 }
@@ -180,7 +192,7 @@ extension EventStream
             merged.performMerge(transform(try event.get()))
           }
           catch StreamCompleted.normally {
-            merged.close()
+            merged.closeFlatMap()
           }
           catch {
             merged.dispatch(Event(error: error))
