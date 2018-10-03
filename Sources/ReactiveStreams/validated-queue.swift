@@ -24,6 +24,14 @@ public struct ValidatedQueue
 
   public init(label: String, target: DispatchQueue)
   {
+#if swift(>=4.1.50) && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    if target is OS_dispatch_queue_serial
+    {
+      self.queue = target
+      return
+    }
+#endif
+
     self.queue = DispatchQueue(label: label+"-"+target.label, target: target)
   }
 }
