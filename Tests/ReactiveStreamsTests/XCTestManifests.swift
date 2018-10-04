@@ -50,7 +50,10 @@ extension onRequestTests {
 extension streamTests {
     static let __allTests = [
         ("testCoalesce", testCoalesce),
+        ("testCompacted", testCompacted),
+        ("testCompactMap", testCompactMap),
         ("testCountEvents", testCountEvents),
+        ("testFilter", testFilter),
         ("testFinal1", testFinal1),
         ("testFinal2", testFinal2),
         ("testFinal3", testFinal3),
