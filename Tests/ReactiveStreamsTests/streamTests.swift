@@ -344,29 +344,28 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 0.1)
   }
 
-  func testFilter()
+  func testFilter1()
+  {
+    let stream = OnRequestStream()
+    let filtered = stream.filter(predicate: { ($0%5)==0 }).next(count: 5)
+
+    let e = expectation(description: "filter 1")
+    filtered.reduce(0,+).onValue { if $0 == 50 { e.fulfill() } else { print($0) } }
+
+    waitForExpectations(timeout: 1.0)
+    XCTAssert(stream.completed == false)
+    stream.close()
+  }
+
+  func testFilter2()
   {
     let stream = OnRequestStream()
 
-    let e = expectation(description: "observation complete 1")
+    let filtered = stream.filter(DispatchQueue(label: "")) { ($0%3)==1 }
+    filtered.onValue { if $0 > 99 { stream.close() } }
 
-    let filtered = stream.filter(predicate: { ($0%2)==0 }).next(count: 5)
-
-    filtered.onValue { if $0 == 8 { e.fulfill() } }
-
-    waitForExpectations(timeout: 1.0)
-
-    let f = expectation(description: "observation complete 2")
-
-    let filt2 = stream.filter(DispatchQueue(label: "")) { ($0%3)==1 }
-    filt2.onValue {
-      v in
-      if v > 99
-      {
-        stream.close()
-      }
-    }
-    filt2.onCompletion { f.fulfill() }
+    let f = expectation(description: "filter 2")
+    filtered.onCompletion { f.fulfill() }
 
     waitForExpectations(timeout: 1.0)
   }
