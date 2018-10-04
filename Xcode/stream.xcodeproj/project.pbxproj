@@ -127,9 +127,9 @@
 		031CFBB81CEFB6CD00F4B44B /* stream-onrequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-onrequest.swift"; sourceTree = "<group>"; };
 		031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = onRequestTests.swift; path = ../../Tests/ReactiveStreamsTests/onRequestTests.swift; sourceTree = "<group>"; };
 		035C016C215AFBA900F4B44B /* stream-filter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "stream-filter.swift"; sourceTree = "<group>"; };
+		035FD8C82166BEA000F4B44B /* test-script.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "test-script.sh"; path = "../Tests/test-script.sh"; sourceTree = "<group>"; };
 		035FF5792155D05600F4B44B /* Outcome.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Outcome.xcodeproj; path = dependencies/outcome/Xcode/Outcome.xcodeproj; sourceTree = "<group>"; };
 		036162D5216577B700F4B44B /* install-swift.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "install-swift.sh"; path = "../Tests/install-swift.sh"; sourceTree = "<group>"; };
-		036162DD216577B700F4B44B /* install-clang.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "install-clang.sh"; path = "../Tests/install-clang.sh"; sourceTree = "<group>"; };
 		036941D420EC4E5600F4B44B /* stream-timer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "stream-timer.swift"; sourceTree = "<group>"; };
 		036941DB20EC586B00F4B44B /* timerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = timerTests.swift; path = ../../Tests/ReactiveStreamsTests/timerTests.swift; sourceTree = "<group>"; };
 		036A8C4B20E7066F00F4B44B /* XCTestManifests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = XCTestManifests.swift; path = ../../Tests/ReactiveStreamsTests/XCTestManifests.swift; sourceTree = "<group>"; };
@@ -225,8 +225,8 @@
 			children = (
 				038FD36F1F573C2D00F4B44B /* Package.swift */,
 				03BBC54F20E44A3D00F4B44B /* .travis.yml */,
-				036162DD216577B700F4B44B /* install-clang.sh */,
 				036162D5216577B700F4B44B /* install-swift.sh */,
+				035FD8C82166BEA000F4B44B /* test-script.sh */,
 				03D89FBC1CD46B4300F4B44B /* Sources */,
 				038527D41CD46A1500F4B44B /* stream */,
 				038527E01CD46A1500F4B44B /* streamTests */,
