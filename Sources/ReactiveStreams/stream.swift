@@ -109,7 +109,7 @@ open class EventStream<Value>: Publisher
 
     for (ws, notificationHandler) in self.observers
     {
-      if let subscription = ws.reference
+      if let subscription = ws.subscription
       {
         if subscription.shouldNotify() { notificationHandler(value) }
       }
@@ -131,7 +131,7 @@ open class EventStream<Value>: Publisher
 
     for (ws, notificationHandler) in self.observers
     {
-      ws.reference?.cancel(self)
+      ws.subscription?.cancel(self)
       notificationHandler(error)
     }
     self.finalizeStream()
@@ -218,10 +218,7 @@ open class EventStream<Value>: Publisher
 #if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
     if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
     {
-      if started
-      {
-        dispatchPrecondition(condition: .notOnQueue(queue))
-      }
+      dispatchPrecondition(condition: .notOnQueue(queue))
     }
 #endif
 
@@ -272,19 +269,28 @@ open class EventStream<Value>: Publisher
 }
 
 
-struct WeakSubscription: Equatable, Hashable
+private struct WeakSubscription: Equatable, Hashable
 {
-  let hashValue: Int
-  weak var reference: Subscription?
+  let identifier: ObjectIdentifier
+  weak var subscription: Subscription?
 
-  init(_ r: Subscription)
+  init(_ s: Subscription)
   {
-    reference = r
-    hashValue = ObjectIdentifier(r).hashValue
+    subscription = s
+    identifier = ObjectIdentifier(s)
   }
 
   static func == (l: WeakSubscription, r: WeakSubscription) -> Bool
   {
-    return l.hashValue == r.hashValue
+    return l.identifier == r.identifier
   }
+
+#if swift(>=4.2)
+  func hash(into hasher: inout Hasher)
+  {
+    identifier.hash(into: &hasher)
+  }
+#else
+  var hashValue: Int { return identifier.hashValue }
+#endif
 }
