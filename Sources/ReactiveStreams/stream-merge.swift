@@ -8,7 +8,7 @@
 
 import Dispatch
 
-public class MergeStream<Value>: SubStream<Value, Value>
+public class MergeStream<Value>: SubStream<Value>
 {
   fileprivate var subscriptions = Set<Subscription>()
   fileprivate var closed = false

@@ -23,7 +23,7 @@ extension EventStream
 
     let streams = (0..<count).map {
       _ -> EventStream in
-      let stream = SubStream<Value, Value>(qos: qos ?? self.qos)
+      let stream = SubStream<Value>(qos: qos ?? self.qos)
       self.subscribe(substream: stream)
       return stream
     }

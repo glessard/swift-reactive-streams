@@ -8,7 +8,7 @@
 
 import CAtomics
 
-open class Paused<Value>: SubStream<Value, Value>
+open class Paused<Value>: SubStream<Value>
 {
   private var torequest = AtomicInt64()
   private var started = AtomicBool()

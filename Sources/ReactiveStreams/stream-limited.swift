@@ -9,7 +9,7 @@
 import Dispatch
 import CAtomics
 
-open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputValue>
+open class LimitedStream<Value>: SubStream<Value>
 {
   public let limit: Int64
   private var counter = AtomicInt64()
@@ -33,7 +33,7 @@ open class LimitedStream<InputValue, OutputValue>: SubStream<InputValue, OutputV
     super.init(validated: validated)
   }
 
-  open override func dispatch(_ event: Event<OutputValue>)
+  open override func dispatch(_ event: Event<Value>)
   {
 #if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
     if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)

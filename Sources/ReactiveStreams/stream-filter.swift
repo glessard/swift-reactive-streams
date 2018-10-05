@@ -10,7 +10,7 @@ import Dispatch
 
 extension EventStream
 {
-  private func compactMap<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) throws -> U?) -> EventStream<U>
+  private func compactMap<U>(_ stream: SubStream<U>, transform: @escaping (Value) throws -> U?) -> EventStream<U>
   {
     self.subscribe(
       substream: stream,
