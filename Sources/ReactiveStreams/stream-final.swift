@@ -10,7 +10,7 @@ import Dispatch
 
 extension EventStream
 {
-  private func finalValue(_ stream: LimitedStream<Value, Value>) -> EventStream<Value>
+  private func finalValue(_ stream: LimitedStream<Value>) -> EventStream<Value>
   {
     var latest: Event<Value>? = nil
     self.subscribe(
@@ -40,11 +40,11 @@ extension EventStream
 
   public func finalValue(qos: DispatchQoS? = nil) -> EventStream<Value>
   {
-    return finalValue(LimitedStream<Value, Value>(qos: qos ?? self.qos, count: 1))
+    return finalValue(LimitedStream<Value>(qos: qos ?? self.qos, count: 1))
   }
 
   public func finalValue(_ queue: DispatchQueue) -> EventStream<Value>
   {
-    return finalValue(LimitedStream<Value, Value>(queue, count: 1))
+    return finalValue(LimitedStream<Value>(queue, count: 1))
   }
 }

@@ -8,7 +8,7 @@
 
 import Dispatch
 
-class ReducingStream<InputValue, OutputValue>: SubStream<InputValue, OutputValue>
+class ReducingStream<InputValue, OutputValue>: SubStream<OutputValue>
 {
   private var current: OutputValue
   private let combiner: (inout OutputValue, InputValue) throws -> Void

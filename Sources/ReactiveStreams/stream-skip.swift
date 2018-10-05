@@ -10,7 +10,7 @@ import Dispatch
 
 extension EventStream
 {
-  private func skip(_ stream: SubStream<Value, Value>, count: Int) -> EventStream<Value>
+  private func skip(_ stream: SubStream<Value>, count: Int) -> EventStream<Value>
   {
     var skipped = 0
     self.subscribe(
@@ -36,11 +36,11 @@ extension EventStream
 
   public func skip(qos: DispatchQoS? = nil, count: Int) -> EventStream<Value>
   {
-    return skip(SubStream<Value, Value>(qos: qos ?? self.qos), count: count)
+    return skip(SubStream<Value>(qos: qos ?? self.qos), count: count)
   }
 
   public func skip(_ queue: DispatchQueue, count: Int) -> EventStream<Value>
   {
-    return skip(SubStream<Value, Value>(queue), count: count)
+    return skip(SubStream<Value>(queue), count: count)
   }
 }
