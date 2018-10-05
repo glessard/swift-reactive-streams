@@ -82,14 +82,22 @@ final public class Subscription
   }
 }
 
-extension Subscription: Equatable {}
-
-public func == (lhs: Subscription, rhs: Subscription) -> Bool
+extension Subscription: Equatable
 {
-  return lhs === rhs
+  public static func == (lhs: Subscription, rhs: Subscription) -> Bool
+  {
+    return lhs === rhs
+  }
 }
 
 extension Subscription: Hashable
 {
+#if swift(>=4.2)
+  public func hash(into hasher: inout Hasher)
+  {
+    ObjectIdentifier(self).hash(into: &hasher)
+  }
+#else
   public var hashValue: Int { return ObjectIdentifier(self).hashValue }
+#endif
 }
