@@ -332,16 +332,24 @@ class streamTests: XCTestCase
     stream.close()
   }
 
-  func testCompacted()
+  func testCompact()
   {
     let stream = OnRequestStream(autostart: false)
     let transformed = stream.map(transform: { i -> Int? in ((i%2)==0 ? i : nil) }).next(count: 10)
 
     let e = expectation(description: "compaction complete")
+    transformed.compact().countEvents().onValue {
+      count in
+      XCTAssert(count == 5)
+      e.fulfill()
+    }
 
-    transformed.compacted().countEvents().onValue { XCTAssert($0 == 5) }
-    transformed.compacted(qos: .utility).countEvents().onValue { XCTAssert($0 == 5) }
-    transformed.onCompletion { e.fulfill() }
+    let f = expectation(description: "compaction complete")
+    transformed.compact(qos: .utility).countEvents().onValue {
+      count in
+      XCTAssert(count == 5)
+      f.fulfill()
+    }
 
     stream.start()
     waitForExpectations(timeout: 0.1)

@@ -62,19 +62,19 @@ extension EventStream
 
 extension EventStream
 {
-  public func compacted<U>() -> EventStream<U>
+  public func compact<U>() -> EventStream<U>
     where Value == Optional<U>
   {
-    return compacted(self.queue)
+    return compact(self.queue)
   }
 
-  public func compacted<U>(qos: DispatchQoS) -> EventStream<U>
+  public func compact<U>(qos: DispatchQoS) -> EventStream<U>
     where Value == Optional<U>
   {
     return compactMap(qos: qos, transform: { $0 })
   }
 
-  public func compacted<U>(_ queue: DispatchQueue) -> EventStream<U>
+  public func compact<U>(_ queue: DispatchQueue) -> EventStream<U>
     where Value == Optional<U>
   {
     return compactMap(queue, transform: { $0 })
