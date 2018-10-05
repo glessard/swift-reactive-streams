@@ -218,10 +218,7 @@ open class EventStream<Value>: Publisher
 #if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
     if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
     {
-      if started
-      {
-        dispatchPrecondition(condition: .notOnQueue(queue))
-      }
+      dispatchPrecondition(condition: .notOnQueue(queue))
     }
 #endif
 
