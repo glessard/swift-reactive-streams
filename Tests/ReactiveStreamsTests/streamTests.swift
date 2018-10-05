@@ -318,12 +318,13 @@ class streamTests: XCTestCase
   {
     let stream = OnRequestStream()
     let filtered = stream.compactMap(transform: { i -> Int? in ((i%2)==0 ? i : nil) })
-    filtered.next(count: 5).reduce(0,+).onValue { if $0 == 20 { stream.close() } else { print ($0) } }
 
     let e = expectation(description: "compactMap complete")
-    stream.onCompletion { e.fulfill() }
+    filtered.next(count: 5).reduce(0,+).onValue { if $0 == 20 { e.fulfill() } else { print ($0) } }
 
     waitForExpectations(timeout: 1.0)
+    XCTAssert(stream.completed == false)
+    stream.close()
   }
 
   func testCompacted()
