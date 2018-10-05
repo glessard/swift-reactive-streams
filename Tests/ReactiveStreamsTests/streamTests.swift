@@ -317,13 +317,10 @@ class streamTests: XCTestCase
   func testCompactMap()
   {
     let stream = OnRequestStream()
-
-    let e = expectation(description: "obvervation complete")
-
     let filtered = stream.compactMap(transform: { i -> Int? in ((i%2)==0 ? i : nil) })
-    let output = filtered.next(count: 5)
+    filtered.next(count: 5).reduce(0,+).onValue { if $0 == 20 { stream.close() } else { print ($0) } }
 
-    output.onValue { if $0 == 8 { stream.close() } }
+    let e = expectation(description: "compactMap complete")
     stream.onCompletion { e.fulfill() }
 
     waitForExpectations(timeout: 1.0)
