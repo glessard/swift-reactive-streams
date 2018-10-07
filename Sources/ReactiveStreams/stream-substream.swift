@@ -45,9 +45,4 @@ open class SubStream<Value>: EventStream<Value>
     }
     return additional
   }
-
-  func request(_ additional: Int64)
-  {
-    subscription?.request(additional)
-  }
 }
