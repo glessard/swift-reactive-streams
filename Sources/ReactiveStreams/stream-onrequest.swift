@@ -11,7 +11,6 @@ import CAtomics
 
 open class OnRequestStream: EventStream<Int>
 {
-  private var additional = AtomicInt64()
   private var started = AtomicBool()
 
   private var counter = 0
@@ -28,27 +27,19 @@ open class OnRequestStream: EventStream<Int>
 
   public init(validated queue: ValidatedQueue, autostart: Bool = true)
   {
-    additional.initialize(0)
     started.initialize(autostart)
-
     super.init(validated: queue)
   }
 
   private func processNext()
   {
     queue.async {
-      var remaining = self.additional.load(.relaxed)
-      repeat {
-        if remaining == 0 { return }
-      } while !self.additional.loadCAS(&remaining, remaining-1, .weak, .relaxed, .relaxed)
+      let remaining = self.requested
+      if remaining <= 0 { return }
 
       self.dispatch(Event(value: self.counter))
       self.counter += 1
-
-      if remaining > 0
-      { // There are events remaining; enqueue another event
-        self.processNext()
-      }
+      self.processNext()
     }
   }
 
@@ -68,9 +59,8 @@ open class OnRequestStream: EventStream<Int>
     let additionalRequest = super.updateRequest(requested)
     if additionalRequest > 0
     {
-      if additional.fetch_add(additionalRequest, .relaxed) == 0 &&
-         started.load(.relaxed) == true
-      { // There were no events remaining; enqueue another event
+      if started.load(.relaxed)
+      { // enqueue some event processing in case stream had been paused
         processNext()
       }
     }
