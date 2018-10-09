@@ -248,6 +248,8 @@ open class EventStream<Value>: Publisher
       if prev >= requested || prev == .min { return 0 }
     } while !pending.loadCAS(&prev, requested, .weak, .relaxed, .relaxed)
 
+    if requested == .max { return .max }
+
     return (requested-prev)
   }
 
