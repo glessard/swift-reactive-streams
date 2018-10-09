@@ -6,7 +6,7 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
-open class SubStream<InputValue, OutputValue>: EventStream<OutputValue>
+open class SubStream<Value>: EventStream<Value>
 {
   private var subscription: Subscription? = nil
 

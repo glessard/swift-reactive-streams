@@ -8,7 +8,7 @@
 
 import CAtomics
 
-open class Paused<Value>: SubStream<Value, Value>
+open class Paused<Value>: SubStream<Value>
 {
   private var torequest = AtomicInt64()
   private var started = AtomicBool()
@@ -45,11 +45,13 @@ open class Paused<Value>: SubStream<Value, Value>
 
   open func start()
   {
-    if started.CAS(false, true, .strong, .relaxed)
-    {
-      let request = torequest.swap(0, .relaxed)
-      if request > 0 { super.updateRequest(request) }
-    }
+    var streaming = started.load(.relaxed)
+    repeat {
+      if streaming { return }
+    } while !started.loadCAS(&streaming, true, .weak, .relaxed, .relaxed)
+
+    let request = torequest.swap(0, .relaxed)
+    if request > 0 { super.updateRequest(request) }
   }
 }
 

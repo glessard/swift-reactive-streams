@@ -170,7 +170,7 @@ open class EventStream<Value>: Publisher
     }
   }
 
-  final public func subscribe<S>(substream: S) where S: SubStream<Value, Value>
+  final public func subscribe<S>(substream: S) where S: SubStream<Value>
   {
     addSubscription(substream.setSubscription) {
       [weak sub = substream] (event: Event<Value>) in
@@ -180,7 +180,7 @@ open class EventStream<Value>: Publisher
 
   final public func subscribe<U, S>(substream: S,
                                     notificationHandler: @escaping (S, Event<Value>) -> Void)
-    where S: SubStream<Value, U>
+    where S: SubStream<U>
   {
     addSubscription(substream.setSubscription) {
       [weak subscriber = substream] (event: Event<Value>) in
@@ -247,6 +247,8 @@ open class EventStream<Value>: Publisher
     repeat {
       if prev >= requested || prev == .min { return 0 }
     } while !pending.loadCAS(&prev, requested, .weak, .relaxed, .relaxed)
+
+    if requested == .max { return .max }
 
     return (requested-prev)
   }

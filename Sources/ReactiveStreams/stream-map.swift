@@ -10,7 +10,7 @@ import Dispatch
 
 extension EventStream
 {
-  private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) throws -> U) -> EventStream<U>
+  private func map<U>(_ stream: SubStream<U>, transform: @escaping (Value) throws -> U) -> EventStream<U>
   {
     self.subscribe(substream: stream) {
       mapped, event in
@@ -29,18 +29,18 @@ extension EventStream
 
   public func map<U>(qos: DispatchQoS? = nil, transform: @escaping (Value) throws -> U) -> EventStream<U>
   {
-    return map(SubStream<Value, U>(qos: qos ?? self.qos), transform: transform)
+    return map(SubStream<U>(qos: qos ?? self.qos), transform: transform)
   }
 
   public func map<U>(_ queue: DispatchQueue, transform: @escaping (Value) throws -> U) -> EventStream<U>
   {
-    return map(SubStream<Value, U>(queue), transform: transform)
+    return map(SubStream<U>(queue), transform: transform)
   }
 }
 
 extension EventStream
 {
-  private func map<U>(_ stream: SubStream<Value, U>, transform: @escaping (Value) throws -> Event<U>) -> EventStream<U>
+  private func map<U>(_ stream: SubStream<U>, transform: @escaping (Value) throws -> Event<U>) -> EventStream<U>
   {
     self.subscribe(substream: stream) {
       mapped, event in
@@ -59,11 +59,11 @@ extension EventStream
 
   public func map<U>(qos: DispatchQoS? = nil, transform: @escaping (Value) throws -> Event<U>) -> EventStream<U>
   {
-    return map(SubStream<Value, U>(qos: qos ?? self.qos), transform: transform)
+    return map(SubStream<U>(qos: qos ?? self.qos), transform: transform)
   }
 
   public func map<U>(_ queue: DispatchQueue, transform: @escaping (Value) throws -> Event<U>) -> EventStream<U>
   {
-    return map(SubStream<Value, U>(queue), transform: transform)
+    return map(SubStream<U>(queue), transform: transform)
   }
 }
