@@ -54,10 +54,12 @@ open class OnRequestStream: EventStream<Int>
 
   open func start()
   {
-    if started.CAS(false, true, .strong, .relaxed)
-    {
-      processNext()
-    }
+    var streaming = started.load(.relaxed)
+    repeat {
+      if streaming { return }
+    } while !started.loadCAS(&streaming, true, .weak, .relaxed, .relaxed)
+
+    processNext()
   }
 
   @discardableResult
