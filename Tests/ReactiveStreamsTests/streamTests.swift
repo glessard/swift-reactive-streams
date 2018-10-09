@@ -808,8 +808,8 @@ class streamTests: XCTestCase
     XCTAssertEqual(stream.requested, 0)
     XCTAssertEqual(paused.requested, 0)
 
-    let signaler = stream.next(count: 5).map(q, transform: { s -> Void in s.signal() })
-    signaler.onValue {}
+    let signaler = stream.next(count: 5)
+    signaler.onValue(q) { $0.signal() }
     q.sync {}
 
     postAndWait()
@@ -831,7 +831,7 @@ class streamTests: XCTestCase
     _ = paused.countEvents()
     postAndWait()
 
-    XCTAssertEqual(stream.requested, Int64.max)
+    XCTAssertEqual(stream.requested, Int64.max, "stream.requested at \(#line)")
     paused.close()
   }
 }
