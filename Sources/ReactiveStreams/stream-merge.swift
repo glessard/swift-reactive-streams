@@ -126,8 +126,9 @@ public class MergeStream<Value>: SubStream<Value>
   public override func updateRequest(_ requested: Int64) -> Int64
   {
     let additional = super.updateRequest(requested)
-    // copy sources so that a modification in the main queue doesn't interfere.
-    // (optimistic? should this use dispatch_barrier_async instead?)
+    // copy set of subscriptions so that a modification on the main queue
+    // will not interfere. (is this too optimistic? should this use
+    // dispatch_barrier_async instead? (or a lock?))
     let s = subscriptions
     for subscription in s
     {
