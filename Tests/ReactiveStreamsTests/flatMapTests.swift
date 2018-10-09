@@ -218,4 +218,22 @@ class flatMapTests: XCTestCase
 
     waitForExpectations(timeout: 0.1)
   }
+
+  func testFlatMap8()
+  {
+    let stream = PostBox<EventStream<Int>>()
+
+    let m = stream.flatMap { $0 }
+    m.onValue { [unowned m] in if $0 >= 10 { m.close() } }
+    let e = expectation(description: "observation ends \(#function)")
+    m.onCompletion { e.fulfill() }
+
+    for i in 1..<10
+    {
+      stream.post(OnRequestStream().next(count: 5+i))
+    }
+    stream.close()
+
+    waitForExpectations(timeout: 0.1)
+  }
 }
