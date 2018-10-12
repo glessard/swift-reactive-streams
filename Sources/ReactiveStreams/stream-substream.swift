@@ -41,7 +41,7 @@ open class SubStream<Value>: EventStream<Value>
     let additional = super.updateRequest(requested)
     if additional > 0
     {
-      subscription?.request(additional)
+      request(additional)
     }
     return additional
   }
