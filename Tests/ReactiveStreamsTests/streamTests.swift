@@ -151,8 +151,8 @@ class streamTests: XCTestCase
   {
     let s = PostBox<Int>()
 
-    XCTAssert(s.state == .waiting)
-    XCTAssert(String(describing: s.state) == "EventStream waiting to begin processing events")
+    XCTAssertEqual(s.state, .waiting)
+    XCTAssertEqual(String(describing: s.state), "EventStream waiting to begin processing events")
 
     let n = s.next(count: 2)
     n.notify {
@@ -160,8 +160,8 @@ class streamTests: XCTestCase
     }
 
     s.post(0)
-    XCTAssert(s.state == .streaming)
-    XCTAssert(String(describing: s.state) == "EventStream active")
+    XCTAssertEqual(s.state, .streaming)
+    XCTAssertEqual(String(describing: s.state), "EventStream active")
 
     let e2 = expectation(description: "second value")
     let n2 = n.next(count: 1)
@@ -169,10 +169,10 @@ class streamTests: XCTestCase
 
     s.post(0)
     waitForExpectations(timeout: 0.1)
-    XCTAssert(s.state == .waiting)
-    XCTAssert(String(describing: s.state) == "EventStream waiting to begin processing events")
-    XCTAssert(n.state == .ended)
-    XCTAssert(String(describing: n.state) == "EventStream has completed")
+    XCTAssertEqual(s.state, .waiting)
+    XCTAssertEqual(String(describing: s.state), "EventStream waiting to begin processing events")
+    XCTAssertEqual(n.state, .ended)
+    XCTAssertEqual(String(describing: n.state), "EventStream has completed")
   }
 
   func testOnValue()
@@ -234,7 +234,7 @@ class streamTests: XCTestCase
     var d = Array<Double>()
     let m = stream.map(transform: { 2.0*Double($0) }).map(transform: { d.append($0) }).finalValue()
     m.onCompletion {
-      XCTAssert(d.count == events)
+      XCTAssertEqual(d.count, events)
       e2.fulfill()
     }
 
@@ -322,10 +322,10 @@ class streamTests: XCTestCase
     let e = expectation(description: "observation onCompletion")
 
     let m = stream.skip(count: count)
-    XCTAssert(stream.requested == count)
+    XCTAssertEqual(stream.requested, Int64(count))
 
     let n = m.next(count: count).skip(DispatchQueue.global(), count: count)
-    XCTAssert(stream.requested == 2*count)
+    XCTAssertEqual(stream.requested, Int64(2*count))
 
     n.notify {
       event in
@@ -361,7 +361,7 @@ class streamTests: XCTestCase
       catch { XCTFail() }
     }
 
-    XCTAssert(stream.requested == Int64(limit))
+    XCTAssertEqual(stream.requested, Int64(limit))
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
@@ -399,7 +399,7 @@ class streamTests: XCTestCase
       catch { XCTFail() }
     }
 
-    XCTAssert(stream.requested == Int64(limit))
+    XCTAssertEqual(stream.requested, Int64(limit))
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
@@ -468,7 +468,7 @@ class streamTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        XCTAssert(value == d.first)
+        XCTAssertEqual(value, d.first)
       }
       catch { e.fulfill() }
     }
@@ -546,7 +546,7 @@ class streamTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        XCTAssert(value == events, "Counted \(value) events instead of \(events)")
+        XCTAssertEqual(value, events, "Counted \(value) events instead of \(events)")
         if value == events { e1.fulfill() }
       }
       catch StreamCompleted.normally { e2.fulfill() }
@@ -572,7 +572,7 @@ class streamTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        XCTAssert(value.count == events, "Coalesced \(value.count) events instead of \(events)")
+        XCTAssertEqual(value.count, events, "Coalesced \(value.count) events instead of \(events)")
         let reduced = value.reduce(0, +)
         if reduced == Double((events-1)*events) { e1.fulfill() }
       }
@@ -600,7 +600,7 @@ class streamTests: XCTestCase
     let events = 10
 
     let split = stream.split()
-    XCTAssert(stream.requested == 0)
+    XCTAssertEqual(stream.requested, 0)
 
     let e1 = expectation(description: "split.0 onValue")
     let e2 = expectation(description: "split.0 onError")
@@ -617,9 +617,9 @@ class streamTests: XCTestCase
       catch StreamCompleted.normally { e2.fulfill() }
       catch { XCTFail() }
     }
-    XCTAssert(split.0.requested == .max)
-    XCTAssert(split.1.requested == 0)
-    XCTAssert(stream.requested == .max, "stream.requested should have been updated synchronously")
+    XCTAssertEqual(split.0.requested, .max)
+    XCTAssertEqual(split.1.requested, 0)
+    XCTAssertEqual(stream.requested, .max, "stream.requested should have been updated synchronously")
 
     let e3 = expectation(description: "split.1 onValue")
     let e4 = expectation(description: "split.1 onError")
@@ -633,15 +633,15 @@ class streamTests: XCTestCase
       else { print("a1 has \(a1.count) elements") }
     }
     s1.onCompletion { e4.fulfill() }
-    XCTAssert(split.1.requested == .max)
-    XCTAssert(s1.requested == 1)
+    XCTAssertEqual(split.1.requested, .max)
+    XCTAssertEqual(s1.requested, 1)
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectations(timeout: 0.1, handler: nil)
 
-    XCTAssert(a0 == a1)
+    XCTAssertEqual(a0, a1)
   }
 
   func testSplit2()
@@ -654,14 +654,14 @@ class streamTests: XCTestCase
     let f = expectation(description: "value observed")
 
     let split = stream.split(count: splits)
-    XCTAssert(stream.requested == 0)
+    XCTAssertEqual(stream.requested, 0)
 
     let merged = EventStream.merge(streams: split)
 
     merged.countEvents().onValue { if $0 == splits*events { f.fulfill() } }
     stream.onCompletion { e.fulfill() }
 
-    XCTAssert(stream.requested == .max)
+    XCTAssertEqual(stream.requested, .max)
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
@@ -678,8 +678,8 @@ class streamTests: XCTestCase
 
     let split = stream.split()
 
-    XCTAssert(split.0.requested == 0)
-    XCTAssert(stream.requested == 0)
+    XCTAssertEqual(split.0.requested, 0)
+    XCTAssertEqual(stream.requested, 0)
 
     split.0.coalesce().onValue {
       values in
@@ -687,9 +687,9 @@ class streamTests: XCTestCase
       count == events ? e1.fulfill() : XCTFail("split.0 expected \(events) events, got \(count)")
     }
 
-    XCTAssert(split.0.requested == .max)
-    XCTAssert(split.1.requested == 0)
-    XCTAssert(stream.requested == .max)
+    XCTAssertEqual(split.0.requested, .max)
+    XCTAssertEqual(split.1.requested, 0)
+    XCTAssertEqual(stream.requested, .max)
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
@@ -698,13 +698,13 @@ class streamTests: XCTestCase
 
     let e3 = expectation(description: "split.1 onCompletion")
 
-    XCTAssert(split.1.requested == .min)
+    XCTAssertEqual(split.1.requested, .min)
     // any subscription attempt will fail
 
     split.1.onValue { _ in XCTFail("split.1 never had a non-zero request") }
     split.1.onCompletion { e3.fulfill() }
 
-    XCTAssert(split.1.state == .ended)
+    XCTAssertEqual(split.1.state, .ended)
 
     waitForExpectations(timeout: 1.0, handler: nil)
   }
@@ -748,19 +748,19 @@ class streamTests: XCTestCase
 
     split.0.next(count: 3).onValue { _ in }
 
-    XCTAssert(stream.requested == 2)
-    XCTAssert(split.0.requested == 3)
-    XCTAssert(split.1.requested == 0)
+    XCTAssertEqual(stream.requested, 2)
+    XCTAssertEqual(split.0.requested, 3)
+    XCTAssertEqual(split.1.requested, 0)
 
     stream.post(0)
     let ne = expectation(description: "second value")
     stream.next(count: 1).onValue { _ in ne.fulfill() }
     stream.post(1)
     waitForExpectations(timeout: 0.1)
-    XCTAssert(stream.requested == 0)
+    XCTAssertEqual(stream.requested, 0)
 
     split.1.next(count: 5).notify { _ in }
-    XCTAssert(stream.requested == 0)
+    XCTAssertEqual(stream.requested, 0)
   }
 
   func testPaused1()

@@ -26,14 +26,14 @@ class mergeTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        XCTAssert(value == count)
+        XCTAssertEqual(value, count)
       }
       catch is StreamCompleted { e1.fulfill() }
       catch {}
     }
 
-    XCTAssert(merged.requested == .max)
-    XCTAssert(s.requested == .max)
+    XCTAssertEqual(merged.requested, .max)
+    XCTAssertEqual(s.requested, .max)
 
     let e2 = expectation(description: "posting ends")
     s.onCompletion { e2.fulfill() }
@@ -58,7 +58,7 @@ class mergeTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        XCTAssert(value == 0)
+        XCTAssertEqual(value, 0)
       }
       catch is StreamCompleted { e1.fulfill() }
       catch { print(error) }
@@ -85,17 +85,17 @@ class mergeTests: XCTestCase
 
     let merged = MergeStream.merge(streams[0], streams[1])
 
-    XCTAssert(merged.requested == 0)
-    XCTAssert(streams[0].requested == 0)
+    XCTAssertEqual(merged.requested, 0)
+    XCTAssertEqual(streams[0].requested, 0)
 
     let c = merged.countEvents()
     let e = expectation(description: "merged stream ends \(#function)")
-    c.onValue { XCTAssert($0 == count*streams.count) }
+    c.onValue { XCTAssertEqual($0, count*streams.count) }
     c.onCompletion { e.fulfill() }
 
-    XCTAssert(merged.requested == .max)
-    XCTAssert(streams[0].requested == .max)
-    XCTAssert(c.requested == 1)
+    XCTAssertEqual(merged.requested, .max)
+    XCTAssertEqual(streams[0].requested, .max)
+    XCTAssertEqual(c.requested, 1)
 
     for stream in streams
     {
@@ -124,7 +124,7 @@ class mergeTests: XCTestCase
       event in
       do {
         let counted = try event.get()
-        XCTAssert(counted < posted)
+        XCTAssertLessThan(counted, posted)
       }
       catch let error as TestError {
         if error.error == id { e1.fulfill() }
@@ -177,7 +177,7 @@ class mergeTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        XCTAssert(value == (count + count/2), String(value))
+        XCTAssertEqual(value, (count + count/2), String(value))
       }
       catch let error as TestError {
         if error.error == count { e.fulfill() }
@@ -212,13 +212,13 @@ class mergeTests: XCTestCase
     let s1 = PostBox<Int>()
     let e1 = expectation(description: "s1")
     let c1 = s1.countEvents()
-    c1.onValue { XCTAssert($0 == 1) }
+    c1.onValue { XCTAssertEqual($0, 1) }
     c1.onCompletion { e1.fulfill() }
 
     let merged = EventStream<Int>.merge(streams: []) as! MergeStream
     let e2 = expectation(description: "merged")
     let c2 = merged.countEvents()
-    c2.onValue { XCTAssert($0 == 0) }
+    c2.onValue { XCTAssertEqual($0, 0) }
     c2.onCompletion { e2.fulfill() }
 
     merged.close()
@@ -235,13 +235,13 @@ class mergeTests: XCTestCase
     let g1 = DispatchGroup()
     g1.enter()
     let c1 = s1.countEvents()
-    c1.onValue { XCTAssert($0 == 1) }
+    c1.onValue { XCTAssertEqual($0, 1) }
     c1.onCompletion { g1.leave() }
 
     let s2 = PostBox<Int>()
     let e2 = expectation(description: "s2")
     let c2 = s2.countEvents()
-    c2.onValue { XCTAssert($0 == 2) }
+    c2.onValue { XCTAssertEqual($0, 2) }
     c2.onCompletion { e2.fulfill() }
 
     let m4 = s1.merge(with: s2)
@@ -251,7 +251,7 @@ class mergeTests: XCTestCase
       event in
       do {
         let count = try event.get()
-        XCTAssert(count == 3, String(count))
+        XCTAssertEqual(count, 3)
       }
       catch StreamCompleted.normally { e4.fulfill() }
       catch { XCTFail() }
@@ -287,10 +287,10 @@ class mergeTests: XCTestCase
       e in
       do {
         let countedEvents = try e.get()
-        XCTAssert(countedEvents == posted)
+        XCTAssertEqual(countedEvents, posted)
       }
-      catch let error as TestError {
-        XCTAssert(error.error == id)
+      catch TestError.value(let e) {
+        XCTAssertEqual(e, id)
         e3.fulfill()
       }
       catch { XCTFail() }
@@ -319,7 +319,7 @@ class mergeTests: XCTestCase
       XCTAssert(error is TestError)
       if let e = error as? TestError
       {
-        XCTAssert(e.error == id)
+        XCTAssertEqual(e.error, id)
         x.fulfill()
       }
     }
