@@ -32,7 +32,7 @@ class timerTests: XCTestCase
   {
     let s = TimerStream(interval: 0.01)
     let n = s.next(count: 10)
-    XCTAssert(s.state != .streaming)
+    XCTAssertNotEqual(s.state, .streaming)
     n.onCompletion { XCTFail() }
 
     var t = TimerStream(interval: 0.01).finalValue()
@@ -47,12 +47,12 @@ class timerTests: XCTestCase
     let s = TimerStream(interval: interval)
     let c = s.next(count: repeats).countEvents()
     let e = expectation(description: "timer timing")
-    c.onValue { XCTAssert($0 == repeats) }
+    c.onValue { XCTAssertEqual($0, repeats) }
     c.onCompletion { e.fulfill() }
 
     s.startTimer()
     waitForExpectations(timeout: 0.1)
     let elapsed = Date().timeIntervalSince(s.startTimer())
-    XCTAssert(elapsed > interval*Double(repeats-1))
+    XCTAssertGreaterThan(elapsed, interval*Double(repeats-1))
   }
 }

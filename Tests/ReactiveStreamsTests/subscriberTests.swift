@@ -44,14 +44,14 @@ class TestSubscriber: Subscriber
 
   func onError(_ error: Error)
   {
-    XCTAssert(received <= limit)
+    XCTAssertLessThanOrEqual(received, limit)
     XCTAssert(subscription.cancelled)
     e.fulfill()
   }
 
   func onCompletion()
   {
-    XCTAssert(received <= limit)
+    XCTAssertLessThanOrEqual(received, limit)
     XCTAssert(subscription.cancelled)
     e.fulfill()
   }

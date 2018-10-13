@@ -86,7 +86,7 @@ class onRequestTests: XCTestCase
     p0.start()
 
     waitForExpectations(timeout: 1.0, handler: nil)
-    XCTAssert(s.1.state == .waiting)
+    XCTAssertEqual(s.1.state, .waiting)
 
     let e1 = expectation(description: "second")
     let p1 = s.1.paused()
