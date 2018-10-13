@@ -43,16 +43,24 @@ class timerTests: XCTestCase
   func testTimerTiming()
   {
     let interval = 0.001
+    let tolerance = 50*10e-6 // == .microseconds(50)
     let repeats = 10
-    let s = TimerStream(interval: interval)
-    let c = s.next(count: repeats).countEvents()
-    let e = expectation(description: "timer timing")
-    c.onValue { XCTAssertEqual($0, repeats) }
-    c.onCompletion { e.fulfill() }
+    let s = TimerStream(interval: interval, tolerance: .microseconds(50))
 
-    s.startTimer()
+    var startDate: Date? = nil
+    let e = expectation(description: "timer timing")
+    s.next(count: repeats).finalValue().onValue {
+      endDate in
+      guard let startDate = startDate else { return }
+
+      let elapsed = endDate.timeIntervalSince(startDate)
+      let minimumElapsed = interval*Double(repeats-1)-tolerance
+      XCTAssertGreaterThan(elapsed, minimumElapsed)
+      e.fulfill()
+    }
+
+    startDate = s.startTimer()
     waitForExpectations(timeout: 0.1)
-    let elapsed = Date().timeIntervalSince(s.startTimer())
-    XCTAssertGreaterThan(elapsed, interval*Double(repeats-1))
+    XCTAssert(startDate == s.startTimer())
   }
 }
