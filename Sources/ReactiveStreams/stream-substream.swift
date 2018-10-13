@@ -6,32 +6,36 @@
 //  Copyright © 2016 Guillaume Lessard. All rights reserved.
 //
 
+import CAtomics
+
 open class SubStream<Value>: EventStream<Value>
 {
-  private var subscription: Subscription? = nil
+  private var sub = OpaqueUnmanagedHelper()
 
   override init(validated: ValidatedQueue)
   {
+    sub.initialize(nil)
     super.init(validated: validated)
   }
 
   deinit
   {
+    let subscription = sub.take()
     subscription?.cancel()
   }
 
   open func setSubscription(_ subscription: Subscription)
   {
-    assert(self.subscription == nil, "SubStream cannot subscribe to multiple streams")
-    self.subscription = subscription
+    assert(sub.rawLoad(.sequential) == nil, "SubStream cannot subscribe to multiple streams")
+    sub.initialize(subscription)
   }
 
   /// precondition: must run on a barrier block or a serial queue
 
   override open func finalizeStream()
   {
+    let subscription = sub.take()
     subscription?.cancel()
-    subscription = nil
     super.finalizeStream()
   }
 
@@ -48,6 +52,7 @@ open class SubStream<Value>: EventStream<Value>
 
   func request(_ additional: Int64)
   {
+    let subscription = sub.load()
     subscription?.request(additional)
   }
 }
