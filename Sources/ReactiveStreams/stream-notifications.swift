@@ -26,7 +26,7 @@ private class NotificationSubscriber<T>: Subscriber
 
   func onSubscription(_ subscription: Subscription)
   {
-    precondition(self.subscription == nil, "received multiple calls to \(#function)")
+    assert(self.subscription == nil, "received multiple calls to \(#function)")
 
     self.subscription = subscription
     // only request events if the event handler for value exists
