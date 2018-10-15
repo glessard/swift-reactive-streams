@@ -42,10 +42,10 @@ class timerTests: XCTestCase
 
   func testTimerTiming()
   {
-    let interval = 0.001
-    let tolerance = 50*10e-6 // == .microseconds(50)
+    let interval = 0.001      // == .milliseconds(1)
+    let tolerance = 100*10e-6 // == .microseconds(100)
     let repeats = 10
-    let s = TimerStream(interval: interval, tolerance: .microseconds(50))
+    let s = TimerStream(interval: interval, tolerance: .microseconds(100))
 
     var startDate: Date? = nil
     let e = expectation(description: "timer timing")
