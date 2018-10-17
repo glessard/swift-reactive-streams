@@ -41,7 +41,6 @@
 		03FCE9D21CD8F93D00F4B44B /* stream-map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FCE9D11CD8F93D00F4B44B /* stream-map.swift */; };
 		03FD4DAD21581BFC00F4B44B /* stream-final.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FD4DAC21581BFC00F4B44B /* stream-final.swift */; };
 		03FD4DB821581E4D00F4B44B /* stream-skip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FD4DB721581E4D00F4B44B /* stream-skip.swift */; };
-		03FE12DD1EA8802800F4B44B /* dispatch-utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -189,7 +188,6 @@
 		03FCE9D11CD8F93D00F4B44B /* stream-map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-map.swift"; sourceTree = "<group>"; };
 		03FD4DAC21581BFC00F4B44B /* stream-final.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "stream-final.swift"; sourceTree = "<group>"; };
 		03FD4DB721581E4D00F4B44B /* stream-skip.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-skip.swift"; sourceTree = "<group>"; };
-		03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "dispatch-utilities.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -346,7 +344,6 @@
 				03E1929A1CE4432000F4B44B /* subscription.swift */,
 				03D89FC31CD4702400F4B44B /* subscriber.swift */,
 				038EB3A61CDD361A00F4B44B /* validated-queue.swift */,
-				03FE12DC1EA8802800F4B44B /* dispatch-utilities.swift */,
 			);
 			name = Sources;
 			path = ../Sources/ReactiveStreams;
@@ -584,7 +581,6 @@
 				03D89FC01CD46C0700F4B44B /* event.swift in Sources */,
 				031C426E1CFE660900F4B44B /* stream-next.swift in Sources */,
 				031C426C1CFE65C900F4B44B /* stream-reduce.swift in Sources */,
-				03FE12DD1EA8802800F4B44B /* dispatch-utilities.swift in Sources */,
 				03A0D5BF1EB15ED000F4B44B /* stream-paused.swift in Sources */,
 				03A0D5C11EB31C0600F4B44B /* stream-limited.swift in Sources */,
 				03D89FBE1CD46B4300F4B44B /* stream.swift in Sources */,
