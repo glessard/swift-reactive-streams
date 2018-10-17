@@ -15,10 +15,11 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/glessard/swift-atomics.git", from: "4.1.0"),
-    .package(url: "https://github.com/glessard/outcome.git", from: "4.1.5")
+    .package(url: "https://github.com/glessard/outcome.git", from: "4.1.5"),
+    .package(url: "https://github.com/glessard/CurrentQoS.git", from: "1.0.0"),
   ],
   targets: [
-    .target(name: "ReactiveStreams", dependencies: ["CAtomics", "Outcome"]),
+    .target(name: "ReactiveStreams", dependencies: ["CAtomics", "Outcome", "CurrentQoS"]),
     .testTarget(name: "ReactiveStreamsTests", dependencies: ["ReactiveStreams"]),
   ],
   swiftLanguageVersions: versions
