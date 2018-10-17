@@ -15,6 +15,7 @@
 		031C42701CFE666600F4B44B /* stream-split.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C426F1CFE666600F4B44B /* stream-split.swift */; };
 		031CFBB91CEFB6CD00F4B44B /* stream-onrequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CFBB81CEFB6CD00F4B44B /* stream-onrequest.swift */; };
 		031CFBBB1CEFD6B100F4B44B /* onRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */; };
+		033A480A2177AF7F00F4B44B /* CurrentQoS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 033A48052177AF7100F4B44B /* CurrentQoS.framework */; };
 		035FF5822155E94900F4B44B /* Outcome.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 035FF57F2155D05600F4B44B /* Outcome.framework */; };
 		036941D520EC4E5600F4B44B /* stream-timer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036941D420EC4E5600F4B44B /* stream-timer.swift */; };
 		036941DD20EC5BDC00F4B44B /* timerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036941DB20EC586B00F4B44B /* timerTests.swift */; };
@@ -44,6 +45,34 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		033A48042177AF7100F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 03840EA821769D5400F4B44B;
+			remoteInfo = CurrentQoS;
+		};
+		033A48062177AF7100F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 03840EB121769D5400F4B44B;
+			remoteInfo = CurrentQoSTests;
+		};
+		033A480B2177AF9B00F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 03840EA721769D5400F4B44B;
+			remoteInfo = CurrentQoS;
+		};
+		033A480D2177AF9B00F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 035FF5792155D05600F4B44B /* Outcome.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 0312008B2152C95100F4B44B;
+			remoteInfo = Outcome;
+		};
 		035FF57E2155D05600F4B44B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 035FF5792155D05600F4B44B /* Outcome.xcodeproj */;
@@ -125,6 +154,7 @@
 		031C426F1CFE666600F4B44B /* stream-split.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-split.swift"; sourceTree = "<group>"; };
 		031CFBB81CEFB6CD00F4B44B /* stream-onrequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-onrequest.swift"; sourceTree = "<group>"; };
 		031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = onRequestTests.swift; path = ../../Tests/ReactiveStreamsTests/onRequestTests.swift; sourceTree = "<group>"; };
+		033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CurrentQoS.xcodeproj; path = "dependencies/current-qos/Xcode/CurrentQoS.xcodeproj"; sourceTree = "<group>"; };
 		035FD8C82166BEA000F4B44B /* test-script.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "test-script.sh"; path = "../Tests/test-script.sh"; sourceTree = "<group>"; };
 		035FF5792155D05600F4B44B /* Outcome.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Outcome.xcodeproj; path = dependencies/outcome/Xcode/Outcome.xcodeproj; sourceTree = "<group>"; };
 		036162D5216577B700F4B44B /* install-swift.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "install-swift.sh"; path = "../Tests/install-swift.sh"; sourceTree = "<group>"; };
@@ -167,6 +197,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				033A480A2177AF7F00F4B44B /* CurrentQoS.framework in Frameworks */,
 				035FF5822155E94900F4B44B /* Outcome.framework in Frameworks */,
 				03CB533D20E1F67700F4B44B /* CAtomics.framework in Frameworks */,
 			);
@@ -199,6 +230,15 @@
 			name = "stream operations";
 			sourceTree = "<group>";
 		};
+		033A47FB2177AF7100F4B44B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				033A48052177AF7100F4B44B /* CurrentQoS.framework */,
+				033A48072177AF7100F4B44B /* CurrentQoSTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		035FF57A2155D05600F4B44B /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -212,6 +252,7 @@
 			isa = PBXGroup;
 			children = (
 				03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */,
+				033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */,
 				035FF5792155D05600F4B44B /* Outcome.xcodeproj */,
 			);
 			name = dependencies;
@@ -337,6 +378,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				033A480C2177AF9B00F4B44B /* PBXTargetDependency */,
+				033A480E2177AF9B00F4B44B /* PBXTargetDependency */,
 				03CB533F20E1F68400F4B44B /* PBXTargetDependency */,
 			);
 			name = ReactiveStreams;
@@ -399,6 +442,10 @@
 					ProjectRef = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
 				},
 				{
+					ProductGroup = 033A47FB2177AF7100F4B44B /* Products */;
+					ProjectRef = 033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */;
+				},
+				{
 					ProductGroup = 035FF57A2155D05600F4B44B /* Products */;
 					ProjectRef = 035FF5792155D05600F4B44B /* Outcome.xcodeproj */;
 				},
@@ -412,6 +459,20 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		033A48052177AF7100F4B44B /* CurrentQoS.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = CurrentQoS.framework;
+			remoteRef = 033A48042177AF7100F4B44B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		033A48072177AF7100F4B44B /* CurrentQoSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = CurrentQoSTests.xctest;
+			remoteRef = 033A48062177AF7100F4B44B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		035FF57F2155D05600F4B44B /* Outcome.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -556,6 +617,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		033A480C2177AF9B00F4B44B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = CurrentQoS;
+			targetProxy = 033A480B2177AF9B00F4B44B /* PBXContainerItemProxy */;
+		};
+		033A480E2177AF9B00F4B44B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Outcome;
+			targetProxy = 033A480D2177AF9B00F4B44B /* PBXContainerItemProxy */;
+		};
 		038527DF1CD46A1500F4B44B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 038527D11CD46A1500F4B44B /* ReactiveStreams */;
