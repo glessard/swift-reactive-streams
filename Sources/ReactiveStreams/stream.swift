@@ -8,6 +8,7 @@
 
 import Dispatch
 import CAtomics
+import CurrentQoS
 
 public enum StreamState: CustomStringConvertible
 {
