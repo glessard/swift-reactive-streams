@@ -34,6 +34,8 @@
 		03D89FC01CD46C0700F4B44B /* event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FBF1CD46C0700F4B44B /* event.swift */; };
 		03E1929B1CE4432000F4B44B /* subscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E1929A1CE4432000F4B44B /* subscription.swift */; };
 		03E1929D1CE4474500F4B44B /* publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E1929C1CE4474500F4B44B /* publisher.swift */; };
+		03F2AC6F2179349200F4B44B /* CurrentQoS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 033A48052177AF7100F4B44B /* CurrentQoS.framework */; };
+		03F2AC702179349200F4B44B /* Outcome.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 035FF57F2155D05600F4B44B /* Outcome.framework */; };
 		03F6666A1CE0145100F4B44B /* subscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FC31CD4702400F4B44B /* subscriber.swift */; };
 		03F6666C1CE054FA00F4B44B /* flatMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F6666B1CE054FA00F4B44B /* flatMapTests.swift */; };
 		03F768B41F5787E000F4B44B /* nzRandom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F768B31F5787DF00F4B44B /* nzRandom.swift */; };
@@ -142,6 +144,20 @@
 			remoteGlobalIDString = 031CA35C20DBDCAD00F4B44B;
 			remoteInfo = CAtomics;
 		};
+		03F2AC642179348C00F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 03840EA721769D5400F4B44B;
+			remoteInfo = CurrentQoS;
+		};
+		03F2AC662179348C00F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 035FF5792155D05600F4B44B /* Outcome.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 0312008B2152C95100F4B44B;
+			remoteInfo = Outcome;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -205,6 +221,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03F2AC6F2179349200F4B44B /* CurrentQoS.framework in Frameworks */,
+				03F2AC702179349200F4B44B /* Outcome.framework in Frameworks */,
 				038527DD1CD46A1500F4B44B /* ReactiveStreams.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -396,6 +414,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				03F2AC652179348C00F4B44B /* PBXTargetDependency */,
+				03F2AC672179348C00F4B44B /* PBXTargetDependency */,
 				038527DF1CD46A1500F4B44B /* PBXTargetDependency */,
 			);
 			name = ReactiveStreamsTests;
@@ -551,11 +571,7 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
-			);
-			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
@@ -632,6 +648,16 @@
 			isa = PBXTargetDependency;
 			name = CAtomics;
 			targetProxy = 03CB533E20E1F68400F4B44B /* PBXContainerItemProxy */;
+		};
+		03F2AC652179348C00F4B44B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = CurrentQoS;
+			targetProxy = 03F2AC642179348C00F4B44B /* PBXContainerItemProxy */;
+		};
+		03F2AC672179348C00F4B44B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Outcome;
+			targetProxy = 03F2AC662179348C00F4B44B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
