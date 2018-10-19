@@ -61,7 +61,7 @@ public class MergeStream<Value>: SubStream<Value>
 #if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
         if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
         {
-          dispatchPrecondition(condition: .onQueue(queue))
+          dispatchPrecondition(condition: .onQueue(self.queue))
         }
 #endif
         subscription = sub
