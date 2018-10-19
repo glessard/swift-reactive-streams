@@ -101,3 +101,32 @@ extension Subscription: Hashable
   public var hashValue: Int { return ObjectIdentifier(self).hashValue }
 #endif
 }
+
+extension OpaqueUnmanagedHelper
+{
+  mutating func initialize(_ subscription: Subscription)
+  {
+    let unmanaged = Unmanaged.passRetained(subscription)
+    initialize(unmanaged.toOpaque())
+  }
+
+  mutating func load() -> Subscription?
+  {
+    guard let pointer = spinLoad(.lock, .relaxed) else { return nil }
+
+    assert(rawLoad(.sequential) == UnsafeRawPointer(bitPattern: 0x7))
+    // atomic container is locked; increment the reference count
+    let unmanaged = Unmanaged<Subscription>.fromOpaque(pointer).retain()
+    // ensure the reference counting operation has occurred before unlocking,
+    // by performing our store operation with StoreMemoryOrder.release
+    rawStore(pointer, .release)
+    // atomic container is unlocked
+    return unmanaged.takeRetainedValue()
+  }
+
+  mutating func take() -> Subscription?
+  {
+    guard let pointer = spinLoad(.null, .acquire) else { return nil }
+    return Unmanaged.fromOpaque(pointer).takeRetainedValue()
+  }
+}

@@ -14,7 +14,7 @@ let package = Package(
     .library(name: "ReactiveStreams", targets: ["ReactiveStreams"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/glessard/swift-atomics.git", from: "4.1.0"),
+    .package(url: "https://github.com/glessard/swift-atomics.git", from: "4.2.0"),
     .package(url: "https://github.com/glessard/outcome.git", from: "4.1.5"),
     .package(url: "https://github.com/glessard/CurrentQoS.git", from: "1.0.0"),
   ],
