@@ -39,8 +39,8 @@ extension EventStream
     return skip(SubStream<Value>(qos: qos ?? self.qos), count: count)
   }
 
-  public func skip(_ queue: DispatchQueue, count: Int) -> EventStream<Value>
+  public func skip(queue: DispatchQueue, count: Int) -> EventStream<Value>
   {
-    return skip(SubStream<Value>(queue), count: count)
+    return skip(SubStream<Value>(queue: queue), count: count)
   }
 }

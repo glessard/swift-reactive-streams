@@ -17,9 +17,9 @@ extension EventStream
     return stream
   }
 
-  public func next(_ queue: DispatchQueue, count: Int) -> EventStream<Value>
+  public func next(queue: DispatchQueue, count: Int) -> EventStream<Value>
   {
-    let stream = LimitedStream<Value>(queue, count: Int64(count))
+    let stream = LimitedStream<Value>(queue: queue, count: Int64(count))
     self.subscribe(substream: stream)
     return stream
   }

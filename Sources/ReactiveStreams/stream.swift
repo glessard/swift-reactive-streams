@@ -49,7 +49,7 @@ open class EventStream<Value>: Publisher
     self.init(validated: ValidatedQueue(label: "eventstream", qos: qos))
   }
 
-  public convenience init(_ queue: DispatchQueue)
+  public convenience init(queue: DispatchQueue)
   {
     self.init(validated: ValidatedQueue(label: "eventstream", target: queue))
   }
