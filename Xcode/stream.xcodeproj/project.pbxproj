@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		031BCE54217A8C3500F4B44B /* CAtomics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE57217A8C3500F4B44B /* CAtomics.framework */; };
+		031BCE55217A8C3500F4B44B /* CurrentQoS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE58217A8C3500F4B44B /* CurrentQoS.framework */; };
+		031BCE56217A8C3500F4B44B /* Outcome.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE59217A8C3500F4B44B /* Outcome.framework */; };
+		031BCE5A217A8C3500F4B44B /* deferred.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE40217A8B6400F4B44B /* deferred.framework */; };
+		031BCE5D217A8C5100F4B44B /* CAtomics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE57217A8C3500F4B44B /* CAtomics.framework */; };
+		031BCE5E217A8C5100F4B44B /* CurrentQoS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE58217A8C3500F4B44B /* CurrentQoS.framework */; };
+		031BCE5F217A8C5100F4B44B /* deferred.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE40217A8B6400F4B44B /* deferred.framework */; };
+		031BCE60217A8C5100F4B44B /* Outcome.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE59217A8C3500F4B44B /* Outcome.framework */; };
+		031BCE74217A931200F4B44B /* deferred-subscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE73217A931200F4B44B /* deferred-subscriber.swift */; };
+		031BCE81217A94F900F4B44B /* deferred-next.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE79217A945500F4B44B /* deferred-next.swift */; };
+		031BCE82217A94FF00F4B44B /* deferredTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE7E217A94CD00F4B44B /* deferredTests.swift */; };
+		031BCE8B217A95B300F4B44B /* deferred-stream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE87217A95B300F4B44B /* deferred-stream.swift */; };
 		031C42651CFE4B9B00F4B44B /* stream-post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42641CFE4B9B00F4B44B /* stream-post.swift */; };
 		031C42671CFE632D00F4B44B /* stream-substream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42661CFE632D00F4B44B /* stream-substream.swift */; };
 		031C426A1CFE651700F4B44B /* stream-notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C42691CFE651700F4B44B /* stream-notifications.swift */; };
@@ -15,8 +27,6 @@
 		031C42701CFE666600F4B44B /* stream-split.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C426F1CFE666600F4B44B /* stream-split.swift */; };
 		031CFBB91CEFB6CD00F4B44B /* stream-onrequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CFBB81CEFB6CD00F4B44B /* stream-onrequest.swift */; };
 		031CFBBB1CEFD6B100F4B44B /* onRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */; };
-		033A480A2177AF7F00F4B44B /* CurrentQoS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 033A48052177AF7100F4B44B /* CurrentQoS.framework */; };
-		035FF5822155E94900F4B44B /* Outcome.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 035FF57F2155D05600F4B44B /* Outcome.framework */; };
 		036941D520EC4E5600F4B44B /* stream-timer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036941D420EC4E5600F4B44B /* stream-timer.swift */; };
 		036941DD20EC5BDC00F4B44B /* timerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036941DB20EC586B00F4B44B /* timerTests.swift */; };
 		038527D61CD46A1500F4B44B /* stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 038527D51CD46A1500F4B44B /* stream.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -29,13 +39,10 @@
 		03A0D5C11EB31C0600F4B44B /* stream-limited.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A0D5C01EB31C0600F4B44B /* stream-limited.swift */; };
 		03A0D5C31EB5563700F4B44B /* subscriberTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A0D5C21EB5563700F4B44B /* subscriberTests.swift */; };
 		03BBC54320E3F4CC00F4B44B /* eventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03BBC53D20E3F4CC00F4B44B /* eventTests.swift */; };
-		03CB533D20E1F67700F4B44B /* CAtomics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03B4C6C520E1F5C100F4B44B /* CAtomics.framework */; };
 		03D89FBE1CD46B4300F4B44B /* stream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FBD1CD46B4300F4B44B /* stream.swift */; };
 		03D89FC01CD46C0700F4B44B /* event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FBF1CD46C0700F4B44B /* event.swift */; };
 		03E1929B1CE4432000F4B44B /* subscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E1929A1CE4432000F4B44B /* subscription.swift */; };
 		03E1929D1CE4474500F4B44B /* publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E1929C1CE4474500F4B44B /* publisher.swift */; };
-		03F2AC6F2179349200F4B44B /* CurrentQoS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 033A48052177AF7100F4B44B /* CurrentQoS.framework */; };
-		03F2AC702179349200F4B44B /* Outcome.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 035FF57F2155D05600F4B44B /* Outcome.framework */; };
 		03F6666A1CE0145100F4B44B /* subscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FC31CD4702400F4B44B /* subscriber.swift */; };
 		03F6666C1CE054FA00F4B44B /* flatMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F6666B1CE054FA00F4B44B /* flatMapTests.swift */; };
 		03F768B41F5787E000F4B44B /* nzRandom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F768B31F5787DF00F4B44B /* nzRandom.swift */; };
@@ -46,47 +53,47 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		033A48042177AF7100F4B44B /* PBXContainerItemProxy */ = {
+		031BCE3F217A8B6400F4B44B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */;
+			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 03840EA821769D5400F4B44B;
-			remoteInfo = CurrentQoS;
+			remoteGlobalIDString = 03B4E06D1C14003B00F4B44B;
+			remoteInfo = deferred;
 		};
-		033A48062177AF7100F4B44B /* PBXContainerItemProxy */ = {
+		031BCE41217A8B6400F4B44B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */;
+			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 03840EB121769D5400F4B44B;
-			remoteInfo = CurrentQoSTests;
+			remoteGlobalIDString = 03B4E0761C14003C00F4B44B;
+			remoteInfo = deferredTests;
 		};
-		033A480B2177AF9B00F4B44B /* PBXContainerItemProxy */ = {
+		031BCE43217A8B6400F4B44B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */;
+			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 03B7767B20CAECFA00F4B44B;
+			remoteInfo = deferredTest;
+		};
+		031BCE45217A8B6400F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 03B7768E20CAECFC00F4B44B;
+			remoteInfo = deferredTestTests;
+		};
+		031BCE4E217A8C2D00F4B44B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 03840EA721769D5400F4B44B;
-			remoteInfo = CurrentQoS;
+			remoteGlobalIDString = 03B4E06C1C14003B00F4B44B;
+			remoteInfo = deferred;
 		};
-		033A480D2177AF9B00F4B44B /* PBXContainerItemProxy */ = {
+		031BCE5B217A8C4A00F4B44B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 035FF5792155D05600F4B44B /* Outcome.xcodeproj */;
+			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 0312008B2152C95100F4B44B;
-			remoteInfo = Outcome;
-		};
-		035FF57E2155D05600F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 035FF5792155D05600F4B44B /* Outcome.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0312008C2152C95100F4B44B;
-			remoteInfo = Outcome;
-		};
-		035FF5802155D05600F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 035FF5792155D05600F4B44B /* Outcome.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 031200952152C95100F4B44B;
-			remoteInfo = OutcomeTests;
+			remoteGlobalIDString = 03B4E06C1C14003B00F4B44B;
+			remoteInfo = deferred;
 		};
 		038527DE1CD46A1500F4B44B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -95,72 +102,17 @@
 			remoteGlobalIDString = 038527D11CD46A1500F4B44B;
 			remoteInfo = stream;
 		};
-		03B4C6C020E1F5C100F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 031CA33E20DBDC0400F4B44B;
-			remoteInfo = Atomics;
-		};
-		03B4C6C220E1F5C100F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 031CA34720DBDC0400F4B44B;
-			remoteInfo = AtomicsTests;
-		};
-		03B4C6C420E1F5C100F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 031CA35D20DBDCAD00F4B44B;
-			remoteInfo = CAtomics;
-		};
-		03B4C6C620E1F5C100F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 031CA36520DBDCAE00F4B44B;
-			remoteInfo = CAtomicsTests;
-		};
-		03B4C6C820E1F5C100F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0382B62620DC4A2B00F4B44B;
-			remoteInfo = AtomicsTestApp;
-		};
-		03B4C6CA20E1F5C100F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 0382B63920DC4A2D00F4B44B;
-			remoteInfo = AtomicsTestAppTests;
-		};
-		03CB533E20E1F68400F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 031CA35C20DBDCAD00F4B44B;
-			remoteInfo = CAtomics;
-		};
-		03F2AC642179348C00F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 03840EA721769D5400F4B44B;
-			remoteInfo = CurrentQoS;
-		};
-		03F2AC662179348C00F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 035FF5792155D05600F4B44B /* Outcome.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 0312008B2152C95100F4B44B;
-			remoteInfo = Outcome;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		031BCE30217A8B6300F4B44B /* deferred.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = deferred.xcodeproj; path = dependencies/deferred/Xcode/deferred.xcodeproj; sourceTree = "<group>"; };
+		031BCE57217A8C3500F4B44B /* CAtomics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CAtomics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		031BCE58217A8C3500F4B44B /* CurrentQoS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CurrentQoS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		031BCE59217A8C3500F4B44B /* Outcome.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Outcome.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		031BCE73217A931200F4B44B /* deferred-subscriber.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "deferred-subscriber.swift"; sourceTree = "<group>"; };
+		031BCE79217A945500F4B44B /* deferred-next.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "deferred-next.swift"; sourceTree = "<group>"; };
+		031BCE7E217A94CD00F4B44B /* deferredTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = deferredTests.swift; path = ../../Tests/ReactiveStreamsTests/deferredTests.swift; sourceTree = "<group>"; };
+		031BCE87217A95B300F4B44B /* deferred-stream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "deferred-stream.swift"; sourceTree = "<group>"; };
 		031C42641CFE4B9B00F4B44B /* stream-post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-post.swift"; sourceTree = "<group>"; };
 		031C42661CFE632D00F4B44B /* stream-substream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-substream.swift"; sourceTree = "<group>"; };
 		031C42691CFE651700F4B44B /* stream-notifications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-notifications.swift"; sourceTree = "<group>"; };
@@ -169,9 +121,7 @@
 		031C426F1CFE666600F4B44B /* stream-split.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-split.swift"; sourceTree = "<group>"; };
 		031CFBB81CEFB6CD00F4B44B /* stream-onrequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-onrequest.swift"; sourceTree = "<group>"; };
 		031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = onRequestTests.swift; path = ../../Tests/ReactiveStreamsTests/onRequestTests.swift; sourceTree = "<group>"; };
-		033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CurrentQoS.xcodeproj; path = "dependencies/current-qos/Xcode/CurrentQoS.xcodeproj"; sourceTree = "<group>"; };
 		035FD8C82166BEA000F4B44B /* test-script.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "test-script.sh"; path = "../Tests/test-script.sh"; sourceTree = "<group>"; };
-		035FF5792155D05600F4B44B /* Outcome.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Outcome.xcodeproj; path = dependencies/outcome/Xcode/Outcome.xcodeproj; sourceTree = "<group>"; };
 		036162D5216577B700F4B44B /* install-swift.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "install-swift.sh"; path = "../Tests/install-swift.sh"; sourceTree = "<group>"; };
 		036941D420EC4E5600F4B44B /* stream-timer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "stream-timer.swift"; sourceTree = "<group>"; };
 		036941DB20EC586B00F4B44B /* timerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = timerTests.swift; path = ../../Tests/ReactiveStreamsTests/timerTests.swift; sourceTree = "<group>"; };
@@ -190,7 +140,6 @@
 		03A0D5BE1EB15ED000F4B44B /* stream-paused.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-paused.swift"; sourceTree = "<group>"; };
 		03A0D5C01EB31C0600F4B44B /* stream-limited.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-limited.swift"; sourceTree = "<group>"; };
 		03A0D5C21EB5563700F4B44B /* subscriberTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = subscriberTests.swift; path = ../../Tests/ReactiveStreamsTests/subscriberTests.swift; sourceTree = "<group>"; };
-		03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Atomics.xcodeproj; path = dependencies/atomics/Xcode/Atomics.xcodeproj; sourceTree = "<group>"; };
 		03BBC53D20E3F4CC00F4B44B /* eventTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = eventTests.swift; path = ../../Tests/ReactiveStreamsTests/eventTests.swift; sourceTree = "<group>"; };
 		03BBC54F20E44A3D00F4B44B /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; name = .travis.yml; path = ../.travis.yml; sourceTree = "<group>"; };
 		03D89FBD1CD46B4300F4B44B /* stream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.swift; sourceTree = "<group>"; };
@@ -211,9 +160,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				033A480A2177AF7F00F4B44B /* CurrentQoS.framework in Frameworks */,
-				035FF5822155E94900F4B44B /* Outcome.framework in Frameworks */,
-				03CB533D20E1F67700F4B44B /* CAtomics.framework in Frameworks */,
+				031BCE54217A8C3500F4B44B /* CAtomics.framework in Frameworks */,
+				031BCE55217A8C3500F4B44B /* CurrentQoS.framework in Frameworks */,
+				031BCE5A217A8C3500F4B44B /* deferred.framework in Frameworks */,
+				031BCE56217A8C3500F4B44B /* Outcome.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,8 +171,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				03F2AC6F2179349200F4B44B /* CurrentQoS.framework in Frameworks */,
-				03F2AC702179349200F4B44B /* Outcome.framework in Frameworks */,
+				031BCE5D217A8C5100F4B44B /* CAtomics.framework in Frameworks */,
+				031BCE5E217A8C5100F4B44B /* CurrentQoS.framework in Frameworks */,
+				031BCE5F217A8C5100F4B44B /* deferred.framework in Frameworks */,
+				031BCE60217A8C5100F4B44B /* Outcome.framework in Frameworks */,
 				038527DD1CD46A1500F4B44B /* ReactiveStreams.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -230,6 +182,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		031BCE31217A8B6300F4B44B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				031BCE40217A8B6400F4B44B /* deferred.framework */,
+				031BCE42217A8B6400F4B44B /* deferredTests.xctest */,
+				031BCE44217A8B6400F4B44B /* deferredTest.app */,
+				031BCE46217A8B6400F4B44B /* deferredTestTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		031BCE6F217A92F900F4B44B /* deferred operations */ = {
+			isa = PBXGroup;
+			children = (
+				031BCE73217A931200F4B44B /* deferred-subscriber.swift */,
+				031BCE79217A945500F4B44B /* deferred-next.swift */,
+				031BCE87217A95B300F4B44B /* deferred-stream.swift */,
+			);
+			name = "deferred operations";
+			sourceTree = "<group>";
+		};
 		031C42681CFE64C000F4B44B /* stream operations */ = {
 			isa = PBXGroup;
 			children = (
@@ -246,30 +219,10 @@
 			name = "stream operations";
 			sourceTree = "<group>";
 		};
-		033A47FB2177AF7100F4B44B /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				033A48052177AF7100F4B44B /* CurrentQoS.framework */,
-				033A48072177AF7100F4B44B /* CurrentQoSTests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		035FF57A2155D05600F4B44B /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				035FF57F2155D05600F4B44B /* Outcome.framework */,
-				035FF5812155D05600F4B44B /* OutcomeTests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		036346AA20E1F58700F4B44B /* dependencies */ = {
 			isa = PBXGroup;
 			children = (
-				03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */,
-				033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */,
-				035FF5792155D05600F4B44B /* Outcome.xcodeproj */,
+				031BCE30217A8B6300F4B44B /* deferred.xcodeproj */,
 			);
 			name = dependencies;
 			sourceTree = "<group>";
@@ -320,6 +273,7 @@
 				031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */,
 				036941DB20EC586B00F4B44B /* timerTests.swift */,
 				03A0D5C21EB5563700F4B44B /* subscriberTests.swift */,
+				031BCE7E217A94CD00F4B44B /* deferredTests.swift */,
 				03F768B31F5787DF00F4B44B /* nzRandom.swift */,
 				03F768B51F5789F300F4B44B /* TestError.swift */,
 				036A8C4B20E7066F00F4B44B /* XCTestManifests.swift */,
@@ -327,22 +281,12 @@
 			path = streamTests;
 			sourceTree = "<group>";
 		};
-		03B4C6B820E1F5C100F4B44B /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				03B4C6C120E1F5C100F4B44B /* Atomics.framework */,
-				03B4C6C320E1F5C100F4B44B /* AtomicsTests.xctest */,
-				03B4C6C520E1F5C100F4B44B /* CAtomics.framework */,
-				03B4C6C720E1F5C100F4B44B /* CAtomicsTests.xctest */,
-				03B4C6C920E1F5C100F4B44B /* AtomicsTestApp.app */,
-				03B4C6CB20E1F5C100F4B44B /* AtomicsTestAppTests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		03CB533620E1F67700F4B44B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				031BCE57217A8C3500F4B44B /* CAtomics.framework */,
+				031BCE58217A8C3500F4B44B /* CurrentQoS.framework */,
+				031BCE59217A8C3500F4B44B /* Outcome.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -357,6 +301,7 @@
 				03A0D5C01EB31C0600F4B44B /* stream-limited.swift */,
 				036941D420EC4E5600F4B44B /* stream-timer.swift */,
 				031C42681CFE64C000F4B44B /* stream operations */,
+				031BCE6F217A92F900F4B44B /* deferred operations */,
 				03D89FBF1CD46C0700F4B44B /* event.swift */,
 				03E1929C1CE4474500F4B44B /* publisher.swift */,
 				03E1929A1CE4432000F4B44B /* subscription.swift */,
@@ -393,9 +338,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				033A480C2177AF9B00F4B44B /* PBXTargetDependency */,
-				033A480E2177AF9B00F4B44B /* PBXTargetDependency */,
-				03CB533F20E1F68400F4B44B /* PBXTargetDependency */,
+				031BCE4F217A8C2D00F4B44B /* PBXTargetDependency */,
 			);
 			name = ReactiveStreams;
 			productName = stream;
@@ -414,8 +357,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				03F2AC652179348C00F4B44B /* PBXTargetDependency */,
-				03F2AC672179348C00F4B44B /* PBXTargetDependency */,
+				031BCE5C217A8C4A00F4B44B /* PBXTargetDependency */,
 				038527DF1CD46A1500F4B44B /* PBXTargetDependency */,
 			);
 			name = ReactiveStreamsTests;
@@ -455,16 +397,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 03B4C6B820E1F5C100F4B44B /* Products */;
-					ProjectRef = 03B4C6B720E1F5C100F4B44B /* Atomics.xcodeproj */;
-				},
-				{
-					ProductGroup = 033A47FB2177AF7100F4B44B /* Products */;
-					ProjectRef = 033A47FA2177AF7100F4B44B /* CurrentQoS.xcodeproj */;
-				},
-				{
-					ProductGroup = 035FF57A2155D05600F4B44B /* Products */;
-					ProjectRef = 035FF5792155D05600F4B44B /* Outcome.xcodeproj */;
+					ProductGroup = 031BCE31217A8B6300F4B44B /* Products */;
+					ProjectRef = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -476,74 +410,32 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		033A48052177AF7100F4B44B /* CurrentQoS.framework */ = {
+		031BCE40217A8B6400F4B44B /* deferred.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = CurrentQoS.framework;
-			remoteRef = 033A48042177AF7100F4B44B /* PBXContainerItemProxy */;
+			path = deferred.framework;
+			remoteRef = 031BCE3F217A8B6400F4B44B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		033A48072177AF7100F4B44B /* CurrentQoSTests.xctest */ = {
+		031BCE42217A8B6400F4B44B /* deferredTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = CurrentQoSTests.xctest;
-			remoteRef = 033A48062177AF7100F4B44B /* PBXContainerItemProxy */;
+			path = deferredTests.xctest;
+			remoteRef = 031BCE41217A8B6400F4B44B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		035FF57F2155D05600F4B44B /* Outcome.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Outcome.framework;
-			remoteRef = 035FF57E2155D05600F4B44B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		035FF5812155D05600F4B44B /* OutcomeTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = OutcomeTests.xctest;
-			remoteRef = 035FF5802155D05600F4B44B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		03B4C6C120E1F5C100F4B44B /* Atomics.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = Atomics.framework;
-			remoteRef = 03B4C6C020E1F5C100F4B44B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		03B4C6C320E1F5C100F4B44B /* AtomicsTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = AtomicsTests.xctest;
-			remoteRef = 03B4C6C220E1F5C100F4B44B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		03B4C6C520E1F5C100F4B44B /* CAtomics.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = CAtomics.framework;
-			remoteRef = 03B4C6C420E1F5C100F4B44B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		03B4C6C720E1F5C100F4B44B /* CAtomicsTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = CAtomicsTests.xctest;
-			remoteRef = 03B4C6C620E1F5C100F4B44B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		03B4C6C920E1F5C100F4B44B /* AtomicsTestApp.app */ = {
+		031BCE44217A8B6400F4B44B /* deferredTest.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = AtomicsTestApp.app;
-			remoteRef = 03B4C6C820E1F5C100F4B44B /* PBXContainerItemProxy */;
+			path = deferredTest.app;
+			remoteRef = 031BCE43217A8B6400F4B44B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		03B4C6CB20E1F5C100F4B44B /* AtomicsTestAppTests.xctest */ = {
+		031BCE46217A8B6400F4B44B /* deferredTestTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = AtomicsTestAppTests.xctest;
-			remoteRef = 03B4C6CA20E1F5C100F4B44B /* PBXContainerItemProxy */;
+			path = deferredTestTests.xctest;
+			remoteRef = 031BCE45217A8B6400F4B44B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -592,10 +484,13 @@
 				031CFBB91CEFB6CD00F4B44B /* stream-onrequest.swift in Sources */,
 				036941D520EC4E5600F4B44B /* stream-timer.swift in Sources */,
 				031C42701CFE666600F4B44B /* stream-split.swift in Sources */,
+				031BCE81217A94F900F4B44B /* deferred-next.swift in Sources */,
 				03E1929D1CE4474500F4B44B /* publisher.swift in Sources */,
 				03FCE9D21CD8F93D00F4B44B /* stream-map.swift in Sources */,
 				03D89FC01CD46C0700F4B44B /* event.swift in Sources */,
+				031BCE74217A931200F4B44B /* deferred-subscriber.swift in Sources */,
 				031C426E1CFE660900F4B44B /* stream-next.swift in Sources */,
+				031BCE8B217A95B300F4B44B /* deferred-stream.swift in Sources */,
 				031C426C1CFE65C900F4B44B /* stream-reduce.swift in Sources */,
 				03A0D5BF1EB15ED000F4B44B /* stream-paused.swift in Sources */,
 				03A0D5C11EB31C0600F4B44B /* stream-limited.swift in Sources */,
@@ -622,6 +517,7 @@
 				03F6666C1CE054FA00F4B44B /* flatMapTests.swift in Sources */,
 				03A0D5C31EB5563700F4B44B /* subscriberTests.swift in Sources */,
 				03F768B61F5789F300F4B44B /* TestError.swift in Sources */,
+				031BCE82217A94FF00F4B44B /* deferredTests.swift in Sources */,
 				038527E21CD46A1500F4B44B /* streamTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -629,35 +525,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		033A480C2177AF9B00F4B44B /* PBXTargetDependency */ = {
+		031BCE4F217A8C2D00F4B44B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = CurrentQoS;
-			targetProxy = 033A480B2177AF9B00F4B44B /* PBXContainerItemProxy */;
+			name = deferred;
+			targetProxy = 031BCE4E217A8C2D00F4B44B /* PBXContainerItemProxy */;
 		};
-		033A480E2177AF9B00F4B44B /* PBXTargetDependency */ = {
+		031BCE5C217A8C4A00F4B44B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = Outcome;
-			targetProxy = 033A480D2177AF9B00F4B44B /* PBXContainerItemProxy */;
+			name = deferred;
+			targetProxy = 031BCE5B217A8C4A00F4B44B /* PBXContainerItemProxy */;
 		};
 		038527DF1CD46A1500F4B44B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 038527D11CD46A1500F4B44B /* ReactiveStreams */;
 			targetProxy = 038527DE1CD46A1500F4B44B /* PBXContainerItemProxy */;
-		};
-		03CB533F20E1F68400F4B44B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = CAtomics;
-			targetProxy = 03CB533E20E1F68400F4B44B /* PBXContainerItemProxy */;
-		};
-		03F2AC652179348C00F4B44B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = CurrentQoS;
-			targetProxy = 03F2AC642179348C00F4B44B /* PBXContainerItemProxy */;
-		};
-		03F2AC672179348C00F4B44B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = Outcome;
-			targetProxy = 03F2AC662179348C00F4B44B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
