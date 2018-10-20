@@ -14,10 +14,10 @@ extension EventStream
   public func next(qos: DispatchQoS? = nil) -> Deferred<Value>
   {
     let queue = DispatchQueue(label: "stream-to-deferred", qos: qos ?? self.qos)
-    return next(queue)
+    return next(queue: queue)
   }
 
-  public func next(_ queue: DispatchQueue) -> Deferred<Value>
+  public func next(queue: DispatchQueue) -> Deferred<Value>
   {
     let tbd = TBD<Value>(queue: queue)
     var deferred: SingleValueSubscriber<Value>!

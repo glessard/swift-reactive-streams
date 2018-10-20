@@ -149,7 +149,7 @@ class mergeTests: XCTestCase
     let e = expectation(description: "observation ends \(#function)")
     let count = 10
 
-    let merged = EventStream.merge(DispatchQueue.global(qos: .utility), streams: [s])
+    let merged = EventStream.merge(queue: DispatchQueue.global(qos: .utility), streams: [s])
     merged.onValue { if $0 == count { e.fulfill() } }
 
     for i in 0..<count { s.post(i+1) }
@@ -309,8 +309,8 @@ class mergeTests: XCTestCase
   {
     let id = nzRandom()
 
-    let q = DispatchQueue(label: "delaying error test")
-    let streams = (0..<10).map { _ in PostBox<Int>(q) }
+    let queue = DispatchQueue(label: "delaying error test")
+    let streams = (0..<10).map { _ in PostBox<Int>(queue: queue) }
 
     let merged = EventStream.merge(streams: streams, delayingErrors: true)
     let x = expectation(description: "correct delayed error")

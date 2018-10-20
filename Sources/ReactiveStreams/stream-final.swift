@@ -43,8 +43,8 @@ extension EventStream
     return finalValue(LimitedStream<Value>(qos: qos ?? self.qos, count: 1))
   }
 
-  public func finalValue(_ queue: DispatchQueue) -> EventStream<Value>
+  public func finalValue(queue: DispatchQueue) -> EventStream<Value>
   {
-    return finalValue(LimitedStream<Value>(queue, count: 1))
+    return finalValue(LimitedStream<Value>(queue: queue, count: 1))
   }
 }

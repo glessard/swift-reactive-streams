@@ -113,7 +113,7 @@ class streamTests: XCTestCase
     let e2 = expectation(description: "observation onError")
     let stream = PostBox<Int>()
 
-    stream.notify(DispatchQueue.global()) {
+    stream.notify(queue: DispatchQueue.global()) {
       event in
       do {
         let value = try event.get()
@@ -181,7 +181,7 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let stream = PostBox<Int>()
 
-    stream.onValue(DispatchQueue.global()) {
+    stream.onValue(queue: DispatchQueue.global()) {
       v in
       if v == events { e1.fulfill() }
     }
@@ -256,7 +256,7 @@ class streamTests: XCTestCase
     let e2 = expectation(description: "observation onError")
 
     let id = nzRandom()
-    let m = stream.map(DispatchQueue.global()) {
+    let m = stream.map(queue: DispatchQueue.global()) {
       i throws -> Int in
       if i < limit { return i+1 }
       throw TestError(id)
@@ -296,7 +296,7 @@ class streamTests: XCTestCase
           Event(error: TestError(id))
     }
 
-    let m2 = m1.map(DispatchQueue.global()) { Event(value: $0+1) }
+    let m2 = m1.map(queue: DispatchQueue.global()) { Event(value: $0+1) }
 
     m2.onValue {
       v in
@@ -324,7 +324,7 @@ class streamTests: XCTestCase
     let m = stream.skip(count: count)
     XCTAssertEqual(stream.requested, Int64(count))
 
-    let n = m.next(count: count).skip(DispatchQueue.global(), count: count)
+    let n = m.next(count: count).skip(queue: DispatchQueue.global(), count: count)
     XCTAssertEqual(stream.requested, Int64(2*count))
 
     n.notify {
@@ -350,7 +350,7 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
-    let m = stream.next(DispatchQueue.global(), count: limit)
+    let m = stream.next(queue: DispatchQueue.global(), count: limit)
     m.notify {
       event in
       do {
@@ -463,7 +463,7 @@ class streamTests: XCTestCase
 
     let d = (0..<events).map { _ in nzRandom() }
 
-    let f = stream.finalValue(DispatchQueue.global())
+    let f = stream.finalValue(queue: DispatchQueue.global())
     f.notify {
       event in
       do {
@@ -481,7 +481,7 @@ class streamTests: XCTestCase
 
   func testReduce1()
   {
-    let stream = PostBox<Int>(DispatchQueue.global(qos: .utility))
+    let stream = PostBox<Int>(queue: DispatchQueue.global(qos: .utility))
     let events = 11
 
     let e1 = expectation(description: "observation onValue")
@@ -512,7 +512,7 @@ class streamTests: XCTestCase
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
 
-    let m = stream.reduce(DispatchQueue(label: "test"), 0, {
+    let m = stream.reduce(queue: DispatchQueue(label: "test"), 0, {
       sum, e throws -> Int in
       guard sum <= events else { throw TestError() }
       return sum+e
@@ -535,13 +535,13 @@ class streamTests: XCTestCase
 
   func testCountEvents()
   {
-    let stream = PostBox<Int>(DispatchQueue(label: "serial", qos: .default))
+    let stream = PostBox<Int>(qos: .default)
     let events = 10
 
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onCompletion")
 
-    let m = stream.countEvents(DispatchQueue.global(qos: .userInitiated))
+    let m = stream.countEvents(queue: DispatchQueue.global(qos: .userInitiated))
     m.notify {
       event in
       do {
@@ -561,13 +561,13 @@ class streamTests: XCTestCase
 
   func testCoalesce()
   {
-    let stream = PostBox<Int>(DispatchQueue(label: "concurrent", qos: .utility, attributes: .concurrent))
+    let stream = PostBox<Int>(qos: .utility)
     let events = 10
 
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onCompletion")
 
-    let m = stream.map(transform: { i in Double(2*i) }).coalesce(DispatchQueue.global(qos: .userInitiated))
+    let m = stream.map(transform: { i in Double(2*i) }).coalesce(queue: DispatchQueue.global(qos: .userInitiated))
     m.notify {
       event in
       do {
@@ -794,7 +794,7 @@ class streamTests: XCTestCase
 
   func testPaused3() throws
   {
-    let q = DispatchQueue(label: "serial")
+    let queue = DispatchQueue(label: "serial")
     let stream = PostBox<DispatchSemaphore>()
     let paused = stream.paused()
 
@@ -809,8 +809,8 @@ class streamTests: XCTestCase
     XCTAssertEqual(paused.requested, 0)
 
     let signaler = stream.next(count: 5)
-    signaler.onValue(q) { $0.signal() }
-    q.sync {}
+    signaler.onValue(queue: queue) { $0.signal() }
+    queue.sync {}
 
     postAndWait()
 

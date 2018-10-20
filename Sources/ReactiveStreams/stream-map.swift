@@ -32,9 +32,9 @@ extension EventStream
     return map(SubStream<U>(qos: qos ?? self.qos), transform: transform)
   }
 
-  public func map<U>(_ queue: DispatchQueue, transform: @escaping (Value) throws -> U) -> EventStream<U>
+  public func map<U>(queue: DispatchQueue, transform: @escaping (Value) throws -> U) -> EventStream<U>
   {
-    return map(SubStream<U>(queue), transform: transform)
+    return map(SubStream<U>(queue: queue), transform: transform)
   }
 }
 
@@ -62,8 +62,8 @@ extension EventStream
     return map(SubStream<U>(qos: qos ?? self.qos), transform: transform)
   }
 
-  public func map<U>(_ queue: DispatchQueue, transform: @escaping (Value) throws -> Event<U>) -> EventStream<U>
+  public func map<U>(queue: DispatchQueue, transform: @escaping (Value) throws -> Event<U>) -> EventStream<U>
   {
-    return map(SubStream<U>(queue), transform: transform)
+    return map(SubStream<U>(queue: queue), transform: transform)
   }
 }
