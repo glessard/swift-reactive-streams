@@ -70,6 +70,21 @@ class deferredTests: XCTestCase
     waitForExpectations(timeout: 0.1)
   }
 
+  func testSingleValueStreamAlreadyDetermined() throws
+  {
+    let deferred = Deferred<Void>(error: TestError(nzRandom()))
+    let stream = deferred.eventStream
+
+    // when `deferred` is already determined, the stream won't get anything.
+    // should we have a buffering behaviour instead?
+    let e = expectation(description: #function)
+    stream.onCompletion {
+      e.fulfill()
+    }
+
+    waitForExpectations(timeout: 0.1)
+  }
+
   func testNext() throws
   {
     let stream = PostBox<Int>()

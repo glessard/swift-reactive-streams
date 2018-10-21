@@ -4,6 +4,7 @@ extension deferredTests {
     static let __allTests = [
         ("testFinalOutcome", testFinalOutcome),
         ("testNext", testNext),
+        ("testSingleValueStreamAlreadyDetermined", testSingleValueStreamAlreadyDetermined),
         ("testSingleValueStreamWithError", testSingleValueStreamWithError),
         ("testSingleValueStreamWithValue", testSingleValueStreamWithValue),
     ]
