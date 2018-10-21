@@ -61,6 +61,6 @@ class timerTests: XCTestCase
 
     startDate = s.startTimer()
     waitForExpectations(timeout: 0.1)
-    XCTAssert(startDate == s.startTimer())
+    XCTAssertEqual(startDate, s.startTimer())
   }
 }
