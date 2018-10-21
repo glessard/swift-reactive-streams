@@ -20,7 +20,7 @@ open class OnRequestStream: EventStream<Int>
     self.init(validated: ValidatedQueue(label: "onrequeststream", qos: qos), autostart: autostart)
   }
 
-  public convenience init(_ queue: DispatchQueue, autostart: Bool = true)
+  public convenience init(queue: DispatchQueue, autostart: Bool = true)
   {
     self.init(validated: ValidatedQueue(label: "onrequeststream", target: queue), autostart: autostart)
   }

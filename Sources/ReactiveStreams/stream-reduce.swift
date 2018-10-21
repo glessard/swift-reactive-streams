@@ -68,7 +68,7 @@ extension EventStream
     return reduce(ReducingStream(queue, initial: initial, combiner: combiner))
   }
 
-  public func reduce<U>(_ queue: DispatchQueue, _ initial: U, _ combiner: @escaping (U, Value) throws -> U) -> EventStream<U>
+  public func reduce<U>(queue: DispatchQueue, _ initial: U, _ combiner: @escaping (U, Value) throws -> U) -> EventStream<U>
   {
     let queue = ValidatedQueue(label: "reducing-queue", target: queue)
     return reduce(ReducingStream(queue, initial: initial, combiner: combiner))
@@ -80,7 +80,7 @@ extension EventStream
     return reduce(ReducingStream(queue, initial: initial, combiner: combiner))
   }
 
-  public func reduce<U>(_ queue: DispatchQueue, into initial: U, _ combiner: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
+  public func reduce<U>(queue: DispatchQueue, into initial: U, _ combiner: @escaping (inout U, Value) throws -> Void) -> EventStream<U>
   {
     let queue = ValidatedQueue(label: "reducing-queue", target: queue)
     return reduce(ReducingStream(queue, initial: initial, combiner: combiner))
@@ -94,9 +94,9 @@ extension EventStream
     return self.reduce(qos: qos, into: 0) { (count: inout Int, _) in count += 1 }
   }
 
-  public func countEvents(_ queue: DispatchQueue) -> EventStream<Int>
+  public func countEvents(queue: DispatchQueue) -> EventStream<Int>
   {
-    return self.reduce(queue, into: 0) { (count: inout Int, _) in count += 1 }
+    return self.reduce(queue: queue, into: 0) { (count: inout Int, _) in count += 1 }
   }
 }
 
@@ -108,8 +108,8 @@ extension EventStream
     return self.reduce(qos: qos, into: []) { (c: inout [Value], e: Value) in c.append(e) }
   }
 
-  public func coalesce(_ queue: DispatchQueue) -> EventStream<[Value]>
+  public func coalesce(queue: DispatchQueue) -> EventStream<[Value]>
   {
-    return self.reduce(queue, into: []) { (c: inout [Value], e: Value) in c.append(e) }
+    return self.reduce(queue: queue, into: []) { (c: inout [Value], e: Value) in c.append(e) }
   }
 }

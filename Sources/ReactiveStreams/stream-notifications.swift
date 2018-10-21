@@ -83,7 +83,7 @@ extension EventStream
     performNotify(ValidatedQueue(label: "notify", qos: qos ?? self.qos), task: task)
   }
 
-  public func notify(_ queue: DispatchQueue, task: @escaping (Event<Value>) -> Void)
+  public func notify(queue: DispatchQueue, task: @escaping (Event<Value>) -> Void)
   {
     performNotify(ValidatedQueue(label: "notify", target: queue), task: task)
   }
@@ -103,7 +103,7 @@ extension EventStream
     performOnValue(ValidatedQueue(label: "onvalue", qos: qos ?? self.qos), task: task)
   }
 
-  public func onValue(_ queue: DispatchQueue, task: @escaping (Value) -> Void)
+  public func onValue(queue: DispatchQueue, task: @escaping (Value) -> Void)
   {
     performOnValue(ValidatedQueue(label: "onvalue", target: queue), task: task)
   }
@@ -114,10 +114,10 @@ extension EventStream
   public func onError(qos: DispatchQoS? = nil, task: @escaping (Error) -> Void)
   {
     let queue = DispatchQueue(label: "concurrent", qos: qos ?? self.qos, attributes: .concurrent)
-    onError(queue, task: task)
+    onError(queue: queue, task: task)
   }
 
-  public func onError(_ queue: DispatchQueue, task: @escaping (Error) -> Void)
+  public func onError(queue: DispatchQueue, task: @escaping (Error) -> Void)
   {
     let notifier = NotificationSubscriber<Value>(queue)
     notifier.errorHandler = { error in withExtendedLifetime(notifier) { task(error) } }
@@ -130,10 +130,10 @@ extension EventStream
   public func onCompletion(qos: DispatchQoS? = nil, task: @escaping () -> Void)
   {
     let queue = DispatchQueue(label: "concurrent", qos: qos ?? self.qos, attributes: .concurrent)
-    onCompletion(queue, task: task)
+    onCompletion(queue: queue, task: task)
   }
 
-  public func onCompletion(_ queue: DispatchQueue, task: @escaping () -> Void)
+  public func onCompletion(queue: DispatchQueue, task: @escaping () -> Void)
   {
     let notifier = NotificationSubscriber<Value>(queue)
     notifier.completionHandler = { withExtendedLifetime(notifier) { task() } }
