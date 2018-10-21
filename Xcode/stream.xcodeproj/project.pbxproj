@@ -27,6 +27,7 @@
 		031C42701CFE666600F4B44B /* stream-split.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031C426F1CFE666600F4B44B /* stream-split.swift */; };
 		031CFBB91CEFB6CD00F4B44B /* stream-onrequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CFBB81CEFB6CD00F4B44B /* stream-onrequest.swift */; };
 		031CFBBB1CEFD6B100F4B44B /* onRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */; };
+		0333402A217BB9A200F4B44B /* deferred-final.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03334029217BB9A200F4B44B /* deferred-final.swift */; };
 		036941D520EC4E5600F4B44B /* stream-timer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036941D420EC4E5600F4B44B /* stream-timer.swift */; };
 		036941DD20EC5BDC00F4B44B /* timerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036941DB20EC586B00F4B44B /* timerTests.swift */; };
 		038527D61CD46A1500F4B44B /* stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 038527D51CD46A1500F4B44B /* stream.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -121,6 +122,7 @@
 		031C426F1CFE666600F4B44B /* stream-split.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-split.swift"; sourceTree = "<group>"; };
 		031CFBB81CEFB6CD00F4B44B /* stream-onrequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-onrequest.swift"; sourceTree = "<group>"; };
 		031CFBBA1CEFD6B100F4B44B /* onRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = onRequestTests.swift; path = ../../Tests/ReactiveStreamsTests/onRequestTests.swift; sourceTree = "<group>"; };
+		03334029217BB9A200F4B44B /* deferred-final.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "deferred-final.swift"; sourceTree = "<group>"; };
 		035FD8C82166BEA000F4B44B /* test-script.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "test-script.sh"; path = "../Tests/test-script.sh"; sourceTree = "<group>"; };
 		036162D5216577B700F4B44B /* install-swift.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = "install-swift.sh"; path = "../Tests/install-swift.sh"; sourceTree = "<group>"; };
 		036941D420EC4E5600F4B44B /* stream-timer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "stream-timer.swift"; sourceTree = "<group>"; };
@@ -199,6 +201,7 @@
 				031BCE73217A931200F4B44B /* deferred-subscriber.swift */,
 				031BCE79217A945500F4B44B /* deferred-next.swift */,
 				031BCE87217A95B300F4B44B /* deferred-stream.swift */,
+				03334029217BB9A200F4B44B /* deferred-final.swift */,
 			);
 			name = "deferred operations";
 			sourceTree = "<group>";
@@ -502,6 +505,7 @@
 				031C426A1CFE651700F4B44B /* stream-notifications.swift in Sources */,
 				03F6666A1CE0145100F4B44B /* subscriber.swift in Sources */,
 				03E1929B1CE4432000F4B44B /* subscription.swift in Sources */,
+				0333402A217BB9A200F4B44B /* deferred-final.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

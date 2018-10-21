@@ -14,9 +14,9 @@ public class SingleValueSubscriber<Value>: Transferred<Value>
 {
   private var sub = OpaqueUnmanagedHelper()
 
-  init(_ source: TBD<Value>, subscription: Subscription)
+  init(_ source: TBD<Value>)
   {
-    sub.initialize(subscription)
+    sub.initialize(nil)
     super.init(from: source)
     self.enqueue(task: {
       [weak self] _ in
@@ -28,5 +28,11 @@ public class SingleValueSubscriber<Value>: Transferred<Value>
   deinit {
     let subscription = sub.take()
     subscription?.cancel()
+  }
+
+  open func setSubscription(_ subscription: Subscription)
+  {
+    assert(sub.rawLoad(.sequential) == nil, "SubStream cannot subscribe to multiple streams")
+    sub.initialize(subscription)
   }
 }
