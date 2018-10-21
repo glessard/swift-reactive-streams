@@ -17,7 +17,7 @@ class deferredTests: XCTestCase
   {
     let tbd = TBD<Int>()
     let random = nzRandom()
-    let stream = SingleValueStream(from: tbd)
+    let stream = SingleValueStream(queue: DispatchQueue(label: #function), from: tbd)
 
     let e1 = expectation(description: "observe value")
     let e2 = expectation(description: "observe completion")

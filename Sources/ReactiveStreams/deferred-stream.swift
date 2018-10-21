@@ -13,15 +13,24 @@ public class SingleValueStream<Value>: EventStream<Value>
 {
   private var deferred: Deferred<Value>?
 
-  public init(queue: DispatchQueue? = nil, from deferred: Deferred<Value>)
+  convenience public init(qos: DispatchQoS? = nil, from deferred: Deferred<Value>)
   {
-    let label = "stream-from-deferred"
-    let validated = queue.map({ ValidatedQueue(label: label, target: $0)}) ??
-                    ValidatedQueue(label: label, qos: deferred.qos)
+    let v = ValidatedQueue(label: "stream-from-deferred", qos: qos ?? deferred.qos)
+    self.init(validated: v, from: deferred)
+  }
+
+  convenience public init(queue: DispatchQueue, from deferred: Deferred<Value>)
+  {
+    let v = ValidatedQueue(label: "stream-from-deferred", target: queue)
+    self.init(validated: v, from: deferred)
+  }
+
+  private init(validated: ValidatedQueue, from deferred: Deferred<Value>)
+  {
     self.deferred = deferred
     super.init(validated: validated)
 
-    deferred.enqueue(queue: validated.queue) {
+    deferred.enqueue(queue: queue) {
       [weak self] event in
       guard let this = self else { return }
       this.deferred = nil
@@ -38,14 +47,12 @@ public class SingleValueStream<Value>: EventStream<Value>
 
   @discardableResult
   open override func updateRequest(_ requested: Int64) -> Int64
-  { // only pass on requested updates up to and including our remaining number of events
+  {
     precondition(requested > 0)
-
-    if deferred?.isDetermined == false
-    {
-      return super.updateRequest(1)
-    }
-    return 0
+    guard deferred?.isDetermined == false
+      else { return 0 }
+    // only pass on requested updates up to and including our remaining number of events
+    return super.updateRequest(1)
   }
 }
 
