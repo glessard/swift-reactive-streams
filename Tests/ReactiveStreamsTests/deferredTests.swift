@@ -22,12 +22,12 @@ class deferredTests: XCTestCase
     let e1 = expectation(description: "observe value")
     let e2 = expectation(description: "observe completion")
 
-    XCTAssert(stream.requested == 0)
+    XCTAssertEqual(stream.requested, 0)
     stream.notify {
       event in
       do {
         let value = try event.get()
-        XCTAssert(value == random)
+        XCTAssertEqual(value, random)
         e1.fulfill()
       }
       catch StreamCompleted.normally {
@@ -35,7 +35,7 @@ class deferredTests: XCTestCase
       }
       catch { XCTFail() }
     }
-    XCTAssert(stream.requested == 1)
+    XCTAssertEqual(stream.requested, 1)
 
     tbd.determine(value: random)
 
@@ -50,20 +50,20 @@ class deferredTests: XCTestCase
 
     let e = expectation(description: "observe error")
 
-    XCTAssert(stream.requested == 0)
+    XCTAssertEqual(stream.requested, 0)
     stream.notify {
       event in
       do {
         let _ = try event.get()
         XCTFail()
       }
-      catch TestError.value(let v) {
-        XCTAssert(v == random)
+      catch TestError.value(let value) {
+        XCTAssertEqual(value, random)
         e.fulfill()
       }
       catch { XCTFail() }
     }
-    XCTAssert(stream.requested == 1)
+    XCTAssertEqual(stream.requested, 1)
 
     tbd.determine(error: TestError(random))
 
@@ -79,12 +79,13 @@ class deferredTests: XCTestCase
 
     let m = stream.skip(count: limit).next()
 
-    XCTAssert(stream.requested == Int64(limit+1))
+    XCTAssertEqual(stream.requested, Int64(limit+1))
 
     for i in 0..<events { stream.post(i) }
     stream.close()
 
     let value = try m.get()
-    XCTAssert(value == limit)
+    XCTAssertEqual(value, limit)
+  }
   }
 }
