@@ -87,5 +87,37 @@ class deferredTests: XCTestCase
     let value = try m.get()
     XCTAssertEqual(value, limit)
   }
+
+  func testFinalOutcome() throws
+  {
+    let s1 = OnRequestStream().map(transform: { $0+1 }).next(count: 10)
+    let d1 = s1.finalOutcome()
+    let f1 = try d1.get()
+    XCTAssertEqual(f1, 10)
+
+    let s2 = OnRequestStream().map {
+      i throws -> Int in
+      guard i < 5 else { throw TestError(i) }
+      return i
+    }
+    let d2 = s2.finalOutcome()
+    do {
+      _ = try d2.get()
+      XCTFail()
+    }
+    catch TestError.value(let i) {
+      XCTAssertEqual(i, 5)
+    }
+
+    let s3 = PostBox<()>()
+    let d3 = s3.finalOutcome()
+    s3.close()
+    do {
+      _ = try d3.get()
+      XCTFail()
+    }
+    catch DeferredError.canceled(let m) {
+      XCTAssertNotEqual(m, "")
+    }
   }
 }
