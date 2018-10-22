@@ -20,7 +20,8 @@ class timerTests: XCTestCase
     let e = expectation(description: "timer creation")
     s.next(count: 1).onValue {
       d in
-      if d > now { e.fulfill() }
+      XCTAssertGreaterThan(d, now)
+      e.fulfill()
     }
 
     s.startTimer()
@@ -33,7 +34,7 @@ class timerTests: XCTestCase
     let s = TimerStream(interval: 0.01)
     let n = s.next(count: 10)
     XCTAssertNotEqual(s.state, .streaming)
-    n.onCompletion { XCTFail() }
+    n.onCompletion { XCTFail("stream not expected to complete normally") }
 
     var t = TimerStream(interval: 0.01).finalValue()
     XCTAssert(!t.completed)
