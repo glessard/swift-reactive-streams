@@ -32,7 +32,7 @@ public class SingleValueSubscriber<Value>: Transferred<Value>
 
   open func setSubscription(_ subscription: Subscription)
   {
-    assert(sub.rawLoad(.sequential) == nil, "SubStream cannot subscribe to multiple streams")
+    assert(sub.rawLoad(.sequential) == nil, "SingleValueSubscriber cannot subscribe to multiple streams")
     sub.initialize(subscription)
   }
 }
