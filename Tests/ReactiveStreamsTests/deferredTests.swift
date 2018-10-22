@@ -13,11 +13,11 @@ import deferred
 
 class deferredTests: XCTestCase
 {
-  func testSingleValueStreamWithValue() throws
+  func testDeferredStreamWithValue() throws
   {
     let tbd = TBD<Int>()
     let random = nzRandom()
-    let stream = SingleValueStream(queue: DispatchQueue(label: #function), from: tbd)
+    let stream = DeferredStream(queue: DispatchQueue(label: #function), from: tbd)
 
     let e1 = expectation(description: "observe value")
     let e2 = expectation(description: "observe completion")
@@ -42,7 +42,7 @@ class deferredTests: XCTestCase
     waitForExpectations(timeout: 0.1)
   }
 
-  func testSingleValueStreamWithError() throws
+  func testDeferredStreamWithError() throws
   {
     let tbd = TBD<Int>()
     let random = nzRandom()
@@ -70,7 +70,7 @@ class deferredTests: XCTestCase
     waitForExpectations(timeout: 0.1)
   }
 
-  func testSingleValueStreamAlreadyDetermined() throws
+  func testDeferredStreamAlreadyDetermined() throws
   {
     let deferred = Deferred<Void>(error: TestError(nzRandom()))
     let stream = deferred.eventStream

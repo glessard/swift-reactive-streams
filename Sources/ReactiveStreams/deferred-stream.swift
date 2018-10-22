@@ -9,7 +9,7 @@
 import Dispatch
 import deferred
 
-public class SingleValueStream<Value>: EventStream<Value>
+public class DeferredStream<Value>: EventStream<Value>
 {
   private var deferred: Deferred<Value>?
 
@@ -58,5 +58,5 @@ public class SingleValueStream<Value>: EventStream<Value>
 
 extension Deferred
 {
-  public var eventStream: EventStream<Value> { return SingleValueStream(from: self) }
+  public var eventStream: EventStream<Value> { return DeferredStream(from: self) }
 }

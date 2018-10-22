@@ -2,11 +2,11 @@ import XCTest
 
 extension deferredTests {
     static let __allTests = [
+        ("testDeferredStreamAlreadyDetermined", testDeferredStreamAlreadyDetermined),
+        ("testDeferredStreamWithError", testDeferredStreamWithError),
+        ("testDeferredStreamWithValue", testDeferredStreamWithValue),
         ("testFinalOutcome", testFinalOutcome),
         ("testNext", testNext),
-        ("testSingleValueStreamAlreadyDetermined", testSingleValueStreamAlreadyDetermined),
-        ("testSingleValueStreamWithError", testSingleValueStreamWithError),
-        ("testSingleValueStreamWithValue", testSingleValueStreamWithValue),
     ]
 }
 
