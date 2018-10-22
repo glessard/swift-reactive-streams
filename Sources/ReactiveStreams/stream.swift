@@ -239,19 +239,22 @@ open class EventStream<Value>: Publisher
 
   // MARK: Publisher
 
-  @discardableResult
-  open func updateRequest(_ requested: Int64) -> Int64
+  open func updateRequest(_ requested: Int64)
   {
     precondition(requested > 0)
 
     var prev = pending.load(.relaxed)
     repeat {
-      if prev >= requested || prev == .min { return 0 }
+      if prev >= requested || prev == .min { return }
     } while !pending.loadCAS(&prev, requested, .weak, .relaxed, .relaxed)
 
-    if requested == .max { return .max }
+    let additional = (requested == .max) ? .max : (requested-prev)
+    processAdditionalRequest(additional)
+  }
 
-    return (requested-prev)
+  open func processAdditionalRequest(_ additional: Int64)
+  { // this is a only a customization point
+    assert(additional > 0)
   }
 
   final public func cancel(subscription: Subscription)
