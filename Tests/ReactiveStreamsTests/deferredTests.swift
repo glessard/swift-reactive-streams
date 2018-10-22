@@ -8,6 +8,7 @@
 
 import XCTest
 
+import Dispatch
 import ReactiveStreams
 import deferred
 
@@ -17,7 +18,8 @@ class deferredTests: XCTestCase
   {
     let tbd = TBD<Int>()
     let random = nzRandom()
-    let stream = DeferredStream(queue: DispatchQueue(label: #function), from: tbd)
+    let queue = DispatchQueue(label: #function)
+    let stream = DeferredStream(queue: queue, from: tbd)
 
     let e1 = expectation(description: "observe value")
     let e2 = expectation(description: "observe completion")
@@ -35,10 +37,11 @@ class deferredTests: XCTestCase
       }
       catch { XCTFail() }
     }
-    XCTAssertEqual(stream.requested, 1)
+    queue.sync {
+      XCTAssertEqual(stream.requested, 1)
+    }
 
     tbd.determine(value: random)
-
     waitForExpectations(timeout: 0.1)
   }
 
@@ -66,19 +69,21 @@ class deferredTests: XCTestCase
     XCTAssertEqual(stream.requested, 1)
 
     tbd.determine(error: TestError(random))
-
     waitForExpectations(timeout: 0.1)
   }
 
   func testDeferredStreamAlreadyDetermined() throws
   {
-    let deferred = Deferred<Void>(error: TestError(nzRandom()))
+    let random = nzRandom()
+    let deferred = Deferred(value: random)
     let stream = deferred.eventStream
 
-    // when `deferred` is already determined, the stream won't get anything.
-    // should we have a buffering behaviour instead?
+    // when `deferred` is already determined, the first stream
+    // to subscribe and (make a request) will get the value.
     let e = expectation(description: #function)
-    stream.onCompletion {
+    stream.onValue {
+      value in
+      XCTAssertEqual(value, random)
       e.fulfill()
     }
 

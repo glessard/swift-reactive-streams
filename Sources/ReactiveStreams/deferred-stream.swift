@@ -31,27 +31,47 @@ public class DeferredStream<Value>: EventStream<Value>
     super.init(validated: validated)
 
     deferred.enqueue(queue: queue) {
-      [weak self] event in
+      [weak self] outcome in
       guard let this = self else { return }
-      this.deferred = nil
-      do {
-        let _ = try event.get()
-        this.dispatch(event)
-        this.dispatch(Event.streamCompleted)
-      }
-      catch {
-        this.dispatch(Event(error: error))
-      }
+      let remaining = this.requested
+      if remaining <= 0 { return }
+
+      this.dispatchOutcome(outcome)
+    }
+  }
+
+  private func dispatchOutcome(_ event: Event<Value>)
+  {
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+    {
+      dispatchPrecondition(condition: .onQueue(queue))
+    }
+#endif
+
+    deferred = nil
+    dispatch(event)
+    if event.isValue
+    {
+      dispatch(Event.streamCompleted)
     }
   }
 
   open override func updateRequest(_ requested: Int64)
-  { // only pass on requested updates up to and including our remaining number of events
+  {
     precondition(requested > 0)
+    super.updateRequest(1)
+  }
 
-    if deferred?.isDetermined == false
-    {
-      super.updateRequest(1)
+  open override func processAdditionalRequest(_ additional: Int64)
+  {
+    queue.async {
+      [ weak self ] in
+      guard let this = self else { return }
+      if let outcome = this.deferred?.peek()
+      {
+        this.dispatchOutcome(outcome)
+      }
     }
   }
 }
