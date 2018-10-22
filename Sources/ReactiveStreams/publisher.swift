@@ -8,7 +8,7 @@
 
 public protocol EventSource: class
 {
-  @discardableResult func updateRequest(_ requested: Int64) -> Int64
+  func updateRequest(_ requested: Int64)
   func cancel(subscription: Subscription)
 }
 

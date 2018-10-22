@@ -22,12 +22,12 @@ open class Paused<Value>: SubStream<Value>
     stream.subscribe(substream: self)
   }
 
-  @discardableResult
-  open override func updateRequest(_ requested: Int64) -> Int64
+  open override func updateRequest(_ requested: Int64)
   {
     if started.load(.relaxed) == true
     {
-      return super.updateRequest(requested)
+      super.updateRequest(requested)
+      return
     }
 
     precondition(requested > 0)
@@ -35,12 +35,10 @@ open class Paused<Value>: SubStream<Value>
     var updated: Int64
     var current = torequest.load(.relaxed)
     repeat {
-      if current == .max { return .max }
+      if current == .max { return }
       updated = current &+ requested // could overflow; avoid trapping
       if updated < 0 { updated = .max } // check and correct for overflow
     } while !torequest.loadCAS(&current, updated, .weak, .relaxed, .relaxed)
-
-    return updated
   }
 
   open func start()
