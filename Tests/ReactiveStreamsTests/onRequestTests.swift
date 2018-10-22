@@ -25,8 +25,8 @@ class onRequestTests: XCTestCase
         if value == 45 { e.fulfill() }
         else { XCTFail() }
       }
-      catch is StreamCompleted {}
-      catch { XCTFail() }
+      catch StreamCompleted.normally {}
+      catch { XCTFail(String(describing: error)) }
     }
 
     o.start()
@@ -80,8 +80,8 @@ class onRequestTests: XCTestCase
         if value == 45 { e0.fulfill() }
         else { XCTFail() }
       }
-      catch is StreamCompleted {}
-      catch { XCTFail() }
+      catch StreamCompleted.normally {}
+      catch { XCTFail(String(describing: error)) }
     }
     p0.start()
 
@@ -97,8 +97,8 @@ class onRequestTests: XCTestCase
         if value == 145 { e1.fulfill() }
         else { XCTFail() }
       }
-      catch is StreamCompleted {}
-      catch { XCTFail() }
+      catch StreamCompleted.normally {}
+      catch { XCTFail(String(describing: error)) }
     }
     p1.start()
 

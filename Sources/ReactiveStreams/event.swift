@@ -26,9 +26,10 @@ extension Event
   }
 
   public var streamError: Error? {
-    if let error = error, !(error is StreamCompleted)
-    { return error }
-
-    return nil
+    guard let error = error else { return nil }
+    if let completed = error as? StreamCompleted,
+       completed == .normally
+    { return nil }
+    return error
   }
 }
