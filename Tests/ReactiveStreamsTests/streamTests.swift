@@ -523,7 +523,7 @@ class streamTests: XCTestCase
         let value = try event.get()
         if value > events { e1.fulfill() }
       }
-      catch is StreamCompleted { XCTFail() }
+      catch StreamCompleted.normally { XCTFail() }
       catch { e2.fulfill() }
     }
 
@@ -701,8 +701,15 @@ class streamTests: XCTestCase
     XCTAssertEqual(split.1.requested, .min)
     // any subscription attempt will fail
 
-    split.1.onValue { _ in XCTFail("split.1 never had a non-zero request") }
-    split.1.onCompletion { e3.fulfill() }
+    split.1.notify {
+      event in
+      do {
+        _ = try event.get()
+        XCTFail("split.1 never had a non-zero request")
+      }
+      catch StreamCompleted.lateSubscription { e3.fulfill() }
+      catch { XCTFail(String(describing: error)) }
+    }
 
     XCTAssertEqual(split.1.state, .ended)
 
