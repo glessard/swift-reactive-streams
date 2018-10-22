@@ -53,17 +53,12 @@ open class OnRequestStream: EventStream<Int>
     processNext()
   }
 
-  @discardableResult
-  override open func updateRequest(_ requested: Int64) -> Int64
+  override open func processAdditionalRequest(_ additional: Int64)
   {
-    let additionalRequest = super.updateRequest(requested)
-    if additionalRequest > 0
-    {
-      if started.load(.relaxed)
-      { // enqueue some event processing in case stream had been paused
-        processNext()
-      }
+    super.processAdditionalRequest(additional)
+    if started.load(.relaxed)
+    { // enqueue some event processing in case stream had been paused
+      processNext()
     }
-    return additionalRequest
   }
 }

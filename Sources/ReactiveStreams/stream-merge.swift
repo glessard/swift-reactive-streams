@@ -122,9 +122,9 @@ public class MergeStream<Value>: SubStream<Value>
     }
   }
 
-  override func request(_ additional: Int64)
+  override public func processAdditionalRequest(_ additional: Int64)
   {
-    super.request(additional)
+    super.processAdditionalRequest(additional)
     // copy set of subscriptions so that a modification on the main queue
     // will not interfere. (is this too optimistic? should this use
     // dispatch_barrier_async instead? (or a lock?))

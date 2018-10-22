@@ -46,11 +46,10 @@ class ReducingStream<InputValue, OutputValue>: SubStream<OutputValue>
     }
   }
 
-  @discardableResult
-  override func updateRequest(_ requested: Int64) -> Int64
+  override func updateRequest(_ requested: Int64)
   { // only pass on requested updates up to and including our remaining number of events
     precondition(requested > 0)
-    return super.updateRequest(1)
+    super.updateRequest(1)
   }
 }
 

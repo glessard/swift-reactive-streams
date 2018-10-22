@@ -39,19 +39,9 @@ open class SubStream<Value>: EventStream<Value>
     super.finalizeStream()
   }
 
-  @discardableResult
-  open override func updateRequest(_ requested: Int64) -> Int64
+  override open func processAdditionalRequest(_ additional: Int64)
   {
-    let additional = super.updateRequest(requested)
-    if additional > 0
-    {
-      request(additional)
-    }
-    return additional
-  }
-
-  func request(_ additional: Int64)
-  {
+    super.processAdditionalRequest(additional)
     let subscription = sub.load()
     subscription?.request(additional)
   }
