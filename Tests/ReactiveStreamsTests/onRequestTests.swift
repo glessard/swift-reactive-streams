@@ -25,7 +25,7 @@ class onRequestTests: XCTestCase
         XCTAssertEqual(value, 45)
         e.fulfill()
       }
-      catch is StreamCompleted {}
+      catch StreamCompleted.normally {}
       catch { XCTFail(String(describing: error)) }
     }
 
@@ -80,7 +80,7 @@ class onRequestTests: XCTestCase
         XCTAssertEqual(value, 45)
         e0.fulfill()
       }
-      catch is StreamCompleted {}
+      catch StreamCompleted.normally {}
       catch { XCTFail(String(describing: error)) }
     }
     p0.start()
@@ -97,7 +97,7 @@ class onRequestTests: XCTestCase
         XCTAssertEqual(value, 145)
         e1.fulfill()
       }
-      catch is StreamCompleted {}
+      catch StreamCompleted.normally {}
       catch { XCTFail(String(describing: error)) }
     }
     p1.start()
