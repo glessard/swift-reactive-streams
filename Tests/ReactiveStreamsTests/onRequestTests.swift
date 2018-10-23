@@ -22,11 +22,11 @@ class onRequestTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        if value == 45 { e.fulfill() }
-        else { XCTFail() }
+        XCTAssertEqual(value, 45)
+        e.fulfill()
       }
-      catch is StreamCompleted {}
-      catch { XCTFail() }
+      catch StreamCompleted.normally {}
+      catch { XCTFail(String(describing: error)) }
     }
 
     o.start()
@@ -58,10 +58,10 @@ class onRequestTests: XCTestCase
 
     let t = Test(expectation: e).paused()
     let s = t.next(count: 5).map(transform: { if $0 == 4 { throw TestError($0) }}).countEvents()
-    s.onValue { if $0 == 4 { g.fulfill() } }
-    s.onError { e in if (e as? TestError) == TestError.value(4) { f.fulfill() } }
+    s.onValue { XCTAssertEqual($0, 4); g.fulfill() }
+    s.onError { e in if let e = e as? TestError { XCTAssertEqual(e, TestError.value(4)) }; f.fulfill() }
     s.onError { _ in t.close() }
-    s.onCompletion { XCTFail() }
+    s.onCompletion { XCTFail("stream not expected to complete normally") }
     t.start()
 
     waitForExpectations(timeout: 1.0, handler: nil)
@@ -77,11 +77,11 @@ class onRequestTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        if value == 45 { e0.fulfill() }
-        else { XCTFail() }
+        XCTAssertEqual(value, 45)
+        e0.fulfill()
       }
-      catch is StreamCompleted {}
-      catch { XCTFail() }
+      catch StreamCompleted.normally {}
+      catch { XCTFail(String(describing: error)) }
     }
     p0.start()
 
@@ -94,11 +94,11 @@ class onRequestTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        if value == 145 { e1.fulfill() }
-        else { XCTFail() }
+        XCTAssertEqual(value, 145)
+        e1.fulfill()
       }
-      catch is StreamCompleted {}
-      catch { XCTFail() }
+      catch StreamCompleted.normally {}
+      catch { XCTFail(String(describing: error)) }
     }
     p1.start()
 

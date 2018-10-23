@@ -35,7 +35,7 @@ class deferredTests: XCTestCase
       catch StreamCompleted.normally {
         e2.fulfill()
       }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
     queue.sync {
       XCTAssertEqual(stream.requested, 1)
@@ -58,13 +58,13 @@ class deferredTests: XCTestCase
       event in
       do {
         let _ = try event.get()
-        XCTFail()
+        XCTFail("stream not expected to produce a value")
       }
       catch TestError.value(let value) {
         XCTAssertEqual(value, random)
         e.fulfill()
       }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
     XCTAssertEqual(stream.requested, 1)
 
@@ -123,7 +123,7 @@ class deferredTests: XCTestCase
     let d2 = s2.finalOutcome()
     do {
       _ = try d2.get()
-      XCTFail()
+      XCTFail("stream not expected to produce a value")
     }
     catch TestError.value(let i) {
       XCTAssertEqual(i, 5)
@@ -134,7 +134,7 @@ class deferredTests: XCTestCase
     s3.close()
     do {
       _ = try d3.get()
-      XCTFail()
+      XCTFail("stream not expected to produce a value")
     }
     catch DeferredError.canceled(let m) {
       XCTAssertNotEqual(m, "")
