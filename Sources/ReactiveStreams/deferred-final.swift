@@ -21,7 +21,7 @@ extension EventStream
   {
     let tbd = TBD<Value>(queue: queue)
     let deferred = SingleValueSubscriber(tbd)
-    var latest: Event<Value>? = nil
+    var latest: Value? = nil
 
     self.subscribe(
       subscriber: tbd,
@@ -34,11 +34,12 @@ extension EventStream
         tbd, event in
         queue.async {
           do {
-            _ = try event.get()
-            latest = event
+            latest = try event.get()
           }
           catch StreamCompleted.normally {
-            tbd.determine(latest ?? Event(error: DeferredError.canceled("Source stream terminated without producing a value")))
+            let event = latest.map(Event.init(value:))
+            let error = DeferredError.canceled("Source stream terminated without producing a value")
+            tbd.determine(event ?? Event(error: error))
           }
           catch {
             tbd.determine(event)
