@@ -120,7 +120,7 @@ class streamTests: XCTestCase
         if value == events { e1.fulfill() }
       }
       catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     for i in 0..<events { stream.post(i+1) }
@@ -199,8 +199,8 @@ class streamTests: XCTestCase
 
     s.onError {
       error in
-      if error is StreamCompleted { XCTFail() }
-      else { e2.fulfill() }
+      if let e = error as? StreamCompleted, e == .normally { XCTFail(String(describing: e)) }
+      e2.fulfill()
     }
 
     s.post(1)
@@ -212,7 +212,7 @@ class streamTests: XCTestCase
   func testOnComplete()
   {
     let s1 = PostBox<Int>()
-    s1.onCompletion { XCTFail() }
+    s1.onCompletion { XCTFail("stream not expected to complete normally") }
 
     s1.post(TestError(-1))
 
@@ -267,8 +267,8 @@ class streamTests: XCTestCase
     }
     m.onError {
       error in
-      if let error = error as? TestError, error == TestError(id)
-      { e2.fulfill() }
+      if let error = error as? TestError { XCTAssertEqual(error, TestError(id)) }
+      e2.fulfill()
     }
 
     for i in 0..<events { stream.post(i+1) }
@@ -331,7 +331,7 @@ class streamTests: XCTestCase
       event in
       if event.streamCompleted == .normally
       { e.fulfill() }
-      else { XCTFail() }
+      else { XCTFail(String(describing: event)) }
     }
 
     for i in 0...2*count { stream.post(i) }
@@ -358,7 +358,7 @@ class streamTests: XCTestCase
         if value == limit { e1.fulfill() }
       }
       catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     XCTAssertEqual(stream.requested, Int64(limit))
@@ -393,10 +393,11 @@ class streamTests: XCTestCase
         let value = try event.get()
         if value == truncation { e1.fulfill() }
       }
-      catch let error as TestError {
-        if error.error == id { e2.fulfill() }
+      catch TestError.value(let value) {
+        XCTAssertEqual(value, id)
+        e2.fulfill()
       }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     XCTAssertEqual(stream.requested, Int64(limit))
@@ -419,7 +420,8 @@ class streamTests: XCTestCase
     let f = stream.finalValue()
     f.onValue {
       value in
-      if value == d.last { e.fulfill() }
+      XCTAssertEqual(value, d.last)
+      e.fulfill()
     }
 
     d.forEach { stream.post($0) }
@@ -492,10 +494,11 @@ class streamTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        if value == (events-1)*events/2 { e1.fulfill() }
+        XCTAssertEqual(value, (events-1)*events/2)
+        e1.fulfill()
       }
       catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     for i in 0..<events { stream.post(i) }
@@ -521,9 +524,10 @@ class streamTests: XCTestCase
       event in
       do {
         let value = try event.get()
-        if value > events { e1.fulfill() }
+        XCTAssertGreaterThan(value, events)
+        e1.fulfill()
       }
-      catch StreamCompleted.normally { XCTFail() }
+      catch StreamCompleted.normally { XCTFail(String(describing: StreamCompleted.normally)) }
       catch { e2.fulfill() }
     }
 
@@ -547,10 +551,10 @@ class streamTests: XCTestCase
       do {
         let value = try event.get()
         XCTAssertEqual(value, events, "Counted \(value) events instead of \(events)")
-        if value == events { e1.fulfill() }
+        e1.fulfill()
       }
       catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     for i in 0..<events { stream.post(i) }
@@ -574,10 +578,11 @@ class streamTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value.count, events, "Coalesced \(value.count) events instead of \(events)")
         let reduced = value.reduce(0, +)
-        if reduced == Double((events-1)*events) { e1.fulfill() }
+        XCTAssertEqual(reduced, Double((events-1)*events))
+        e1.fulfill()
       }
       catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     for i in 0..<events { stream.post(i) }
@@ -611,11 +616,11 @@ class streamTests: XCTestCase
       do {
         let value = try event.get()
         a0 = value
-        if value.count == events { e1.fulfill() }
-        else { print("a0 has \(a0.count) elements") }
+        XCTAssertEqual(value.count, events)
+        e1.fulfill()
       }
       catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
     XCTAssertEqual(split.0.requested, .max)
     XCTAssertEqual(split.1.requested, 0)
@@ -629,8 +634,8 @@ class streamTests: XCTestCase
     s1.onValue {
       value in
       a1 = value
-      if value.count == events { e3.fulfill() }
-      else { print("a1 has \(a1.count) elements") }
+      XCTAssertEqual(value.count, events)
+      e3.fulfill()
     }
     s1.onCompletion { e4.fulfill() }
     XCTAssertEqual(split.1.requested, .max)
@@ -658,7 +663,7 @@ class streamTests: XCTestCase
 
     let merged = EventStream.merge(streams: split)
 
-    merged.countEvents().onValue { if $0 == splits*events { f.fulfill() } }
+    merged.countEvents().onValue { XCTAssertEqual($0, splits*events); f.fulfill() }
     stream.onCompletion { e.fulfill() }
 
     XCTAssertEqual(stream.requested, .max)
@@ -683,8 +688,8 @@ class streamTests: XCTestCase
 
     split.0.coalesce().onValue {
       values in
-      let count = values.count
-      count == events ? e1.fulfill() : XCTFail("split.0 expected \(events) events, got \(count)")
+      XCTAssertEqual(values.count, events)
+      e1.fulfill()
     }
 
     XCTAssertEqual(split.0.requested, .max)
@@ -726,7 +731,7 @@ class streamTests: XCTestCase
     let e2 = expectation(description: "1 event")
 
     split.0.countEvents().onValue {
-      if $0 == events { e1.fulfill() }
+      XCTAssertEqual($0, events); e1.fulfill()
     }
 
     let sem = DispatchSemaphore(value: 0)
@@ -786,10 +791,10 @@ class streamTests: XCTestCase
     let e2 = expectation(description: "coalesce events")
 
     stream.countEvents().onValue {
-      if $0 == 1 { e1.fulfill() }
+      XCTAssertEqual($0, 1); e1.fulfill()
     }
     stream.coalesce().onValue {
-      if $0.count == 1 { e2.fulfill() }
+      XCTAssertEqual($0.count, 1); e2.fulfill()
     }
 
     stream.start()

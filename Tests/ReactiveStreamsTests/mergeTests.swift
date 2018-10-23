@@ -126,10 +126,11 @@ class mergeTests: XCTestCase
         let counted = try event.get()
         XCTAssertLessThan(counted, posted)
       }
-      catch let error as TestError {
-        if error.error == id { e1.fulfill() }
+      catch TestError.value(let value) {
+        XCTAssertEqual(value, id)
+        e1.fulfill()
       }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     let e2 = expectation(description: "posting ends")
@@ -179,10 +180,11 @@ class mergeTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, (count + count/2), String(value))
       }
-      catch let error as TestError {
-        if error.error == count { e.fulfill() }
+      catch TestError.value(let value) {
+        XCTAssertEqual(value, count)
+        e.fulfill()
       }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     for (n,stream) in s.enumerated()
@@ -254,7 +256,7 @@ class mergeTests: XCTestCase
         XCTAssertEqual(count, 3)
       }
       catch StreamCompleted.normally { e4.fulfill() }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     s1.post(1)
@@ -293,7 +295,7 @@ class mergeTests: XCTestCase
         XCTAssertEqual(e, id)
         e3.fulfill()
       }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     s1.post(0)

@@ -20,7 +20,7 @@ class flatMapTests: XCTestCase
     let m = s.flatMap {
       count -> EventStream<Double> in
       let s = EventStream<Double>()
-      XCTFail()
+      XCTFail("unexpected execution")
       s.close()
       return s
     }
@@ -29,10 +29,10 @@ class flatMapTests: XCTestCase
       event in
       do {
         _ = try event.get()
-        XCTFail()
+        XCTFail("unexpected execution")
       }
       catch StreamCompleted.normally { e.fulfill() }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     s.close()
@@ -84,7 +84,7 @@ class flatMapTests: XCTestCase
         XCTAssertEqual(value, 0)
       }
       catch StreamCompleted.normally { e.fulfill() }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     s.post(events)
@@ -109,7 +109,7 @@ class flatMapTests: XCTestCase
         XCTAssertEqual(value, events*events)
       }
       catch StreamCompleted.normally { e.fulfill() }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     for _ in (0..<events) { stream.post(events) }
@@ -142,10 +142,11 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssertLessThan(value, Double(limit), "value of \(value) reported")
       }
-      catch let error as TestError {
-        if error.error >= 5 { e.fulfill() }
+      catch TestError.value(let value) {
+        XCTAssertGreaterThanOrEqual(value, 5)
+        e.fulfill()
       }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     for i in (1...events) { s.post(i) }
@@ -170,10 +171,11 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, 0, "counted \(value) events instead of zero")
       }
-      catch let error as TestError {
-        if error.error == events { e.fulfill() }
+      catch TestError.value(let value) {
+        XCTAssertEqual(value, events)
+        e.fulfill()
       }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     for i in (1...events).reversed()
@@ -205,7 +207,7 @@ class flatMapTests: XCTestCase
       catch StreamCompleted.normally {
         e.fulfill()
       }
-      catch { XCTFail() }
+      catch { XCTFail(String(describing: error)) }
     }
 
     for i in 1..<streams
