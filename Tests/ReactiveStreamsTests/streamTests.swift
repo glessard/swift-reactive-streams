@@ -298,14 +298,17 @@ class streamTests: XCTestCase
 
     let m2 = m1.map(queue: DispatchQueue.global()) { Event(value: $0+1) }
 
-    m2.onValue {
-      v in
-      if v == (limit+1) { e1.fulfill() }
-    }
-    m2.onError {
-      error in
-      if let error = error as? TestError, error == TestError(id)
-      { e2.fulfill() }
+    m2.notify {
+      event in
+      do {
+        let v = try event.get()
+        if v == (limit+1) { e1.fulfill() }
+      }
+      catch TestError.value(let value) {
+        XCTAssertEqual(value, id)
+        e2.fulfill()
+      }
+      catch { XCTFail(String(describing: event)) }
     }
 
     for i in 0..<events { stream.post(i+1) }
@@ -329,9 +332,12 @@ class streamTests: XCTestCase
 
     n.notify {
       event in
-      if event.streamCompleted == .normally
-      { e.fulfill() }
-      else { XCTFail(String(describing: event)) }
+      do {
+        _ = try event.get()
+        XCTFail("unreachable function")
+      }
+      catch StreamCompleted.normally { e.fulfill() }
+      catch { XCTFail(String(describing: event)) }
     }
 
     for i in 0...2*count { stream.post(i) }
