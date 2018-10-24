@@ -1,12 +1,25 @@
 import XCTest
 
-extension deferredTests {
+extension DeferredOperationsTests {
+    static let __allTests = [
+        ("testFinalOutcome", testFinalOutcome),
+        ("testNext", testNext),
+    ]
+}
+
+extension DeferredStreamTests {
     static let __allTests = [
         ("testDeferredStreamAlreadyDetermined", testDeferredStreamAlreadyDetermined),
         ("testDeferredStreamWithError", testDeferredStreamWithError),
         ("testDeferredStreamWithValue", testDeferredStreamWithValue),
-        ("testFinalOutcome", testFinalOutcome),
-        ("testNext", testNext),
+    ]
+}
+
+extension SingleValueSubscriberTests {
+    static let __allTests = [
+        ("testSingleValueSubscriberCancelled", testSingleValueSubscriberCancelled),
+        ("testSingleValueSubscriberWithError", testSingleValueSubscriberWithError),
+        ("testSingleValueSubscriberWithValue", testSingleValueSubscriberWithValue),
     ]
 }
 
@@ -107,7 +120,9 @@ extension timerTests {
 #if !os(macOS)
 public func __allTests() -> [XCTestCaseEntry] {
     return [
-        testCase(deferredTests.__allTests),
+        testCase(DeferredOperationsTests.__allTests),
+        testCase(DeferredStreamTests.__allTests),
+        testCase(SingleValueSubscriberTests.__allTests),
         testCase(eventTests.__allTests),
         testCase(flatMapTests.__allTests),
         testCase(mergeTests.__allTests),
