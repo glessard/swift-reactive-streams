@@ -37,9 +37,6 @@ open class EventStream<Value>: Publisher
   let queue: DispatchQueue
   private var observers = Dictionary<WeakSubscription, (Event<Value>) -> Void>()
 
-  private var begun = AtomicBool()
-  private var started: Bool { return begun.load(.relaxed) }
-
   private var pending = AtomicInt64()
   public  var requested: Int64 { return pending.load(.relaxed) }
   public  var completed: Bool  { return pending.load(.relaxed) == .min }
@@ -57,7 +54,6 @@ open class EventStream<Value>: Publisher
   public init(validated queue: ValidatedQueue)
   {
     pending.initialize(0)
-    begun.initialize(false)
     self.queue = queue.queue
   }
 
@@ -65,7 +61,7 @@ open class EventStream<Value>: Publisher
     switch requested
     {
     case Int64.min:         return .ended
-    case let n where n > 0: return started ? .streaming : .waiting
+    case let n where n > 0: return .streaming
     case 0:                 return .waiting
     default: /* n < 0 */    fatalError()
     }
@@ -127,8 +123,10 @@ open class EventStream<Value>: Publisher
   {
     assert(!error.isValue)
 
-    let prev = pending.swap(.min, .relaxed)
-    if prev == .min { return }
+    var prev = pending.load(.relaxed)
+    repeat {
+      if prev == .min { return }
+    } while !pending.loadCAS(&prev, .min, .weak, .relaxed, .relaxed)
 
     for (ws, notificationHandler) in self.observers
     {
@@ -224,7 +222,6 @@ open class EventStream<Value>: Publisher
 #endif
 
     queue.sync {
-      begun.store(true, .relaxed)
       subscriptionHandler(subscription)
       if !completed
       {
