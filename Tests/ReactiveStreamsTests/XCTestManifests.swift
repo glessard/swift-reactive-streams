@@ -77,6 +77,7 @@ extension streamTests {
         ("testPost", testPost),
         ("testReduce1", testReduce1),
         ("testReduce2", testReduce2),
+        ("testReduceEmptyStream", testReduceEmptyStream),
         ("testSkipN", testSkipN),
         ("testSplit0", testSplit0),
         ("testSplit1", testSplit1),

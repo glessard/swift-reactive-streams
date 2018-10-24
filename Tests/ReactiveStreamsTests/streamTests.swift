@@ -543,6 +543,30 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0, handler: nil)
   }
 
+  func testReduceEmptyStream()
+  {
+    let stream = PostBox<Int>()
+    let initial = nzRandom()
+
+    let e1 = expectation(description: #function+"1")
+    let e2 = expectation(description: #function+"2")
+
+    let m = stream.reduce(initial, { (c: Int, _) in c-1 })
+    m.notify {
+      event in
+      do {
+        let value = try event.get()
+        XCTAssertEqual(value, initial)
+        e1.fulfill()
+      }
+      catch StreamCompleted.normally { e2.fulfill() }
+      catch { XCTFail(String(describing: error)) }
+    }
+
+    stream.post(Event.streamCompleted)
+    waitForExpectations(timeout: 0.1)
+  }
+
   func testCountEvents()
   {
     let stream = PostBox<Int>(qos: .default)
