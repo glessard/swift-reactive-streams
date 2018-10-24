@@ -809,7 +809,9 @@ class streamTests: XCTestCase
   {
     let postbox = PostBox<Int>()
     let stream = postbox.paused()
+    XCTAssertEqual(stream.isPaused, true)
     stream.start()
+    XCTAssertEqual(stream.isPaused, false)
   }
 
   func testPaused2()

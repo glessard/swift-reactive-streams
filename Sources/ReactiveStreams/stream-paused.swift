@@ -10,13 +10,11 @@ import CAtomics
 
 open class Paused<Value>: SubStream<Value>
 {
-  private var torequest = AtomicInt64()
-  private var started = AtomicBool()
+  private var pending = AtomicInt64()
 
   public init(_ stream: EventStream<Value>)
   {
-    torequest.initialize(0)
-    started.initialize(false)
+    pending.initialize(0)
     super.init(validated: ValidatedQueue(label: "pausedrequests", target: stream.queue))
 
     stream.subscribe(substream: self)
@@ -24,32 +22,34 @@ open class Paused<Value>: SubStream<Value>
 
   open override func updateRequest(_ requested: Int64)
   {
-    if started.load(.relaxed) == true
-    {
-      super.updateRequest(requested)
-      return
-    }
-
     precondition(requested > 0)
 
     var updated: Int64
-    var current = torequest.load(.relaxed)
+    var request = pending.load(.relaxed)
     repeat {
-      if current == .max { return }
-      updated = current &+ requested // could overflow; avoid trapping
+      if request == .min
+      {
+        super.updateRequest(requested)
+        return
+      }
+      if request == .max { return }
+      updated = request &+ requested // could overflow; avoid trapping
       if updated < 0 { updated = .max } // check and correct for overflow
-    } while !torequest.loadCAS(&current, updated, .weak, .relaxed, .relaxed)
+    } while !pending.loadCAS(&request, updated, .weak, .relaxed, .relaxed)
   }
 
   open func start()
   {
-    var streaming = started.load(.relaxed)
+    var request = pending.load(.relaxed)
     repeat {
-      if streaming { return }
-    } while !started.loadCAS(&streaming, true, .weak, .relaxed, .relaxed)
+      if request == .min { return }
+    } while !pending.loadCAS(&request, .min, .weak, .relaxed, .relaxed)
 
-    let request = torequest.swap(0, .relaxed)
     if request > 0 { super.updateRequest(request) }
+  }
+
+  public var isPaused: Bool {
+    return pending.load(.relaxed) != .min
   }
 }
 
