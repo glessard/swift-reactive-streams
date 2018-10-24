@@ -19,22 +19,18 @@ extension EventStream
 
   public func next(queue: DispatchQueue) -> Deferred<Value>
   {
-    let tbd = TBD<Value>(queue: queue)
-    let deferred = SingleValueSubscriber(tbd)
+    let subscriber = SingleValueSubscriber<Value>(queue: queue)
 
     self.subscribe(
-      subscriber: tbd,
+      subscriber: subscriber,
       subscriptionHandler: {
         subscription in
-        deferred.setSubscription(subscription)
+        subscriber.setSubscription(subscription)
         subscription.request(1)
       },
-      notificationHandler: {
-        tbd, event in
-        queue.async { tbd.determine(event) }
-      }
+      notificationHandler: { $0.determine($1) }
     )
 
-    return deferred
+    return Transferred(from: subscriber, on: queue)
   }
 }

@@ -10,14 +10,14 @@ import Dispatch
 import deferred
 import CAtomics
 
-public class SingleValueSubscriber<Value>: Transferred<Value>
+public class SingleValueSubscriber<Value>: TBD<Value>
 {
   private var sub = OpaqueUnmanagedHelper()
 
-  init(_ source: TBD<Value>)
+  public override init(queue: DispatchQueue)
   {
     sub.initialize(nil)
-    super.init(from: source)
+    super.init(queue: queue)
     self.enqueue(task: {
       [weak self] _ in
       let subscription = self?.sub.take()
@@ -34,5 +34,16 @@ public class SingleValueSubscriber<Value>: Transferred<Value>
   {
     assert(sub.rawLoad(.sequential) == nil, "SingleValueSubscriber cannot subscribe to multiple streams")
     sub.initialize(subscription)
+  }
+
+  public func requestAll()
+  {
+    request(Int64.max)
+  }
+
+  public func request(_ additional: Int64)
+  {
+    let subscription = sub.load()
+    subscription?.request(additional)
   }
 }
