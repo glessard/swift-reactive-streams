@@ -199,9 +199,9 @@
 			isa = PBXGroup;
 			children = (
 				031BCE73217A931200F4B44B /* deferred-subscriber.swift */,
+				03334029217BB9A200F4B44B /* deferred-final.swift */,
 				031BCE79217A945500F4B44B /* deferred-next.swift */,
 				031BCE87217A95B300F4B44B /* deferred-stream.swift */,
-				03334029217BB9A200F4B44B /* deferred-final.swift */,
 			);
 			name = "deferred operations";
 			sourceTree = "<group>";
