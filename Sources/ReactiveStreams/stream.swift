@@ -127,8 +127,10 @@ open class EventStream<Value>: Publisher
   {
     assert(!error.isValue)
 
-    let prev = pending.swap(.min, .relaxed)
-    if prev == .min { return }
+    var prev = pending.load(.relaxed)
+    repeat {
+      if prev == .min { return }
+    } while !pending.loadCAS(&prev, .min, .weak, .relaxed, .relaxed)
 
     for (ws, notificationHandler) in self.observers
     {

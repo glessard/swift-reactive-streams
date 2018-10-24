@@ -67,10 +67,12 @@ final public class Subscription
 
   public func cancel()
   {
-    if requested.swap(.min, .relaxed) != .min
-    {
-      source.cancel(subscription: self)
-    }
+    var prev = requested.load(.relaxed)
+    repeat {
+      if prev == .min { return }
+    } while !requested.loadCAS(&prev, .min, .weak, .relaxed, .relaxed)
+
+    source.cancel(subscription: self)
   }
 
   internal func cancel<P: Publisher>(_ publisher: P)
