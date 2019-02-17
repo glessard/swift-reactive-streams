@@ -60,7 +60,7 @@ public class SingleValueSubscriberTests: XCTestCase
   func testSingleValueSubscriberCancelled() throws
   {
     let stream = PostBox<Int>()
-    let subscriber = SingleValueSubscriber<Int>(qos: .background)
+    let subscriber = SingleValueSubscriber<Int>(queue: DispatchQueue(label: #function, qos: .utility))
 
     stream.subscribe(
       subscriber: subscriber,
