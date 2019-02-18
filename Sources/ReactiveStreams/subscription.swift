@@ -94,7 +94,7 @@ extension Subscription: Equatable
 
 extension Subscription: Hashable
 {
-#if swift(>=4.2)
+#if swift(>=4.1.50)
   public func hash(into hasher: inout Hasher)
   {
     ObjectIdentifier(self).hash(into: &hasher)

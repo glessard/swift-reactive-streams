@@ -288,7 +288,7 @@ private struct WeakSubscription: Equatable, Hashable
     return l.identifier == r.identifier
   }
 
-#if swift(>=4.2)
+#if swift(>=4.1.50)
   func hash(into hasher: inout Hasher)
   {
     identifier.hash(into: &hasher)
