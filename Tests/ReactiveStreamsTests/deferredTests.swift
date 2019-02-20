@@ -26,14 +26,15 @@ public class SingleValueSubscriberTests: XCTestCase
       notificationHandler: { $0.determine($1) }
     )
 
-    stream.post(1)
-    queue.sync {}
+    let r = nzRandom()
+    stream.post(r)
     XCTAssertNil(subscriber.peek())
 
     subscriber.request(1)
-    stream.post(2)
-    queue.sync {}
-    XCTAssertEqual(subscriber.value, 2)
+    stream.post(0)
+    XCTAssertEqual(subscriber.value, r)
+
+    stream.close()
   }
 
   func testSingleValueSubscriberWithError() throws
@@ -48,13 +49,11 @@ public class SingleValueSubscriberTests: XCTestCase
       notificationHandler: { $0.determine($1) }
     )
 
-    stream.post(1)
-    queue.sync {}
     XCTAssertNil(subscriber.peek())
 
-    stream.post(TestError(2))
-    queue.sync {}
-    XCTAssertEqual(subscriber.error as? TestError, TestError(2))
+    let r = nzRandom()
+    stream.post(TestError(r))
+    XCTAssertEqual(subscriber.error as? TestError, TestError(r))
   }
 
   func testSingleValueSubscriberCancelled() throws
