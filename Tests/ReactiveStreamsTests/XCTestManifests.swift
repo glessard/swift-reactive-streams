@@ -92,6 +92,18 @@ extension onRequestTests {
     ]
 }
 
+extension postBoxTests {
+    static let __allTests = [
+        ("testPerformanceDequeue", testPerformanceDequeue),
+        ("testPostAfterCompletion", testPostAfterCompletion),
+        ("testPostConcurrentProducers", testPostConcurrentProducers),
+        ("testPostDeinitWithPendingEvents", testPostDeinitWithPendingEvents),
+        ("testPostDoubleTermination", testPostDoubleTermination),
+        ("testPostErrorWithoutRequest", testPostErrorWithoutRequest),
+        ("testPostNormal", testPostNormal),
+    ]
+}
+
 extension reduceTests {
     static let __allTests = [
         ("testCoalesce", testCoalesce),
@@ -114,7 +126,6 @@ extension streamTests {
         ("testPaused1", testPaused1),
         ("testPaused2", testPaused2),
         ("testPaused3", testPaused3),
-        ("testPost", testPost),
         ("testSkipN", testSkipN),
         ("testSplit0", testSplit0),
         ("testSplit1", testSplit1),
@@ -154,6 +165,7 @@ public func __allTests() -> [XCTestCaseEntry] {
         testCase(mergeTests.__allTests),
         testCase(notificationTests.__allTests),
         testCase(onRequestTests.__allTests),
+        testCase(postBoxTests.__allTests),
         testCase(reduceTests.__allTests),
         testCase(streamTests.__allTests),
         testCase(subscriberTests.__allTests),

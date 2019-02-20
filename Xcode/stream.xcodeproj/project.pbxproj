@@ -48,6 +48,7 @@
 		03A0D5C11EB31C0600F4B44B /* stream-limited.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A0D5C01EB31C0600F4B44B /* stream-limited.swift */; };
 		03A1465D2224966E00F4B44B /* mapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A1465C2224966E00F4B44B /* mapTests.swift */; };
 		03A14662222497BC00F4B44B /* notificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A14661222497BC00F4B44B /* notificationTests.swift */; };
+		03A1469722259E6600F4B44B /* postBoxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A1469322259E6600F4B44B /* postBoxTests.swift */; };
 		03D89FBE1CD46B4300F4B44B /* stream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FBD1CD46B4300F4B44B /* stream.swift */; };
 		03D89FC01CD46C0700F4B44B /* event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D89FBF1CD46C0700F4B44B /* event.swift */; };
 		03E1929B1CE4432000F4B44B /* subscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E1929A1CE4432000F4B44B /* subscription.swift */; };
@@ -155,6 +156,7 @@
 		03A0D5C01EB31C0600F4B44B /* stream-limited.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "stream-limited.swift"; sourceTree = "<group>"; };
 		03A1465C2224966E00F4B44B /* mapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mapTests.swift; sourceTree = "<group>"; };
 		03A14661222497BC00F4B44B /* notificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = notificationTests.swift; sourceTree = "<group>"; };
+		03A1469322259E6600F4B44B /* postBoxTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = postBoxTests.swift; sourceTree = "<group>"; };
 		03B817B52218CD1C00F4B44B /* Package@swift-4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Package@swift-4.swift"; path = "../Package@swift-4.swift"; sourceTree = "<group>"; };
 		03BBC54F20E44A3D00F4B44B /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; name = .travis.yml; path = ../.travis.yml; sourceTree = "<group>"; };
 		03D89FBD1CD46B4300F4B44B /* stream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.swift; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 				035312372224946E00F4B44B /* eventTests.swift */,
 				035312342224946E00F4B44B /* streamTests.swift */,
 				0353122D2224946E00F4B44B /* onRequestTests.swift */,
+				03A1469322259E6600F4B44B /* postBoxTests.swift */,
 				03A14661222497BC00F4B44B /* notificationTests.swift */,
 				035312312224946E00F4B44B /* filterTests.swift */,
 				03A1465C2224966E00F4B44B /* mapTests.swift */,
@@ -560,6 +563,7 @@
 				035312432224946E00F4B44B /* mergeTests.swift in Sources */,
 				03A1465D2224966E00F4B44B /* mapTests.swift in Sources */,
 				0353123F2224946E00F4B44B /* reduceTests.swift in Sources */,
+				03A1469722259E6600F4B44B /* postBoxTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
