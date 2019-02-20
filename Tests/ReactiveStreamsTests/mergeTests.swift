@@ -95,7 +95,6 @@ class mergeTests: XCTestCase
 
     XCTAssertEqual(merged.requested, .max)
     XCTAssertEqual(streams[0].requested, .max)
-    XCTAssertEqual(c.requested, 1)
 
     for stream in streams
     {

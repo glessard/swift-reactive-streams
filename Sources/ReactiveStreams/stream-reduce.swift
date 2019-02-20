@@ -27,12 +27,6 @@ class ReducingStream<InputValue, OutputValue>: SubStream<OutputValue>
     super.init(validated: validated)
   }
 
-  override func setSubscription(_ subscription: Subscription)
-  {
-    super.setSubscription(subscription)
-    subscription.requestAll()
-  }
-
   func processEvent(_ event: Event<InputValue>)
   {
     queue.async {
@@ -47,9 +41,14 @@ class ReducingStream<InputValue, OutputValue>: SubStream<OutputValue>
   }
 
   override func updateRequest(_ requested: Int64)
-  { // only pass on requested updates up to and including our remaining number of events
+  { // We only every provide 1 event before the stream ends.
+    // However, we need every event from our source in order to
+    // provide that 1 event to our own subscribers.
+    // Setting the request to `Int64.max` ensures that our
+    // subscription is set up accordingly while minimizing traffic
+    // to the variables that hold the number of requested updates.
     precondition(requested > 0)
-    super.updateRequest(1)
+    super.updateRequest(.max)
   }
 }
 

@@ -669,7 +669,6 @@ class streamTests: XCTestCase
     }
     s1.onCompletion { e4.fulfill() }
     XCTAssertEqual(split.1.requested, .max)
-    XCTAssertEqual(s1.requested, 1)
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
@@ -838,7 +837,6 @@ class streamTests: XCTestCase
 
   func testPaused3() throws
   {
-    let queue = DispatchQueue(label: "serial")
     let stream = PostBox<DispatchSemaphore>()
     let paused = stream.paused()
 
@@ -853,8 +851,7 @@ class streamTests: XCTestCase
     XCTAssertEqual(paused.requested, 0)
 
     let signaler = stream.next(count: 5)
-    signaler.onValue(queue: queue) { $0.signal() }
-    queue.sync {}
+    signaler.onValue() { $0.signal() }
 
     postAndWait()
 
@@ -872,7 +869,7 @@ class streamTests: XCTestCase
     XCTAssertEqual(paused.requested, 10)
     XCTAssertEqual(stream.requested, 10)
 
-    _ = paused.countEvents()
+    paused.countEvents().onValue(task: { _ in })
     postAndWait()
 
     XCTAssertEqual(stream.requested, Int64.max, "stream.requested at \(#line)")
