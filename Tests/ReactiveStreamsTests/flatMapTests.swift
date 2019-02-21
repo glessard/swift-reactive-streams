@@ -36,7 +36,7 @@ class flatMapTests: XCTestCase
     }
 
     s.close()
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap2()
@@ -59,7 +59,7 @@ class flatMapTests: XCTestCase
     for _ in 0..<reps { stream.post(events) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap3()
@@ -90,7 +90,7 @@ class flatMapTests: XCTestCase
     s.post(events)
     s.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap4()
@@ -115,7 +115,7 @@ class flatMapTests: XCTestCase
     for _ in (0..<events) { stream.post(events) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap5()
@@ -152,7 +152,7 @@ class flatMapTests: XCTestCase
     for i in (1...events) { s.post(i) }
     s.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap6()
@@ -185,7 +185,7 @@ class flatMapTests: XCTestCase
     }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap7()
@@ -218,7 +218,7 @@ class flatMapTests: XCTestCase
     }
     stream.close()
 
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap8()
@@ -236,6 +236,6 @@ class flatMapTests: XCTestCase
     }
     stream.close()
 
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
   }
 }

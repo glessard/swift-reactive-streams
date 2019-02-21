@@ -70,7 +70,7 @@ class subscriberTests: XCTestCase
     stream.subscribe(subscriber)
     stream.start()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testSubscriber2()
@@ -87,6 +87,6 @@ class subscriberTests: XCTestCase
     stream.post(1)
     stream.post(TestError())
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 }

@@ -31,7 +31,7 @@ class onRequestTests: XCTestCase
 
     o.start()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testOnRequest2()
@@ -64,7 +64,7 @@ class onRequestTests: XCTestCase
     s.onCompletion { XCTFail("stream not expected to complete normally") }
     t.start()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testOnRequest3()
@@ -85,7 +85,7 @@ class onRequestTests: XCTestCase
     }
     p0.start()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
     XCTAssertEqual(s.1.state, .waiting)
 
     let e1 = expectation(description: "second")
@@ -102,6 +102,6 @@ class onRequestTests: XCTestCase
     }
     p1.start()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 }

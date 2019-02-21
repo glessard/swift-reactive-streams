@@ -170,7 +170,7 @@ class DeferredStreamTests: XCTestCase
     }
 
     tbd.determine(value: random)
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testDeferredStreamWithError() throws
@@ -197,7 +197,7 @@ class DeferredStreamTests: XCTestCase
     XCTAssertEqual(stream.requested, 1)
 
     tbd.determine(error: TestError(random))
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testDeferredStreamAlreadyDetermined() throws
@@ -227,6 +227,6 @@ class DeferredStreamTests: XCTestCase
     flattener.post(stream)
     flattener.close()
 
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
   }
 }
