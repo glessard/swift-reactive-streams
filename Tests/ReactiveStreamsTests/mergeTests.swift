@@ -28,8 +28,10 @@ class mergeTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, count)
       }
-      catch StreamCompleted.normally { e1.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e1.fulfill()
+      }
     }
 
     XCTAssertEqual(merged.requested, .max)
@@ -60,8 +62,10 @@ class mergeTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, 0)
       }
-      catch StreamCompleted.normally { e1.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e1.fulfill()
+      }
     }
 
     // merged stream is closed before any events come through,
@@ -125,11 +129,10 @@ class mergeTests: XCTestCase
         let counted = try event.get()
         XCTAssertLessThan(counted, posted)
       }
-      catch TestError.value(let value) {
-        XCTAssertEqual(value, id)
+      catch {
+        XCTAssertErrorEquals(error, TestError(id))
         e1.fulfill()
       }
-      catch { XCTFail(String(describing: error)) }
     }
 
     let e2 = expectation(description: "posting ends")

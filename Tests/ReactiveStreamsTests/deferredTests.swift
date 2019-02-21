@@ -78,9 +78,7 @@ public class SingleValueSubscriberTests: XCTestCase
       let i = try subscriber.get()
       XCTFail("\(i) exists when it should not")
     }
-    catch DeferredError.canceled(let message) {
-      XCTAssertEqual(message, "")
-    }
+    catch DeferredError.canceled("") {}
 
     stream.close()
   }
@@ -123,9 +121,7 @@ class DeferredOperationsTests: XCTestCase
       _ = try d2.get()
       XCTFail("stream not expected to produce a value")
     }
-    catch TestError.value(let i) {
-      XCTAssertEqual(i, 5)
-    }
+    catch TestError(5) {}
 
     let s3 = PostBox<()>()
     let d3 = s3.finalOutcome()
@@ -160,10 +156,10 @@ class DeferredStreamTests: XCTestCase
         XCTAssertEqual(value, random)
         e1.fulfill()
       }
-      catch StreamCompleted.normally {
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
         e2.fulfill()
       }
-      catch { XCTFail(String(describing: error)) }
     }
     queue.sync {
       XCTAssertEqual(stream.requested, 1)
@@ -188,11 +184,10 @@ class DeferredStreamTests: XCTestCase
         let _ = try event.get()
         XCTFail("stream not expected to produce a value")
       }
-      catch TestError.value(let value) {
-        XCTAssertEqual(value, random)
+      catch {
+        XCTAssertErrorEquals(error, TestError(random))
         e.fulfill()
       }
-      catch { XCTFail(String(describing: error)) }
     }
     XCTAssertEqual(stream.requested, 1)
 
