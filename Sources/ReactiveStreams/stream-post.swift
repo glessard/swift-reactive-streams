@@ -144,7 +144,11 @@ private struct BufferNode<Element>: Equatable
   private init()
   {
     let size = dataOffset + MemoryLayout<Element>.stride
+#if swift(>=4.1)
     storage = UnsafeMutableRawPointer.allocate(byteCount: size, alignment: 16)
+#else
+    storage = UnsafeMutableRawPointer.allocate(bytes: size, alignedTo: 16)
+#endif
     (storage+nextOffset).bindMemory(to: AtomicOptionalMutableRawPointer.self, capacity: 1)
     nptr = AtomicOptionalMutableRawPointer(nil)
     (storage+dataOffset).bindMemory(to: Element.self, capacity: 1)
@@ -160,7 +164,12 @@ private struct BufferNode<Element>: Equatable
 
   func deallocate()
   {
+#if swift(>=4.1)
     storage.deallocate()
+#else
+    let size = dataOffset + MemoryLayout<Element>.stride
+    storage.deallocate(bytes: size, alignedTo: 16)
+#endif
   }
 
   var nptr: AtomicOptionalMutableRawPointer {
@@ -189,4 +198,11 @@ private struct BufferNode<Element>: Equatable
   {
     return data.move()
   }
+
+#if !swift(>=4.1)
+  public static func ==(lhs: BufferNode, rhs: BufferNode) -> Bool
+  {
+    return lhs.storage == rhs.storage
+  }
+#endif
 }
