@@ -231,10 +231,15 @@ class streamTests: XCTestCase
     let events = 10
     let stream = PostBox<Int>()
 
-    let e2 = expectation(description: "observation onError")
+    let e1 = expectation(description: "observation onValue")
+    let e2 = expectation(description: "observation onCompletion")
 
     var d = Array<Double>()
     let m = stream.map(transform: { 2.0*Double($0) }).map(transform: { d.append($0) }).finalValue()
+    m.onValue {
+      XCTAssertFalse(d.isEmpty)
+      e1.fulfill()
+    }
     m.onCompletion {
       XCTAssertEqual(d.count, events)
       e2.fulfill()
@@ -244,7 +249,6 @@ class streamTests: XCTestCase
     stream.close()
 
     waitForExpectations(timeout: 1.0)
-    // print(d)
   }
 
   func testMap2()
@@ -263,13 +267,14 @@ class streamTests: XCTestCase
       if i < limit { return i+1 }
       throw TestError(id)
     }
-    m.onValue {
+    m.finalValue().onValue {
       v in
-      if v == limit { e1.fulfill() }
+      XCTAssertEqual(v, limit)
+      e1.fulfill()
     }
     m.onError {
       error in
-      if let error = error as? TestError { XCTAssertEqual(error, TestError(id)) }
+      XCTAssertErrorEquals(error, TestError(id))
       e2.fulfill()
     }
 
@@ -486,7 +491,7 @@ class streamTests: XCTestCase
         XCTAssertEqual(value, d.first)
       }
       catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        XCTAssertErrorEquals(error, TestError())
         e.fulfill()
       }
     }
@@ -546,7 +551,7 @@ class streamTests: XCTestCase
         e1.fulfill()
       }
       catch {
-        XCTAssertErrorNotEqual(error, StreamCompleted.normally)
+        XCTAssertErrorEquals(error, TestError())
         e2.fulfill()
       }
     }

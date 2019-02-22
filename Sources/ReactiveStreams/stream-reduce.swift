@@ -8,7 +8,26 @@
 
 import Dispatch
 
-class ReducingStream<InputValue, OutputValue>: SubStream<OutputValue>
+class SingleValueStream<InputValue, OutputValue>: SubStream<OutputValue>
+{
+  override init(validated: ValidatedQueue)
+  {
+    super.init(validated: validated)
+  }
+
+  override func updateRequest(_ requested: Int64)
+  { // We only ever provide 1 event before the stream ends.
+    // However, we need every event from our source in order to
+    // provide that 1 event to our own subscribers.
+    // Setting the request to `Int64.max` ensures that our
+    // subscription is set up accordingly while minimizing traffic
+    // to the variables that hold the number of requested updates.
+    precondition(requested > 0)
+    super.updateRequest(.max)
+  }
+}
+
+class ReducingStream<InputValue, OutputValue>: SingleValueStream<InputValue, OutputValue>
 {
   private var current: OutputValue
   private let combiner: (inout OutputValue, InputValue) throws -> Void
@@ -38,17 +57,6 @@ class ReducingStream<InputValue, OutputValue>: SubStream<OutputValue>
         self.dispatch(Event(error: error))
       }
     }
-  }
-
-  override func updateRequest(_ requested: Int64)
-  { // We only every provide 1 event before the stream ends.
-    // However, we need every event from our source in order to
-    // provide that 1 event to our own subscribers.
-    // Setting the request to `Int64.max` ensures that our
-    // subscription is set up accordingly while minimizing traffic
-    // to the variables that hold the number of requested updates.
-    precondition(requested > 0)
-    super.updateRequest(.max)
   }
 }
 
