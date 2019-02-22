@@ -29,11 +29,11 @@ class ReducingStream<InputValue, OutputValue>: SubStream<OutputValue>
 
   func processEvent(_ event: Event<InputValue>)
   {
-    queue.async {
-      do {
-        try self.combiner(&self.current, event.get())
-      }
-      catch {
+    do {
+      try self.combiner(&self.current, event.get())
+    }
+    catch {
+      queue.async {
         self.dispatch(Event(value: self.current))
         self.dispatch(Event(error: error))
       }
@@ -100,7 +100,6 @@ extension EventStream
 
 extension EventStream
 {
-
   public func coalesce(qos: DispatchQoS? = nil) -> EventStream<[Value]>
   {
     return self.reduce(qos: qos, into: []) { (c: inout [Value], e: Value) in c.append(e) }
