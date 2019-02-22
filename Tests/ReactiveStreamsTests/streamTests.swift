@@ -33,7 +33,7 @@ class streamTests: XCTestCase
     let s = SpyStream(expectation(description: "deletion")).finalValue()
     s.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testLifetime2()
@@ -58,7 +58,7 @@ class streamTests: XCTestCase
     p.initialize(to: SpyStream(expectation(description: "deletion")).finalValue())
     p.deinitialize(count: 1)
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
 #if swift(>=4.1)
     p.deallocate()
 #else
@@ -103,7 +103,7 @@ class streamTests: XCTestCase
     stream.post(2)
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testNotify()
@@ -119,14 +119,16 @@ class streamTests: XCTestCase
         let value = try event.get()
         if value == events { e1.fulfill() }
       }
-      catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
     }
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testPost()
@@ -140,7 +142,7 @@ class streamTests: XCTestCase
     stream.post(Event(value: 1))
     stream.post(StreamCompleted.normally)
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
 
     stream.post(Int.max)
     stream.post(Event(value: Int.min))
@@ -168,7 +170,7 @@ class streamTests: XCTestCase
     n2.onCompletion { e2.fulfill() }
 
     s.post(0)
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
     XCTAssertEqual(s.state, .waiting)
     XCTAssertEqual(String(describing: s.state), "EventStream waiting to begin processing events")
     XCTAssertEqual(n.state, .ended)
@@ -189,7 +191,7 @@ class streamTests: XCTestCase
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testOnError()
@@ -206,7 +208,7 @@ class streamTests: XCTestCase
     s.post(1)
     s.post(TestError(42))
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testOnComplete()
@@ -221,7 +223,7 @@ class streamTests: XCTestCase
     s2.onCompletion { e2.fulfill() }
     s2.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testMap1()
@@ -241,7 +243,7 @@ class streamTests: XCTestCase
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
     // print(d)
   }
 
@@ -274,7 +276,7 @@ class streamTests: XCTestCase
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testMap3()
@@ -304,17 +306,16 @@ class streamTests: XCTestCase
         let v = try event.get()
         if v == (limit+1) { e1.fulfill() }
       }
-      catch TestError.value(let value) {
-        XCTAssertEqual(value, id)
+      catch {
+        XCTAssertErrorEquals(error, TestError(id))
         e2.fulfill()
       }
-      catch { XCTFail(String(describing: event)) }
     }
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testSkipN()
@@ -336,8 +337,10 @@ class streamTests: XCTestCase
         _ = try event.get()
         XCTFail("unreachable function")
       }
-      catch StreamCompleted.normally { e.fulfill() }
-      catch { XCTFail(String(describing: event)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e.fulfill()
+      }
     }
 
     for i in 0...2*count { stream.post(i) }
@@ -363,8 +366,10 @@ class streamTests: XCTestCase
         let value = try event.get()
         if value == limit { e1.fulfill() }
       }
-      catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
     }
 
     XCTAssertEqual(stream.requested, Int64(limit))
@@ -372,7 +377,7 @@ class streamTests: XCTestCase
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testNextTruncated()
@@ -399,11 +404,10 @@ class streamTests: XCTestCase
         let value = try event.get()
         if value == truncation { e1.fulfill() }
       }
-      catch TestError.value(let value) {
-        XCTAssertEqual(value, id)
+      catch {
+        XCTAssertErrorEquals(error, TestError(id))
         e2.fulfill()
       }
-      catch { XCTFail(String(describing: error)) }
     }
 
     XCTAssertEqual(stream.requested, Int64(limit))
@@ -411,7 +415,7 @@ class streamTests: XCTestCase
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFinal1()
@@ -433,7 +437,7 @@ class streamTests: XCTestCase
     d.forEach { stream.post($0) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFinal2()
@@ -452,13 +456,16 @@ class streamTests: XCTestCase
         _ = try event.get()
         XCTFail("not expected to get a value when \"final\" stream is closed")
       }
-      catch { e.fulfill() }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e.fulfill()
+      }
     }
 
     f.close()
     d.forEach { stream.post($0) }
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
     stream.close()
   }
 
@@ -478,13 +485,16 @@ class streamTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, d.first)
       }
-      catch { e.fulfill() }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e.fulfill()
+      }
     }
 
     stream.post(d[0])
     stream.post(TestError())
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testReduce1()
@@ -503,14 +513,16 @@ class streamTests: XCTestCase
         XCTAssertEqual(value, (events-1)*events/2)
         e1.fulfill()
       }
-      catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
     }
 
     for i in 0..<events { stream.post(i) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testReduce2()
@@ -533,14 +545,16 @@ class streamTests: XCTestCase
         XCTAssertGreaterThan(value, events)
         e1.fulfill()
       }
-      catch StreamCompleted.normally { XCTFail(String(describing: StreamCompleted.normally)) }
-      catch { e2.fulfill() }
+      catch {
+        XCTAssertErrorNotEqual(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
     }
 
     for i in 0..<events { stream.post(i) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testReduceEmptyStream()
@@ -559,12 +573,14 @@ class streamTests: XCTestCase
         XCTAssertEqual(value, initial)
         e1.fulfill()
       }
-      catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
     }
 
     stream.post(Event.streamCompleted)
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testCountEvents()
@@ -583,14 +599,16 @@ class streamTests: XCTestCase
         XCTAssertEqual(value, events, "Counted \(value) events instead of \(events)")
         e1.fulfill()
       }
-      catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
     }
 
     for i in 0..<events { stream.post(i) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testCoalesce()
@@ -611,14 +629,16 @@ class streamTests: XCTestCase
         XCTAssertEqual(reduced, Double((events-1)*events))
         e1.fulfill()
       }
-      catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
     }
 
     for i in 0..<events { stream.post(i) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testSplit0()
@@ -649,8 +669,10 @@ class streamTests: XCTestCase
         XCTAssertEqual(value.count, events)
         e1.fulfill()
       }
-      catch StreamCompleted.normally { e2.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
     }
     XCTAssertEqual(split.0.requested, .max)
     XCTAssertEqual(split.1.requested, 0)
@@ -673,7 +695,7 @@ class streamTests: XCTestCase
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
-    waitForExpectations(timeout: 0.1, handler: nil)
+    waitForExpectations(timeout: 1.0)
 
     XCTAssertEqual(a0, a1)
   }
@@ -699,7 +721,7 @@ class streamTests: XCTestCase
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
     merged.close()
   }
 
@@ -728,7 +750,7 @@ class streamTests: XCTestCase
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
 
     let e3 = expectation(description: "split.1 onCompletion")
 
@@ -741,13 +763,15 @@ class streamTests: XCTestCase
         _ = try event.get()
         XCTFail("split.1 never had a non-zero request")
       }
-      catch StreamCompleted.lateSubscription { e3.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.lateSubscription)
+        e3.fulfill()
+      }
     }
 
     XCTAssertEqual(split.1.state, .ended)
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testSplit4()
@@ -770,7 +794,10 @@ class streamTests: XCTestCase
         let value = try event.get()
         if value == 1 { sem.signal() }
       }
-      catch { e2.fulfill() }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
     }
 
     stream.post(0)
@@ -779,7 +806,7 @@ class streamTests: XCTestCase
     (1..<events).forEach { stream.post($0) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testSplit5()
@@ -797,7 +824,7 @@ class streamTests: XCTestCase
     let ne = expectation(description: "second value")
     stream.next(count: 1).onValue { _ in ne.fulfill() }
     stream.post(1)
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
     XCTAssertEqual(stream.requested, 0)
 
     split.1.next(count: 5).notify { _ in }
@@ -832,7 +859,7 @@ class streamTests: XCTestCase
     postbox.post(1)
     postbox.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testPaused3() throws

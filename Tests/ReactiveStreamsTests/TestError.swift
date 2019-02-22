@@ -24,3 +24,46 @@ func == (l: TestError, r: TestError) -> Bool
   case let (.value(lv), .value(rv)): return lv == rv
   }
 }
+
+func ~= <EquatableError>(match: EquatableError, error: Error?) -> Bool
+  where EquatableError: Error & Equatable
+{
+  return match == (error as? EquatableError)
+}
+
+import XCTest
+
+func XCTAssertErrorEquals<EquatableError>(_ error: Error?, _ target: EquatableError,
+                                          _ message: @autoclosure () -> String = "",
+                                          file: StaticString = #file, line: UInt = #line)
+  where EquatableError: Error & Equatable
+{
+  if let e = error as? EquatableError
+  {
+    XCTAssertEqual(e, target, message(), file: file, line: line)
+  }
+  else
+  {
+    let d = error.map(String.init(describing:)) ?? "error"
+    XCTAssertEqual(d, String(describing: target), message(), file: file, line: line)
+  }
+}
+
+func XCTAssertErrorNotEqual<EquatableError>(_ error: Error?, _ target: EquatableError,
+                                            _ message: @autoclosure () -> String = "",
+                                            file: StaticString = #file, line: UInt = #line)
+  where EquatableError: Error & Equatable
+{
+  if let e = error as? EquatableError
+  {
+    XCTAssertNotEqual(e, target, message(), file: file, line: line)
+  }
+  else if let d = error.map(String.init(describing:))
+  {
+    XCTAssertNotEqual(d, String(describing: target), message(), file: file, line: line)
+  }
+  else
+  {
+    XCTAssertNotEqual(Optional<EquatableError>.none, target, message(), file: file, line: line)
+  }
+}

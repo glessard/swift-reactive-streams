@@ -31,12 +31,14 @@ class flatMapTests: XCTestCase
         _ = try event.get()
         XCTFail("unexpected execution")
       }
-      catch StreamCompleted.normally { e.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e.fulfill()
+      }
     }
 
     s.close()
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap2()
@@ -59,7 +61,7 @@ class flatMapTests: XCTestCase
     for _ in 0..<reps { stream.post(events) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap3()
@@ -83,14 +85,16 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, 0)
       }
-      catch StreamCompleted.normally { e.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e.fulfill()
+      }
     }
 
     s.post(events)
     s.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap4()
@@ -108,14 +112,16 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, events*events)
       }
-      catch StreamCompleted.normally { e.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e.fulfill()
+      }
     }
 
     for _ in (0..<events) { stream.post(events) }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap5()
@@ -142,17 +148,18 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssertLessThan(value, Double(limit), "value of \(value) reported")
       }
-      catch TestError.value(let value) {
-        XCTAssertGreaterThanOrEqual(value, 5)
+      catch {
+        XCTAssert(error is TestError, String(describing: error) )
+        if let error = error as? TestError, case let .value(value) = error
+        { XCTAssertGreaterThanOrEqual(value, 5) }
         e.fulfill()
       }
-      catch { XCTFail(String(describing: error)) }
     }
 
     for i in (1...events) { s.post(i) }
     s.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap6()
@@ -171,11 +178,10 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, 0, "counted \(value) events instead of zero")
       }
-      catch TestError.value(let value) {
-        XCTAssertEqual(value, events)
+      catch {
+        XCTAssertErrorEquals(error, TestError(events))
         e.fulfill()
       }
-      catch { XCTFail(String(describing: error)) }
     }
 
     for i in (1...events).reversed()
@@ -185,7 +191,7 @@ class flatMapTests: XCTestCase
     }
     stream.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap7()
@@ -204,10 +210,10 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, events*(streams/2))
       }
-      catch StreamCompleted.normally {
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
         e.fulfill()
       }
-      catch { XCTFail(String(describing: error)) }
     }
 
     for i in 1..<streams
@@ -218,7 +224,7 @@ class flatMapTests: XCTestCase
     }
     stream.close()
 
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testFlatMap8()
@@ -236,6 +242,6 @@ class flatMapTests: XCTestCase
     }
     stream.close()
 
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
   }
 }

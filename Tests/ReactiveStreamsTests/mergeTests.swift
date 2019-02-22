@@ -28,8 +28,10 @@ class mergeTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, count)
       }
-      catch StreamCompleted.normally { e1.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e1.fulfill()
+      }
     }
 
     XCTAssertEqual(merged.requested, .max)
@@ -41,7 +43,7 @@ class mergeTests: XCTestCase
     for i in 0..<count { s.post(i+1) }
     s.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testMerge2()
@@ -60,8 +62,10 @@ class mergeTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, 0)
       }
-      catch StreamCompleted.normally { e1.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e1.fulfill()
+      }
     }
 
     // merged stream is closed before any events come through,
@@ -74,7 +78,7 @@ class mergeTests: XCTestCase
     for i in 0..<count { s.post(i+1) }
     s.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testMerge3()
@@ -105,7 +109,7 @@ class mergeTests: XCTestCase
 
     streams.forEach { $0.close() }
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testMerge4()
@@ -125,11 +129,10 @@ class mergeTests: XCTestCase
         let counted = try event.get()
         XCTAssertLessThan(counted, posted)
       }
-      catch TestError.value(let value) {
-        XCTAssertEqual(value, id)
+      catch {
+        XCTAssertErrorEquals(error, TestError(id))
         e1.fulfill()
       }
-      catch { XCTFail(String(describing: error)) }
     }
 
     let e2 = expectation(description: "posting ends")
@@ -140,7 +143,7 @@ class mergeTests: XCTestCase
     for i in 1..<posted { s.post(i+1) }
     s.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testMerge5()
@@ -154,14 +157,14 @@ class mergeTests: XCTestCase
 
     for i in 0..<count { s.post(i+1) }
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
 
     let g = expectation(description: "observation ends \(#function)")
 
     merged.onCompletion { g.fulfill() }
     s.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testMerge6()
@@ -173,39 +176,28 @@ class mergeTests: XCTestCase
 
     let merged = s[0].merge(with: s.dropFirst())
 
-    merged.countEvents().notify {
-      event in
-      do {
-        let value = try event.get()
-        XCTAssertEqual(value, (count + count/2), String(value))
-      }
-      catch TestError.value(let value) {
-        XCTAssertEqual(value, count)
-        e.fulfill()
-      }
-      catch { XCTFail(String(describing: error)) }
-    }
+    merged.onValue { XCTAssertLessThan($0, count+count/2) }
+    merged.onError { XCTAssertErrorEquals($0, TestError(count+count/2)) }
+    merged.onError { _ in e.fulfill() }
 
     for (n,stream) in s.enumerated()
     {
-      for i in 0..<count
-      {
-        do {
-          let v = (n+1)*i
-          if v >= count { throw TestError(v) }
+      do {
+        for i in 0..<count
+        {
+          let v = i + (n*count)
+          guard v < (count+count/2) else { throw TestError(v) }
           stream.post(Event(value: v))
         }
-        catch {
-          stream.post(Event(error: error))
-        }
+      }
+      catch {
+        stream.post(error)
       }
 
-      let x = expectation(description: "posting ends")
-      stream.notify { e in if !e.isValue { x.fulfill() } }
       stream.close()
     }
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testMerge7()
@@ -227,7 +219,7 @@ class mergeTests: XCTestCase
     s1.post(0)
     s1.close()
 
-    waitForExpectations(timeout: 1.0, handler: nil)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testMerge8()
@@ -254,8 +246,10 @@ class mergeTests: XCTestCase
         let count = try event.get()
         XCTAssertEqual(count, 3)
       }
-      catch StreamCompleted.normally { e4.fulfill() }
-      catch { XCTFail(String(describing: error)) }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e4.fulfill()
+      }
     }
 
     s1.post(1)
@@ -265,7 +259,7 @@ class mergeTests: XCTestCase
     s2.post(2)
     s2.close()
 
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
     m4.close()
   }
 
@@ -290,11 +284,10 @@ class mergeTests: XCTestCase
         let countedEvents = try e.get()
         XCTAssertEqual(countedEvents, posted)
       }
-      catch TestError.value(let e) {
-        XCTAssertEqual(e, id)
+      catch {
+        XCTAssertErrorEquals(error, TestError(id))
         e3.fulfill()
       }
-      catch { XCTFail(String(describing: error)) }
     }
 
     s1.post(0)
@@ -303,7 +296,7 @@ class mergeTests: XCTestCase
     for i in 2..<posted { s1.post(i) }
     s1.close()
 
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
   }
 
   func testMergeDelayingError2()
@@ -317,12 +310,8 @@ class mergeTests: XCTestCase
     let x = expectation(description: "correct delayed error")
     merged.onError {
       error in
-      XCTAssert(error is TestError)
-      if let e = error as? TestError
-      {
-        XCTAssertEqual(e.error, id)
-        x.fulfill()
-      }
+      XCTAssertErrorEquals(error, TestError(id))
+      x.fulfill()
     }
 
     streams.first?.post(TestError(id))
@@ -330,6 +319,6 @@ class mergeTests: XCTestCase
       $0.post(TestError(nzRandom()))
     }
 
-    waitForExpectations(timeout: 0.1)
+    waitForExpectations(timeout: 1.0)
   }
 }
