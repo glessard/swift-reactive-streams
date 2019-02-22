@@ -114,9 +114,9 @@ extension OpaqueUnmanagedHelper
 
   mutating func load() -> Subscription?
   {
-    guard let pointer = lockAndLoad(.relaxed) else { return nil }
+    guard let pointer = lockAndLoad(.acquire) else { return nil }
 
-    assert(load(.sequential) == UnsafeRawPointer(bitPattern: 0x7))
+    assert(load(.acquire) == UnsafeRawPointer(bitPattern: 0x7))
     // atomic container is locked; increment the reference count
     let unmanaged = Unmanaged<Subscription>.fromOpaque(pointer).retain()
     // ensure the reference counting operation has occurred before unlocking,
