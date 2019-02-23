@@ -88,24 +88,6 @@ class streamTests: XCTestCase
     // the SpyStream should leak because one of its observers is kept alive by the pointer
   }
 
-  func testLifetime4()
-  {
-    let stream = PostBox<Int>()
-
-    var f = stream.finalValue()
-
-    stream.post(1)
-
-    let e = expectation(description: "completion")
-    f = stream.map { i throws in i }
-    f.onCompletion { e.fulfill() }
-
-    stream.post(2)
-    stream.close()
-
-    waitForExpectations(timeout: 1.0)
-  }
-
   func testPost()
   {
     let e1 = expectation(description: "closed")

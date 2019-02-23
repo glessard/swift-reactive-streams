@@ -109,7 +109,6 @@ extension streamTests {
         ("testLifetime1", testLifetime1),
         ("testLifetime2", testLifetime2),
         ("testLifetime3", testLifetime3),
-        ("testLifetime4", testLifetime4),
         ("testNextN", testNextN),
         ("testNextTruncated", testNextTruncated),
         ("testPaused1", testPaused1),
