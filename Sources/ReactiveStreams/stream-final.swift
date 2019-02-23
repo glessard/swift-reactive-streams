@@ -10,41 +10,33 @@ import Dispatch
 
 extension EventStream
 {
-  private func finalValue(_ stream: LimitedStream<Value>) -> EventStream<Value>
+  private func finalValue(_ stream: SingleValueStream<Value, Value>) -> EventStream<Value>
   {
     var latest: Event<Value>? = nil
-    self.subscribe(
-      subscriber: stream,
-      subscriptionHandler: {
-        subscription in
-        subscription.requestAll()
-        stream.setSubscription(subscription)
-    },
-      notificationHandler: {
-        mapped, event in
+    self.subscribe(substream: stream) {
+      mapped, event in
+      if event.isValue
+      {
+        latest = event
+      }
+      else
+      {
         mapped.queue.async {
-          if event.isValue
-          {
-            latest = event
-          }
-          else
-          {
-            if let latest = latest { mapped.dispatch(latest) }
-            mapped.dispatch(event)
-          }
+          latest.map({ mapped.dispatch($0) })
+          mapped.dispatch(event)
         }
+      }
     }
-    )
     return stream
   }
 
   public func finalValue(qos: DispatchQoS? = nil) -> EventStream<Value>
   {
-    return finalValue(LimitedStream<Value>(qos: qos ?? self.qos, count: 1))
+    return finalValue(SingleValueStream<Value, Value>(qos: qos ?? self.qos))
   }
 
   public func finalValue(queue: DispatchQueue) -> EventStream<Value>
   {
-    return finalValue(LimitedStream<Value>(queue: queue, count: 1))
+    return finalValue(SingleValueStream<Value, Value>(queue: queue))
   }
 }
