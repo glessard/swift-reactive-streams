@@ -110,11 +110,20 @@ open class PostBox<Value>: EventStream<Value>
     }
 #endif
 
+    let continueProcessing = processNext(batch: 2)
+    if continueProcessing == true
+    {
+      queue.async(execute: self.processNext)
+    }
+  }
+
+  private func processNext(batch: Int8) -> Bool
+  {
     // try to dequeue the next event
     let oldHead = head
     let next = CAtomicsLoad(oldHead.nptr, .acquire)
 
-    if requested <= 0 && CAtomicsLoad(fptr, .relaxed) != next { return }
+    if requested <= 0 && CAtomicsLoad(fptr, .relaxed) != next { return false }
 
     if let next = Node(storage: next)
     {
@@ -123,13 +132,13 @@ open class PostBox<Value>: EventStream<Value>
       oldHead.deallocate()
 
       dispatch(event)
-      queue.async(execute: self.processNext)
-      return
+      return batch > 0 ? processNext(batch: batch-1) : true
     }
 
     // Either the queue is empty, or processing is blocked.
     // Either way, processing will resume once
     // a node has been linked after the current `head`
+    return false
   }
 
   open override func processAdditionalRequest(_ additional: Int64)
