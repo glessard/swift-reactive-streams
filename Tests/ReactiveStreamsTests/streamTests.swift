@@ -735,33 +735,28 @@ class streamTests: XCTestCase
     let stream = PostBox<Int>()
     let events = 10
 
-    let e1 = expectation(description: "split.0 onValue")
-
     let split = stream.split()
 
     XCTAssertEqual(split.0.requested, 0)
     XCTAssertEqual(stream.requested, 0)
 
-    split.0.coalesce().onValue {
-      values in
-      XCTAssertEqual(values.count, events)
-      e1.fulfill()
-    }
+    let e1 = expectation(description: "split.0 onCompletion")
+    split.0.countEvents().onValue { XCTAssertEqual($0, events) }
+    split.0.onCompletion { e1.fulfill() }
 
+    XCTAssertEqual(stream.requested, .max)
     XCTAssertEqual(split.0.requested, .max)
     XCTAssertEqual(split.1.requested, 0)
-    XCTAssertEqual(stream.requested, .max)
 
     for i in 0..<events { stream.post(i+1) }
     stream.close()
 
     waitForExpectations(timeout: 1.0)
 
-    let e3 = expectation(description: "split.1 onCompletion")
+    XCTAssertEqual(split.0.requested, .min)
+    // `split.1.requested` equals 0 or .min
 
-    XCTAssertEqual(split.1.requested, .min)
-    // any subscription attempt will fail
-
+    let e2 = expectation(description: "split.1 onCompletion")
     split.1.notify {
       event in
       do {
@@ -770,7 +765,7 @@ class streamTests: XCTestCase
       }
       catch {
         XCTAssertErrorEquals(error, StreamCompleted.lateSubscription)
-        e3.fulfill()
+        e2.fulfill()
       }
     }
 
