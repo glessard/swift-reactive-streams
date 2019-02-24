@@ -59,12 +59,21 @@ class onRequestTests: XCTestCase
 
     let t = Test(expectation: e).paused()
     let s = t.next(count: 5).map(transform: { if $0 == 4 { throw TestError($0) }}).countEvents()
-    s.onValue { XCTAssertEqual($0, 4); g.fulfill() }
-    s.onError { e in if let e = e as? TestError { XCTAssertEqual(e, TestError.value(4)) }; f.fulfill() }
-    s.onError { _ in t.close() }
-    s.onCompletion { XCTFail("stream not expected to complete normally") }
-    t.start()
+    s.notify {
+      event in
+      do {
+        let count = try event.get()
+        XCTAssertEqual(count, 4)
+        g.fulfill()
+      }
+      catch {
+        XCTAssertErrorEquals(error, TestError(4))
+        t.close()
+        f.fulfill()
+      }
+    }
 
+    t.start()
     waitForExpectations(timeout: 1.0)
   }
 
@@ -79,10 +88,10 @@ class onRequestTests: XCTestCase
       do {
         let value = try event.get()
         XCTAssertEqual(value, 45)
-        e0.fulfill()
       }
       catch {
         XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e0.fulfill()
       }
     }
     p0.start()
@@ -97,10 +106,10 @@ class onRequestTests: XCTestCase
       do {
         let value = try event.get()
         XCTAssertEqual(value, 145)
-        e1.fulfill()
       }
       catch {
         XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e1.fulfill()
       }
     }
     p1.start()
