@@ -29,6 +29,16 @@ extension eventTests {
     ]
 }
 
+extension filterTests {
+    static let __allTests = [
+        ("testCompact1", testCompact1),
+        ("testCompact2", testCompact2),
+        ("testCompactMap", testCompactMap),
+        ("testFilter1", testFilter1),
+        ("testFilter2", testFilter2),
+    ]
+}
+
 extension flatMapTests {
     static let __allTests = [
         ("testFlatMap1", testFlatMap1),
@@ -68,12 +78,7 @@ extension onRequestTests {
 extension streamTests {
     static let __allTests = [
         ("testCoalesce", testCoalesce),
-        ("testCompact1", testCompact1),
-        ("testCompact2", testCompact2),
-        ("testCompactMap", testCompactMap),
         ("testCountEvents", testCountEvents),
-        ("testFilter1", testFilter1),
-        ("testFilter2", testFilter2),
         ("testFinal1", testFinal1),
         ("testFinal2", testFinal2),
         ("testFinal3", testFinal3),
@@ -130,6 +135,7 @@ public func __allTests() -> [XCTestCaseEntry] {
         testCase(DeferredStreamTests.__allTests),
         testCase(SingleValueSubscriberTests.__allTests),
         testCase(eventTests.__allTests),
+        testCase(filterTests.__allTests),
         testCase(flatMapTests.__allTests),
         testCase(mergeTests.__allTests),
         testCase(onRequestTests.__allTests),
