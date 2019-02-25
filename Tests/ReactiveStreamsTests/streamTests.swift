@@ -851,9 +851,11 @@ class streamTests: XCTestCase
     XCTAssertEqual(split.0.requested, 0)
     XCTAssertEqual(stream.requested, 0)
 
-    let e1 = expectation(description: "split.0 onCompletion")
     split.0.countEvents().onValue { XCTAssertEqual($0, events) }
-    split.0.onCompletion { e1.fulfill() }
+    let e0 = expectation(description: "split.0 onCompletion")
+    split.0.onCompletion { e0.fulfill() }
+    let e1 = expectation(description: "split.1 onCompletion")
+    split.1.onCompletion { e1.fulfill() }
 
     XCTAssertEqual(stream.requested, .max)
     XCTAssertEqual(split.0.requested, .max)
@@ -864,23 +866,16 @@ class streamTests: XCTestCase
 
     waitForExpectations(timeout: 1.0)
 
+    XCTAssertEqual(stream.requested, .min)
     XCTAssertEqual(split.0.requested, .min)
-    // `split.1.requested` equals 0 or .min
+    XCTAssertEqual(split.1.requested, .min)
 
-    let e2 = expectation(description: "split.1 onCompletion")
-    split.1.notify {
-      event in
-      do {
-        _ = try event.get()
-        XCTFail("split.1 never had a non-zero request")
-      }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.lateSubscription)
-        e2.fulfill()
-      }
+    let e2 = expectation(description: "split.1 onError")
+    split.1.onError {
+      error in
+      XCTAssertErrorEquals(error, StreamCompleted.lateSubscription)
+      e2.fulfill()
     }
-
-    XCTAssertEqual(split.1.state, .ended)
 
     waitForExpectations(timeout: 1.0)
   }
