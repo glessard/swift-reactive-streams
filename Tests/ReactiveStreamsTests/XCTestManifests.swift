@@ -75,13 +75,20 @@ extension onRequestTests {
     ]
 }
 
-extension streamTests {
+extension reduceTests {
     static let __allTests = [
         ("testCoalesce", testCoalesce),
         ("testCountEvents", testCountEvents),
         ("testFinal1", testFinal1),
         ("testFinal2", testFinal2),
-        ("testFinal3", testFinal3),
+        ("testReduce1", testReduce1),
+        ("testReduce2", testReduce2),
+        ("testReduceEmptyStream", testReduceEmptyStream),
+    ]
+}
+
+extension streamTests {
+    static let __allTests = [
         ("testLifetime1", testLifetime1),
         ("testLifetime2", testLifetime2),
         ("testLifetime3", testLifetime3),
@@ -99,9 +106,6 @@ extension streamTests {
         ("testPaused2", testPaused2),
         ("testPaused3", testPaused3),
         ("testPost", testPost),
-        ("testReduce1", testReduce1),
-        ("testReduce2", testReduce2),
-        ("testReduceEmptyStream", testReduceEmptyStream),
         ("testSkipN", testSkipN),
         ("testSplit0", testSplit0),
         ("testSplit1", testSplit1),
@@ -139,6 +143,7 @@ public func __allTests() -> [XCTestCaseEntry] {
         testCase(flatMapTests.__allTests),
         testCase(mergeTests.__allTests),
         testCase(onRequestTests.__allTests),
+        testCase(reduceTests.__allTests),
         testCase(streamTests.__allTests),
         testCase(subscriberTests.__allTests),
         testCase(timerTests.__allTests),
