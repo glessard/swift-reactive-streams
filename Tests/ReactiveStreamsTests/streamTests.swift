@@ -106,31 +106,6 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0)
   }
 
-  func testNotify()
-  {
-    let events = 10
-    let e1 = expectation(description: "observation onValue")
-    let e2 = expectation(description: "observation onError")
-    let stream = PostBox<Int>()
-
-    stream.notify(queue: DispatchQueue.global()) {
-      event in
-      do {
-        let value = try event.get()
-        if value == events { e1.fulfill() }
-      }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
-      }
-    }
-
-    for i in 0..<events { stream.post(i+1) }
-    stream.close()
-
-    waitForExpectations(timeout: 1.0)
-  }
-
   func testPost()
   {
     let e1 = expectation(description: "closed")
@@ -175,55 +150,6 @@ class streamTests: XCTestCase
     XCTAssertEqual(String(describing: s.state), "EventStream waiting to begin processing events")
     XCTAssertEqual(n.state, .ended)
     XCTAssertEqual(String(describing: n.state), "EventStream has completed")
-  }
-
-  func testOnValue()
-  {
-    let events = 10
-    let e1 = expectation(description: "observation onValue")
-    let stream = PostBox<Int>()
-
-    stream.onValue(queue: DispatchQueue.global()) {
-      v in
-      if v == events { e1.fulfill() }
-    }
-
-    for i in 0..<events { stream.post(i+1) }
-    stream.close()
-
-    waitForExpectations(timeout: 1.0)
-  }
-
-  func testOnError()
-  {
-    let e2 = expectation(description: "observation onError")
-    let s = PostBox<Int>()
-
-    s.onError {
-      error in
-      if let e = error as? StreamCompleted, e == .normally { XCTFail(String(describing: e)) }
-      e2.fulfill()
-    }
-
-    s.post(1)
-    s.post(TestError(42))
-
-    waitForExpectations(timeout: 1.0)
-  }
-
-  func testOnComplete()
-  {
-    let s1 = PostBox<Int>()
-    s1.onCompletion { XCTFail("stream not expected to complete normally") }
-
-    s1.post(TestError(-1))
-
-    let e2 = expectation(description: "observation onCompletion")
-    let s2 = EventStream<Int>()
-    s2.onCompletion { e2.fulfill() }
-    s2.close()
-
-    waitForExpectations(timeout: 1.0)
   }
 
   func testSkipN()

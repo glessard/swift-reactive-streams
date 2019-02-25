@@ -75,6 +75,15 @@ extension mergeTests {
     ]
 }
 
+extension notificationTests {
+    static let __allTests = [
+        ("testNotify", testNotify),
+        ("testOnComplete", testOnComplete),
+        ("testOnError", testOnError),
+        ("testOnValue", testOnValue),
+    ]
+}
+
 extension onRequestTests {
     static let __allTests = [
         ("testOnRequest1", testOnRequest1),
@@ -103,10 +112,6 @@ extension streamTests {
         ("testLifetime4", testLifetime4),
         ("testNextN", testNextN),
         ("testNextTruncated", testNextTruncated),
-        ("testNotify", testNotify),
-        ("testOnComplete", testOnComplete),
-        ("testOnError", testOnError),
-        ("testOnValue", testOnValue),
         ("testPaused1", testPaused1),
         ("testPaused2", testPaused2),
         ("testPaused3", testPaused3),
@@ -148,6 +153,7 @@ public func __allTests() -> [XCTestCaseEntry] {
         testCase(flatMapTests.__allTests),
         testCase(mapTests.__allTests),
         testCase(mergeTests.__allTests),
+        testCase(notificationTests.__allTests),
         testCase(onRequestTests.__allTests),
         testCase(reduceTests.__allTests),
         testCase(streamTests.__allTests),
