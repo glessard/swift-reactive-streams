@@ -32,11 +32,7 @@ public class DeferredStream<Value>: EventStream<Value>
 
     deferred.enqueue(queue: queue) {
       [weak self] outcome in
-      guard let this = self else { return }
-      let remaining = this.requested
-      if remaining <= 0 { return }
-
-      this.dispatchOutcome(outcome)
+      self?.dispatchOutcome(outcome)
     }
   }
 
@@ -48,6 +44,8 @@ public class DeferredStream<Value>: EventStream<Value>
       dispatchPrecondition(condition: .onQueue(queue))
     }
 #endif
+
+    guard requested > 0 else { return }
 
     deferred = nil
     dispatch(event)
@@ -65,12 +63,11 @@ public class DeferredStream<Value>: EventStream<Value>
 
   open override func processAdditionalRequest(_ additional: Int64)
   {
-    queue.async {
-      [ weak self ] in
-      guard let this = self else { return }
-      if let outcome = this.deferred?.peek()
-      {
-        this.dispatchOutcome(outcome)
+    if let outcome = deferred?.peek()
+    {
+      queue.async {
+        [weak self] in
+        self?.dispatchOutcome(outcome)
       }
     }
   }

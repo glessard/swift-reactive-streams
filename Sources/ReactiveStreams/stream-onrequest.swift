@@ -33,14 +33,18 @@ open class OnRequestStream: EventStream<Int>
 
   private func processNext()
   {
-    queue.async {
-      let remaining = self.requested
-      if remaining <= 0 { return }
-
-      self.dispatch(Event(value: self.counter))
-      self.counter += 1
-      self.processNext()
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+    {
+      dispatchPrecondition(condition: .onQueue(queue))
     }
+#endif
+
+    if requested <= 0 { return }
+
+    dispatch(Event(value: counter))
+    counter += 1
+    queue.async(execute: self.processNext)
   }
 
   open func start()
@@ -50,7 +54,7 @@ open class OnRequestStream: EventStream<Int>
       if streaming { return }
     } while !started.loadCAS(&streaming, true, .weak, .relaxed, .relaxed)
 
-    processNext()
+    queue.async(execute: self.processNext)
   }
 
   override open func processAdditionalRequest(_ additional: Int64)
@@ -58,7 +62,7 @@ open class OnRequestStream: EventStream<Int>
     super.processAdditionalRequest(additional)
     if started.load(.relaxed)
     { // enqueue some event processing in case stream had been paused
-      processNext()
+      queue.async(execute: self.processNext)
     }
   }
 }
