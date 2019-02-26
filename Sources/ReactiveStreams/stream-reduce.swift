@@ -42,7 +42,7 @@ class ReducingStream<InputValue, OutputValue>: SingleValueStream<InputValue, Out
   init(_ validated: ValidatedQueue, initial: OutputValue, combiner: @escaping (OutputValue, InputValue) throws -> OutputValue)
   {
     self.current = initial
-    self.combiner = { $0 = try combiner ($0, $1) }
+    self.combiner = { $0 = try combiner($0, $1) }
     super.init(validated: validated)
   }
 

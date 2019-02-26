@@ -29,6 +29,16 @@ extension eventTests {
     ]
 }
 
+extension filterTests {
+    static let __allTests = [
+        ("testCompact1", testCompact1),
+        ("testCompact2", testCompact2),
+        ("testCompactMap", testCompactMap),
+        ("testFilter1", testFilter1),
+        ("testFilter2", testFilter2),
+    ]
+}
+
 extension flatMapTests {
     static let __allTests = [
         ("testFlatMap1", testFlatMap1),
@@ -39,6 +49,14 @@ extension flatMapTests {
         ("testFlatMap6", testFlatMap6),
         ("testFlatMap7", testFlatMap7),
         ("testFlatMap8", testFlatMap8),
+    ]
+}
+
+extension mapTests {
+    static let __allTests = [
+        ("testMap1", testMap1),
+        ("testMap2", testMap2),
+        ("testMap3", testMap3),
     ]
 }
 
@@ -57,6 +75,15 @@ extension mergeTests {
     ]
 }
 
+extension notificationTests {
+    static let __allTests = [
+        ("testNotify", testNotify),
+        ("testOnComplete", testOnComplete),
+        ("testOnError", testOnError),
+        ("testOnValue", testOnValue),
+    ]
+}
+
 extension onRequestTests {
     static let __allTests = [
         ("testOnRequest1", testOnRequest1),
@@ -65,38 +92,30 @@ extension onRequestTests {
     ]
 }
 
-extension streamTests {
+extension reduceTests {
     static let __allTests = [
         ("testCoalesce", testCoalesce),
-        ("testCompact1", testCompact1),
-        ("testCompact2", testCompact2),
-        ("testCompactMap", testCompactMap),
         ("testCountEvents", testCountEvents),
-        ("testFilter1", testFilter1),
-        ("testFilter2", testFilter2),
         ("testFinal1", testFinal1),
         ("testFinal2", testFinal2),
-        ("testFinal3", testFinal3),
+        ("testReduce1", testReduce1),
+        ("testReduce2", testReduce2),
+        ("testReduceEmptyStream", testReduceEmptyStream),
+    ]
+}
+
+extension streamTests {
+    static let __allTests = [
         ("testLifetime1", testLifetime1),
         ("testLifetime2", testLifetime2),
         ("testLifetime3", testLifetime3),
         ("testLifetime4", testLifetime4),
-        ("testMap1", testMap1),
-        ("testMap2", testMap2),
-        ("testMap3", testMap3),
         ("testNextN", testNextN),
         ("testNextTruncated", testNextTruncated),
-        ("testNotify", testNotify),
-        ("testOnComplete", testOnComplete),
-        ("testOnError", testOnError),
-        ("testOnValue", testOnValue),
         ("testPaused1", testPaused1),
         ("testPaused2", testPaused2),
         ("testPaused3", testPaused3),
         ("testPost", testPost),
-        ("testReduce1", testReduce1),
-        ("testReduce2", testReduce2),
-        ("testReduceEmptyStream", testReduceEmptyStream),
         ("testSkipN", testSkipN),
         ("testSplit0", testSplit0),
         ("testSplit1", testSplit1),
@@ -130,9 +149,13 @@ public func __allTests() -> [XCTestCaseEntry] {
         testCase(DeferredStreamTests.__allTests),
         testCase(SingleValueSubscriberTests.__allTests),
         testCase(eventTests.__allTests),
+        testCase(filterTests.__allTests),
         testCase(flatMapTests.__allTests),
+        testCase(mapTests.__allTests),
         testCase(mergeTests.__allTests),
+        testCase(notificationTests.__allTests),
         testCase(onRequestTests.__allTests),
+        testCase(reduceTests.__allTests),
         testCase(streamTests.__allTests),
         testCase(subscriberTests.__allTests),
         testCase(timerTests.__allTests),
