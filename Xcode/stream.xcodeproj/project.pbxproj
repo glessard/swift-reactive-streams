@@ -35,7 +35,6 @@
 		0353123D2224946E00F4B44B /* TestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 035312302224946E00F4B44B /* TestError.swift */; };
 		0353123E2224946E00F4B44B /* filterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 035312312224946E00F4B44B /* filterTests.swift */; };
 		0353123F2224946E00F4B44B /* reduceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 035312322224946E00F4B44B /* reduceTests.swift */; };
-		035312402224946E00F4B44B /* XCTestManifests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 035312332224946E00F4B44B /* XCTestManifests.swift */; };
 		035312412224946E00F4B44B /* streamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 035312342224946E00F4B44B /* streamTests.swift */; };
 		035312422224946E00F4B44B /* subscriberTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 035312352224946E00F4B44B /* subscriberTests.swift */; };
 		035312432224946E00F4B44B /* mergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 035312362224946E00F4B44B /* mergeTests.swift */; };
@@ -556,7 +555,6 @@
 				035312442224946E00F4B44B /* eventTests.swift in Sources */,
 				035312382224946E00F4B44B /* nzRandom.swift in Sources */,
 				0353123D2224946E00F4B44B /* TestError.swift in Sources */,
-				035312402224946E00F4B44B /* XCTestManifests.swift in Sources */,
 				035312412224946E00F4B44B /* streamTests.swift in Sources */,
 				0353123C2224946E00F4B44B /* timerTests.swift in Sources */,
 				035312432224946E00F4B44B /* mergeTests.swift in Sources */,
