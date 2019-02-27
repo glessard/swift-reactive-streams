@@ -34,13 +34,15 @@ class notificationTests: XCTestCase
 
     for i in 1...events { stream.post(i) }
     stream.close()
-    queue.sync {} // ensure the stream is done
+
+    waitForExpectations(timeout: 1.0)
 
     let e3 = expectation(description: #function)
     stream.notify() {
       event in
       do {
         _ = try event.get()
+        XCTFail("stream not expected to produce a value")
       }
       catch {
         XCTAssertErrorEquals(error, StreamCompleted.lateSubscription)
@@ -65,26 +67,26 @@ class notificationTests: XCTestCase
 
     for i in 1...events { stream.post(i) }
     stream.close()
-    queue.sync {} // ensure the stream is done
-
-    stream.onValue() { _ in XCTFail("Shouldn't receive any values after the stream has been closed") }
 
     waitForExpectations(timeout: 1.0)
+
+    stream.onValue() { _ in XCTFail("Shouldn't receive any values after the stream has been closed") }
   }
 
   func testOnError()
   {
-    let e2 = expectation(description: "observation onError")
+    let e2 = expectation(description: #function)
     let s = PostBox<Int>()
 
     s.onError {
       error in
-      if let e = error as? StreamCompleted, e == .normally { XCTFail(String(describing: e)) }
+      XCTAssertErrorEquals(error, TestError(42))
       e2.fulfill()
     }
 
     s.post(1)
     s.post(TestError(42))
+    s.updateRequest(1)
 
     waitForExpectations(timeout: 1.0)
   }

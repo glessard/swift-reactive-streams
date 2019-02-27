@@ -150,19 +150,42 @@ class reduceTests: XCTestCase
     let queue = DispatchQueue(label: #function, qos: .default)
     let stream = PostBox<Int>(queue: queue)
     let events = 10
+    let e0 = expectation(description: #function+"0")
+    stream.onValue { if $0 == events { e0.fulfill() } }
+
+    let m = stream.countEvents(queue: .global(qos: .userInitiated))
+    m.updateRequest(1)
+
+    for i in 2...events { stream.post(i) }
+
+    waitForExpectations(timeout: 1.0)
 
     let e1 = expectation(description: #function+"1")
-    let m = stream.countEvents(queue: .global(qos: .userInitiated))
-    m.onValue { XCTAssertEqual($0, events) }
-    m.onCompletion { e1.fulfill() }
-
-    for i in 1..<events { stream.post(i) }
-    queue.sync {}
+    m.notify {
+      event in
+      do {
+        let count = try event.get()
+        XCTAssertEqual(count, events)
+      }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e1.fulfill()
+      }
+    }
 
     let e2 = expectation(description: #function+"2")
     let z = stream.countEvents()
-    z.onValue { XCTAssertEqual($0, 1) }
-    z.onCompletion { e2.fulfill() }
+    z.notify {
+      event in
+      do {
+        let count = try event.get()
+        XCTAssertEqual(count, 1)
+      }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
+    }
 
     stream.post(.max)
     stream.close()
@@ -175,18 +198,42 @@ class reduceTests: XCTestCase
     let queue = DispatchQueue(label: #function, qos: .default)
     let stream = PostBox<Int>(queue: queue)
     let events = 10
+    let e0 = expectation(description: #function+"0")
+    stream.onValue { if $0 == events { e0.fulfill() } }
+
+    let m = stream.coalesce(queue: .global(qos: .userInitiated))
+    m.updateRequest(1)
+
+    for i in 2...events { stream.post(i) }
+
+    waitForExpectations(timeout: 1.0)
 
     let e1 = expectation(description: #function+"1")
-    let m = stream.coalesce(queue: .global(qos: .userInitiated))
-    m.onValue { XCTAssertEqual($0.count, events) }
-    m.onCompletion { e1.fulfill() }
+    m.notify {
+      event in
+      do {
+        let coalesced = try event.get()
+        XCTAssertEqual(coalesced.count, events)
+      }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e1.fulfill()
+      }
+    }
 
-    for i in 1..<events { stream.post(i) }
-
-    let e2 = expectation(description: #function+"2")
     let o = stream.coalesce()
-    o.onValue { XCTAssertEqual($0.count, 1) }
-    o.onCompletion { e2.fulfill() }
+    let e2 = expectation(description: #function+"2")
+    o.notify {
+      event in
+      do {
+        let coalesced = try event.get()
+        XCTAssertEqual(coalesced.count, 1)
+      }
+      catch {
+        XCTAssertErrorEquals(error, StreamCompleted.normally)
+        e2.fulfill()
+      }
+    }
 
     stream.post(.max)
     stream.close()
