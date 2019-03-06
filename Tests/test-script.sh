@@ -5,7 +5,12 @@ COMPILER_MAJOR_VERSION=`echo ${COMPILER_VERSION} | awk -F . '{print $1}'`
 TEST_OPTIONS="-c release"
 
 swift --version
-swift test ${TEST_OPTIONS}
+if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+then
+  swift test ${TEST_OPTIONS} 2> /dev/null
+else
+  swift test ${TEST_OPTIONS}
+fi
 
 if [[ "${COMPILER_MAJOR_VERSION}" = "4" ]]
 then
@@ -25,5 +30,10 @@ do
   echo "Testing in compatibility mode for Swift ${LANGUAGE_VERSION}"
   swift package reset
   rm -f Package.resolved
-  swift test ${TEST_OPTIONS} -Xswiftc -swift-version -Xswiftc ${LANGUAGE_VERSION}
+  if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+  then
+    swift test ${TEST_OPTIONS} -Xswiftc -swift-version -Xswiftc ${LANGUAGE_VERSION} 2> /dev/null
+  else
+    swift test ${TEST_OPTIONS} -Xswiftc -swift-version -Xswiftc ${LANGUAGE_VERSION}
+  fi
 done
