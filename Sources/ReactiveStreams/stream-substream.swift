@@ -26,7 +26,7 @@ open class SubStream<Value>: EventStream<Value>
 
   open func setSubscription(_ subscription: Subscription)
   {
-    assert(sub.load(.sequential) == nil, "SubStream cannot subscribe to multiple streams")
+    assert(CAtomicsLoad(&sub, .sequential) == nil, "SubStream cannot subscribe to multiple streams")
     sub.initialize(subscription)
   }
 

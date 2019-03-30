@@ -32,7 +32,7 @@ public class SingleValueSubscriber<Value>: TBD<Value>
 
   open func setSubscription(_ subscription: Subscription)
   {
-    assert(sub.load(.sequential) == nil, "SingleValueSubscriber cannot subscribe to multiple streams")
+    assert(CAtomicsLoad(&sub, .sequential) == nil, "SingleValueSubscriber cannot subscribe to multiple streams")
     sub.initialize(subscription)
   }
 

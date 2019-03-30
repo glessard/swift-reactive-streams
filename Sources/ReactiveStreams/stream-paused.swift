@@ -14,7 +14,7 @@ open class Paused<Value>: SubStream<Value>
 
   public init(_ stream: EventStream<Value>)
   {
-    pending.initialize(0)
+    CAtomicsInitialize(&pending, 0)
     super.init(validated: ValidatedQueue(label: "pausedrequests", target: stream.queue))
 
     stream.subscribe(substream: self)
@@ -25,7 +25,7 @@ open class Paused<Value>: SubStream<Value>
     precondition(requested > 0)
 
     var updated: Int64
-    var request = pending.load(.relaxed)
+    var request = CAtomicsLoad(&pending, .relaxed)
     repeat {
       if request == .min
       {
@@ -35,21 +35,21 @@ open class Paused<Value>: SubStream<Value>
       if request == .max { return }
       updated = request &+ requested // could overflow; avoid trapping
       if updated < 0 { updated = .max } // check and correct for overflow
-    } while !pending.loadCAS(&request, updated, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchange(&pending, &request, updated, .weak, .relaxed, .relaxed)
   }
 
   open func start()
   {
-    var request = pending.load(.relaxed)
+    var request = CAtomicsLoad(&pending, .relaxed)
     repeat {
       if request == .min { return }
-    } while !pending.loadCAS(&request, .min, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchange(&pending, &request, .min, .weak, .relaxed, .relaxed)
 
     if request > 0 { super.updateRequest(request) }
   }
 
   public var isPaused: Bool {
-    return pending.load(.relaxed) != .min
+    return CAtomicsLoad(&pending, .relaxed) != .min
   }
 }
 

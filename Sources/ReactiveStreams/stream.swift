@@ -38,8 +38,8 @@ open class EventStream<Value>: Publisher
   private var observers = Dictionary<WeakSubscription, (Event<Value>) -> Void>()
 
   private var pending = AtomicInt64()
-  public  var requested: Int64 { return pending.load(.relaxed) }
-  public  var completed: Bool  { return pending.load(.relaxed) == .min }
+  public  var requested: Int64 { return CAtomicsLoad(&pending, .relaxed) }
+  public  var completed: Bool  { return CAtomicsLoad(&pending, .relaxed) == .min }
 
   public convenience init(qos: DispatchQoS = .current)
   {
@@ -53,7 +53,7 @@ open class EventStream<Value>: Publisher
 
   public init(validated queue: ValidatedQueue)
   {
-    pending.initialize(0)
+    CAtomicsInitialize(&pending, 0)
     self.queue = queue.queue
   }
 
@@ -98,11 +98,11 @@ open class EventStream<Value>: Publisher
   {
     assert(value.isValue)
 
-    var prev = pending.load(.relaxed)
+    var prev = CAtomicsLoad(&pending, .relaxed)
     repeat {
       if prev == .max { break }
       if prev <= 0 { return }
-    } while !pending.loadCAS(&prev, prev-1, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchange(&pending, &prev, prev-1, .weak, .relaxed, .relaxed)
 
     for (ws, notificationHandler) in self.observers
     {
@@ -123,10 +123,10 @@ open class EventStream<Value>: Publisher
   {
     assert(!error.isValue)
 
-    var prev = pending.load(.relaxed)
+    var prev = CAtomicsLoad(&pending, .relaxed)
     repeat {
       if prev == .min { return }
-    } while !pending.loadCAS(&prev, .min, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchange(&pending, &prev, .min, .weak, .relaxed, .relaxed)
 
     for (ws, notificationHandler) in self.observers
     {
@@ -240,10 +240,10 @@ open class EventStream<Value>: Publisher
   {
     precondition(requested > 0)
 
-    var prev = pending.load(.relaxed)
+    var prev = CAtomicsLoad(&pending, .relaxed)
     repeat {
       if prev >= requested || prev == .min { return }
-    } while !pending.loadCAS(&prev, requested, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchange(&pending, &prev, requested, .weak, .relaxed, .relaxed)
 
     let additional = (requested == .max) ? .max : (requested-prev)
     processAdditionalRequest(additional)

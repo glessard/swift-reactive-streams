@@ -14,23 +14,23 @@ final public class Subscription
 
   private var requested = AtomicInt64()
 
-  public var cancelled: Bool { return requested.load(.relaxed) == .min }
+  public var cancelled: Bool { return CAtomicsLoad(&requested, .relaxed) == .min }
 
   init<P: Publisher>(publisher: P)
   {
     source = publisher as EventSource
-    requested.initialize(0)
+    CAtomicsInitialize(&requested, 0)
   }
 
   // called by our source
 
   func shouldNotify() -> Bool
   {
-    var remaining = requested.load(.relaxed)
+    var remaining = CAtomicsLoad(&requested, .relaxed)
     repeat {
       if remaining == .max { break }
       if remaining <= 0 { return false }
-    } while !requested.loadCAS(&remaining, remaining-1, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchange(&requested, &remaining, remaining-1, .weak, .relaxed, .relaxed)
     return true
   }
 
@@ -53,12 +53,12 @@ final public class Subscription
     if count < 1 { return }
 
     var updated: Int64
-    var current = requested.load(.relaxed)
+    var current = CAtomicsLoad(&requested, .relaxed)
     repeat {
       if current == .min || current == .max { return }
       updated = current &+ count // could overflow; avoid trapping
       if updated < 0 { updated = .max } // check and correct for overflow
-    } while !requested.loadCAS(&current, updated, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchange(&requested, &current, updated, .weak, .relaxed, .relaxed)
 
     source.updateRequest(updated)
   }
@@ -67,10 +67,10 @@ final public class Subscription
 
   public func cancel()
   {
-    var prev = requested.load(.relaxed)
+    var prev = CAtomicsLoad(&requested, .relaxed)
     repeat {
       if prev == .min { return }
-    } while !requested.loadCAS(&prev, .min, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchange(&requested, &prev, .min, .weak, .relaxed, .relaxed)
 
     source.cancel(subscription: self)
   }
@@ -79,7 +79,7 @@ final public class Subscription
   {
     if (publisher as EventSource) === source
     {
-      requested.store(.min, .relaxed)
+      CAtomicsStore(&requested, .min, .relaxed)
     }
   }
 }
@@ -106,29 +106,29 @@ extension Subscription: Hashable
 
 extension OpaqueUnmanagedHelper
 {
-  mutating func initialize(_ subscription: Subscription)
+  mutating func initialize(_ subscription: Subscription?)
   {
-    let unmanaged = Unmanaged.passRetained(subscription)
-    initialize(unmanaged.toOpaque())
+    let unmanaged = subscription.map(Unmanaged.passRetained)
+    CAtomicsInitialize(&self, unmanaged?.toOpaque())
   }
 
   mutating func load() -> Subscription?
   {
-    guard let pointer = lockAndLoad(.acquire) else { return nil }
+    guard let pointer = CAtomicsUnmanagedLockAndLoad(&self, .acquire) else { return nil }
 
-    assert(load(.acquire) == UnsafeRawPointer(bitPattern: 0x7))
+    assert(CAtomicsLoad(&self, .acquire) == UnsafeRawPointer(bitPattern: 0x7))
     // atomic container is locked; increment the reference count
     let unmanaged = Unmanaged<Subscription>.fromOpaque(pointer).retain()
     // ensure the reference counting operation has occurred before unlocking,
     // by performing our store operation with StoreMemoryOrder.release
-    store(pointer, .release)
+    CAtomicsStore(&self, pointer, .release)
     // atomic container is unlocked
     return unmanaged.takeRetainedValue()
   }
 
   mutating func take() -> Subscription?
   {
-    guard let pointer = spinSwap(nil, .acquire) else { return nil }
+    guard let pointer = CAtomicsExchange(&self, nil, .acquire) else { return nil }
     return Unmanaged.fromOpaque(pointer).takeRetainedValue()
   }
 }

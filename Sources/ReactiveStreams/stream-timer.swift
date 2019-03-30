@@ -26,7 +26,7 @@ open class TimerStream: EventStream<Date>
     timingInterval = interval
     timingLeeway = tolerance ?? .nanoseconds(0)
     source = DispatchSource.makeTimerSource(queue: queue.queue)
-    started.initialize(false)
+    CAtomicsInitialize(&started, false)
 
     super.init(validated: queue)
 
@@ -37,13 +37,13 @@ open class TimerStream: EventStream<Date>
   @discardableResult
   open func startTimer() -> Date
   {
-    var s = started.load(.relaxed)
+    var s = CAtomicsLoad(&started, .relaxed)
     repeat {
       if s == true
       {
         return startDate
       }
-    } while !started.loadCAS(&s, true, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchange(&started, &s, true, .weak, .relaxed, .relaxed)
 
     source.suspend()
     source.setEventHandler {
