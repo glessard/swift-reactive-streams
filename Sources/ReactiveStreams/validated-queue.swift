@@ -14,7 +14,7 @@ public struct ValidatedQueue
 
   public init(label: String, qos: DispatchQoS = .current)
   {
-#if swift(>=4.2) && os(Linux)
+#if swift(>=4.2) && !swift(>=5.0) && os(Linux)
     // workaround for <https://bugs.swift.org/browse/SR-8906>
     self.queue = DispatchQueue(label: label, qos: qos)
 #else
