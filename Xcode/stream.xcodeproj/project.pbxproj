@@ -157,7 +157,7 @@
 		03A1465C2224966E00F4B44B /* mapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mapTests.swift; sourceTree = "<group>"; };
 		03A14661222497BC00F4B44B /* notificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = notificationTests.swift; sourceTree = "<group>"; };
 		03A1469322259E6600F4B44B /* postBoxTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = postBoxTests.swift; sourceTree = "<group>"; };
-		03B817B52218CD1C00F4B44B /* Package@swift-4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Package@swift-4.swift"; path = "../Package@swift-4.swift"; sourceTree = "<group>"; };
+		03B817B52218CD1C00F4B44B /* Package@swift-4.2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Package@swift-4.2.swift"; path = "../Package@swift-4.2.swift"; sourceTree = "<group>"; };
 		03BBC54F20E44A3D00F4B44B /* .travis.yml */ = {isa = PBXFileReference; lastKnownFileType = text; name = .travis.yml; path = ../.travis.yml; sourceTree = "<group>"; };
 		03D89FBD1CD46B4300F4B44B /* stream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.swift; sourceTree = "<group>"; };
 		03D89FBF1CD46C0700F4B44B /* event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = event.swift; sourceTree = "<group>"; };
@@ -279,7 +279,7 @@
 			isa = PBXGroup;
 			children = (
 				038FD36F1F573C2D00F4B44B /* Package.swift */,
-				03B817B52218CD1C00F4B44B /* Package@swift-4.swift */,
+				03B817B52218CD1C00F4B44B /* Package@swift-4.2.swift */,
 				03BBC54F20E44A3D00F4B44B /* .travis.yml */,
 				036162D5216577B700F4B44B /* install-swift.sh */,
 				035FD8C82166BEA000F4B44B /* test-script.sh */,

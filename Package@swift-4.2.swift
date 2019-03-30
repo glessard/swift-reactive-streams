@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:4.2
 
 import PackageDescription
 
@@ -17,5 +17,5 @@ let package = Package(
     .target(name: "ReactiveStreams", dependencies: ["CAtomics", "Outcome", "CurrentQoS", "deferred"]),
     .testTarget(name: "ReactiveStreamsTests", dependencies: ["ReactiveStreams"]),
   ],
-  swiftLanguageVersions: [.v4, .v4_2, .v5]
+  swiftLanguageVersions: [.v4, .v4_2, .version("5")]
 )
