@@ -14,10 +14,14 @@ public class SingleValueSubscriber<Value>: TBD<Value>
 {
   private var sub = UnsafeMutablePointer<OpaqueUnmanagedHelper>.allocate(capacity: 1)
 
-  public override init(queue: DispatchQueue)
+  public init(queue: DispatchQueue, execute: (Resolver<Value>) -> Subscription)
   {
-    CAtomicsInitialize(sub, nil)
-    super.init(queue: queue)
+    super.init(queue: queue) {
+      [sub] resolver in
+      let subscription = execute(resolver)
+      sub.initialize(subscription)
+    }
+
     self.enqueue(task: {
       [weak self] _ in
       let subscription = self?.sub.take()

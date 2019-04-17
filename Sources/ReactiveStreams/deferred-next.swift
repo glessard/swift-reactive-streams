@@ -19,18 +19,19 @@ extension EventStream
 
   public func next(queue: DispatchQueue) -> Deferred<Value>
   {
-    let subscriber = SingleValueSubscriber<Value>(queue: queue)
+    return SingleValueSubscriber<Value>(queue: queue) {
+      resolver in
+      var sub: Subscription? = nil
 
-    self.subscribe(
-      subscriber: subscriber,
-      subscriptionHandler: {
-        subscription in
-        subscriber.setSubscription(subscription)
-        subscription.request(1)
-      },
-      notificationHandler: { $0.determine($1) }
-    )
-
-    return Transferred(from: subscriber, on: queue)
+      self.subscribe(
+        subscriptionHandler: {
+          subscription in
+          sub = subscription
+          subscription.request(1)
+        },
+        notificationHandler: { resolver.resolve($0) }
+      )
+      return sub.unsafelyUnwrapped
+    }
   }
 }

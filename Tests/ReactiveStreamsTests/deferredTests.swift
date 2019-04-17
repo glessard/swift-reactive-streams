@@ -14,17 +14,24 @@ import deferred
 
 public class SingleValueSubscriberTests: XCTestCase
 {
+  func makeTestSubscriber(stream: EventStream<Int>, queue: DispatchQueue) -> SingleValueSubscriber<Int>
+  {
+    return SingleValueSubscriber<Int>(queue: queue) {
+      resolver in
+      var sub: Subscription? = nil
+      stream.subscribe(
+        subscriptionHandler: { sub = $0 },
+        notificationHandler: { resolver.resolve($0) }
+      )
+      return sub.unsafelyUnwrapped
+    }
+  }
+
   func testSingleValueSubscriberWithValue() throws
   {
     let queue = DispatchQueue(label: #function, qos: .utility)
     let stream = PostBox<Int>(queue: queue)
-    let subscriber = SingleValueSubscriber<Int>(queue: queue)
-
-    stream.subscribe(
-      subscriber: subscriber,
-      subscriptionHandler: subscriber.setSubscription,
-      notificationHandler: { $0.determine($1) }
-    )
+    let subscriber = makeTestSubscriber(stream: stream, queue: queue)
 
     let r = nzRandom()
     stream.post(r)
@@ -41,13 +48,7 @@ public class SingleValueSubscriberTests: XCTestCase
   {
     let queue = DispatchQueue(label: #function, qos: .utility)
     let stream = PostBox<Int>(queue: queue)
-    let subscriber = SingleValueSubscriber<Int>(queue: queue)
-
-    stream.subscribe(
-      subscriber: subscriber,
-      subscriptionHandler: subscriber.setSubscription,
-      notificationHandler: { $0.determine($1) }
-    )
+    let subscriber = makeTestSubscriber(stream: stream, queue: queue)
 
     XCTAssertNil(subscriber.peek())
 
@@ -58,14 +59,9 @@ public class SingleValueSubscriberTests: XCTestCase
 
   func testSingleValueSubscriberCancelled() throws
   {
+    let queue = DispatchQueue(label: #function, qos: .utility)
     let stream = PostBox<Int>()
-    let subscriber = SingleValueSubscriber<Int>(queue: DispatchQueue(label: #function, qos: .utility))
-
-    stream.subscribe(
-      subscriber: subscriber,
-      subscriptionHandler: subscriber.setSubscription,
-      notificationHandler: { $0.determine($1) }
-    )
+    let subscriber = makeTestSubscriber(stream: stream, queue: queue)
 
     subscriber.requestAll()
     XCTAssertNil(subscriber.peek())
@@ -139,7 +135,7 @@ class DeferredStreamTests: XCTestCase
 {
   func testDeferredStreamWithValue() throws
   {
-    let tbd = TBD<Int>()
+    let (resolver, tbd) = TBD<Int>.CreatePair()
     let random = nzRandom()
     let queue = DispatchQueue(label: #function)
     let stream = DeferredStream(queue: queue, from: tbd)
@@ -164,13 +160,13 @@ class DeferredStreamTests: XCTestCase
       XCTAssertEqual(stream.requested, 1)
     }
 
-    tbd.determine(value: random)
+    resolver.resolve(value: random)
     waitForExpectations(timeout: 1.0)
   }
 
   func testDeferredStreamWithError() throws
   {
-    let tbd = TBD<Int>()
+    let (resolver, tbd) = TBD<Int>.CreatePair()
     let random = nzRandom()
     let stream = tbd.eventStream
 
@@ -190,7 +186,7 @@ class DeferredStreamTests: XCTestCase
     }
     XCTAssertEqual(stream.requested, 1)
 
-    tbd.determine(error: TestError(random))
+    resolver.resolve(error: TestError(random))
     waitForExpectations(timeout: 1.0)
   }
 
