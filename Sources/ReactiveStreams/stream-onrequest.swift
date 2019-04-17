@@ -11,7 +11,7 @@ import CAtomics
 
 open class OnRequestStream: EventStream<Int>
 {
-  private var started = AtomicBool()
+  private var started = UnsafeMutablePointer<AtomicBool>.allocate(capacity: 1)
 
   private var counter = 0
 
@@ -25,9 +25,13 @@ open class OnRequestStream: EventStream<Int>
     self.init(validated: ValidatedQueue(label: "onrequeststream", target: queue), autostart: autostart)
   }
 
+  deinit {
+    started.deallocate()
+  }
+
   public init(validated queue: ValidatedQueue, autostart: Bool = true)
   {
-    CAtomicsInitialize(&started, autostart)
+    CAtomicsInitialize(started, autostart)
     super.init(validated: queue)
   }
 
@@ -49,10 +53,10 @@ open class OnRequestStream: EventStream<Int>
 
   open func start()
   {
-    var streaming = CAtomicsLoad(&started, .relaxed)
+    var streaming = CAtomicsLoad(started, .relaxed)
     repeat {
       if streaming { return }
-    } while !CAtomicsCompareAndExchange(&started, &streaming, true, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchange(started, &streaming, true, .weak, .relaxed, .relaxed)
 
     queue.async(execute: self.processNext)
   }
@@ -60,7 +64,7 @@ open class OnRequestStream: EventStream<Int>
   override open func processAdditionalRequest(_ additional: Int64)
   {
     super.processAdditionalRequest(additional)
-    if CAtomicsLoad(&started, .relaxed)
+    if CAtomicsLoad(started, .relaxed)
     { // enqueue some event processing in case stream had been paused
       queue.async(execute: self.processNext)
     }

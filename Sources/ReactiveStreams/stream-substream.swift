@@ -10,11 +10,11 @@ import CAtomics
 
 open class SubStream<Value>: EventStream<Value>
 {
-  private var sub = OpaqueUnmanagedHelper()
+  private var sub = UnsafeMutablePointer<OpaqueUnmanagedHelper>.allocate(capacity: 1)
 
   override init(validated: ValidatedQueue)
   {
-    sub.initialize(nil)
+    CAtomicsInitialize(sub, nil)
     super.init(validated: validated)
   }
 
@@ -22,11 +22,12 @@ open class SubStream<Value>: EventStream<Value>
   {
     let subscription = sub.take()
     subscription?.cancel()
+    sub.deallocate()
   }
 
   open func setSubscription(_ subscription: Subscription)
   {
-    assert(CAtomicsLoad(&sub, .sequential) == nil, "SubStream cannot subscribe to multiple streams")
+    assert(CAtomicsLoad(sub, .sequential) == nil, "SubStream cannot subscribe to multiple streams")
     sub.initialize(subscription)
   }
 

@@ -9,25 +9,41 @@
 import Dispatch
 import CAtomics
 
+private let hptrOffset = 0
+private let tptrOffset = MemoryLayout<AtomicMutableRawPointer>.stride
+private let fptrOffset = MemoryLayout<AtomicMutableRawPointer>.stride*2
+
 open class PostBox<Value>: EventStream<Value>
 {
   private typealias Node = BufferNode<Event<Value>>
 
-  private var hptr: AtomicMutableRawPointer
-  private var head: Node {
-    get { return Node(storage: CAtomicsLoad(&hptr, .relaxed)) }
-    set { CAtomicsStore(&hptr, newValue.storage, .relaxed) }
+  private let s = UnsafeMutableRawPointer.allocate(byteCount: MemoryLayout<AtomicMutableRawPointer>.stride*3,
+                                                   alignment: MemoryLayout<AtomicMutableRawPointer>.alignment)
+  private var hptr: UnsafeMutablePointer<AtomicMutableRawPointer> {
+    return (s+hptrOffset).assumingMemoryBound(to: AtomicMutableRawPointer.self)
   }
-  private var tptr: AtomicMutableRawPointer
-  private var fptr: AtomicOptionalMutableRawPointer
+  private var head: Node {
+    get { return Node(storage: CAtomicsLoad(hptr, .relaxed)) }
+    set { CAtomicsStore(hptr, newValue.storage, .relaxed) }
+  }
+  private var tptr: UnsafeMutablePointer<AtomicMutableRawPointer> {
+    return (s+tptrOffset).assumingMemoryBound(to: AtomicMutableRawPointer.self)
+  }
+  private var fptr: UnsafeMutablePointer<AtomicOptionalMutableRawPointer> {
+    return (s+fptrOffset).assumingMemoryBound(to: AtomicOptionalMutableRawPointer.self)
+  }
 
   override init(validated: ValidatedQueue)
-  { // set up an initial dummy node
-    let node = Node.dummy
-    hptr = AtomicMutableRawPointer(node.storage)
-    tptr = AtomicMutableRawPointer(node.storage)
-    fptr = AtomicOptionalMutableRawPointer(nil)
+  {
     super.init(validated: validated)
+
+    // set up an initial dummy node
+    let node = Node.dummy
+    (s+hptrOffset).bindMemory(to: AtomicMutableRawPointer.self, capacity: 2)
+    CAtomicsInitialize(hptr, node.storage)
+    CAtomicsInitialize(tptr, node.storage)
+    (s+fptrOffset).bindMemory(to: AtomicOptionalMutableRawPointer.self, capacity: 1)
+    CAtomicsInitialize(fptr, nil)
   }
 
   deinit {
@@ -40,29 +56,30 @@ open class PostBox<Value>: EventStream<Value>
       node.deinitialize()
       node.deallocate()
     }
-    head.deallocate()
+
+    s.deallocate()
   }
 
-  final public var isEmpty: Bool { return CAtomicsLoad(&hptr, .relaxed) == CAtomicsLoad(&tptr, .relaxed) }
+  final public var isEmpty: Bool { return CAtomicsLoad(hptr, .relaxed) == CAtomicsLoad(tptr, .relaxed) }
 
   final public func post(_ event: Event<Value>)
   {
-    guard completed == false, CAtomicsLoad(&fptr, .relaxed) == nil else { return }
+    guard completed == false, CAtomicsLoad(fptr, .relaxed) == nil else { return }
 
     let node = Node(initializedWith: event)
     if event.isError
     {
-      guard CAtomicsCompareAndExchange(&fptr, nil, node.storage, .strong, .relaxed) else { return }
+      guard CAtomicsCompareAndExchange(fptr, nil, node.storage, .strong, .relaxed) else { return }
     }
 
     // events posted "simultaneously" synchronize with each other here
-    let previousTailPointer = CAtomicsExchange(&tptr, node.storage, .acqrel)
+    let previousTailPointer = CAtomicsExchange(tptr, node.storage, .acqrel)
     let previousTail = Node(storage: previousTailPointer)
 
     // publish the new node to processing loop here
     CAtomicsStore(previousTail.nptr, node.storage, .release)
 
-    if previousTailPointer == CAtomicsLoad(&hptr, .relaxed)
+    if previousTailPointer == CAtomicsLoad(hptr, .relaxed)
     { // the queue had been empty or blocked
       // resume processing enqueued events
       queue.async(execute: self.processNext)
@@ -97,7 +114,7 @@ open class PostBox<Value>: EventStream<Value>
     let oldHead = head
     let next = CAtomicsLoad(oldHead.nptr, .acquire)
 
-    if requested <= 0 && CAtomicsLoad(&fptr, .relaxed) != next { return }
+    if requested <= 0 && CAtomicsLoad(fptr, .relaxed) != next { return }
 
     if let next = Node(storage: next)
     {
