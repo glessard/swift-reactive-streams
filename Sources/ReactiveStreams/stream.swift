@@ -167,7 +167,7 @@ open class EventStream<Value>: Publisher
   final public func subscribe<S: Subscriber>(_ subscriber: S)
     where S.Value == Value
   {
-    addSubscription(subscriber.onSubscription) {
+    subscribe(subscriptionHandler: subscriber.onSubscription) {
       [weak subscriber = subscriber] (event: Event<Value>) in
       if let subscriber = subscriber { subscriber.notify(event) }
     }
@@ -175,7 +175,7 @@ open class EventStream<Value>: Publisher
 
   final public func subscribe<S>(substream: S) where S: SubStream<Value>
   {
-    addSubscription(substream.setSubscription) {
+    subscribe(subscriptionHandler: substream.setSubscription) {
       [weak sub = substream] (event: Event<Value>) in
       if let sub = sub { sub.queue.async { sub.dispatch(event) } }
     }
@@ -185,7 +185,7 @@ open class EventStream<Value>: Publisher
                                     notificationHandler: @escaping (S, Event<Value>) -> Void)
     where S: SubStream<U>
   {
-    addSubscription(substream.setSubscription) {
+    subscribe(subscriptionHandler: substream.setSubscription) {
       [weak subscriber = substream] (event: Event<Value>) in
       if let substream = subscriber { notificationHandler(substream, event) }
     }
@@ -196,7 +196,7 @@ open class EventStream<Value>: Publisher
                                             subscriptionHandler: (Subscription) -> Void,
                                             notificationHandler: @escaping (T, Event<Value>) -> Void)
   {
-    addSubscription(subscriptionHandler) {
+    subscribe(subscriptionHandler: subscriptionHandler) {
       [weak subscriber = subscriber] (event: Event<Value>) in
       if let subscriber = subscriber { notificationHandler(subscriber, event) }
     }
@@ -206,15 +206,15 @@ open class EventStream<Value>: Publisher
                                             subscriptionHandler: @escaping (Subscription) -> Void,
                                             notificationHandler: @escaping (T, Event<Value>) -> Void)
   {
-    addSubscription(subscriptionHandler) {
+  subscribe(subscriptionHandler: subscriptionHandler) {
       [weak subscriber = subscriber] (event: Event<Value>) in
       if let subscriber = subscriber { notificationHandler(subscriber, event) }
     }
   }
 #endif
 
-  private func addSubscription(_ subscriptionHandler: (Subscription) -> Void,
-                               _ notificationHandler: @escaping (Event<Value>) -> Void)
+  final public func subscribe(subscriptionHandler: (Subscription) -> Void,
+                              notificationHandler: @escaping (Event<Value>) -> Void)
   {
     let subscription = Subscription(publisher: self)
 
