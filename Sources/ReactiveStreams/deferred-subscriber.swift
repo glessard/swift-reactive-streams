@@ -12,12 +12,16 @@ import CAtomics
 
 public class SingleValueSubscriber<Value>: TBD<Value>
 {
-  private var sub = OpaqueUnmanagedHelper()
+  private var sub = UnsafeMutablePointer<OpaqueUnmanagedHelper>.allocate(capacity: 1)
 
-  public override init(queue: DispatchQueue)
+  public init(queue: DispatchQueue, execute: (Resolver<Value>) -> Subscription)
   {
-    sub.initialize(nil)
-    super.init(queue: queue)
+    super.init(queue: queue) {
+      [sub] resolver in
+      let subscription = execute(resolver)
+      sub.initialize(subscription)
+    }
+
     self.enqueue(task: {
       [weak self] _ in
       let subscription = self?.sub.take()
@@ -28,11 +32,12 @@ public class SingleValueSubscriber<Value>: TBD<Value>
   deinit {
     let subscription = sub.take()
     subscription?.cancel()
+    sub.deallocate()
   }
 
   open func setSubscription(_ subscription: Subscription)
   {
-    assert(sub.load(.sequential) == nil, "SingleValueSubscriber cannot subscribe to multiple streams")
+    assert(CAtomicsLoad(sub, .sequential) == nil, "SingleValueSubscriber cannot subscribe to multiple streams")
     sub.initialize(subscription)
   }
 

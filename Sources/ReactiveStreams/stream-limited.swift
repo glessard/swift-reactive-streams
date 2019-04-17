@@ -12,8 +12,8 @@ import CAtomics
 open class LimitedStream<Value>: SubStream<Value>
 {
   public let limit: Int64
-  private var counter = AtomicInt64()
-  public var count: Int64 { return counter.load(.relaxed) }
+  private var counter = UnsafeMutablePointer<AtomicInt64>.allocate(capacity: 1)
+  public var count: Int64 { return CAtomicsLoad(counter, .relaxed) }
 
   public convenience init(qos: DispatchQoS = .current, count: Int64)
   {
@@ -28,9 +28,13 @@ open class LimitedStream<Value>: SubStream<Value>
   init(validated: ValidatedQueue, count: Int64)
   {
     assert(count >= 0)
-    counter.initialize(0)
+    CAtomicsInitialize(counter, 0)
     self.limit = count
     super.init(validated: validated)
+  }
+  
+  deinit {
+    counter.deallocate()
   }
 
   open override func dispatch(_ event: Event<Value>)
@@ -45,8 +49,8 @@ open class LimitedStream<Value>: SubStream<Value>
     guard count < limit else { return }
 
     super.dispatch(event)
-    let c = 1+counter.fetch_add(1, .relaxed)
-    if c == limit && event.isValue
+    let c = CAtomicsAdd(counter, 1, .relaxed)
+    if (c+1) == limit && event.isValue
     { // close the stream if it hasn't been closed already
       super.dispatch(Event.streamCompleted)
     }

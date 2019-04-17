@@ -19,37 +19,38 @@ extension EventStream
 
   public func finalOutcome(queue: DispatchQueue) -> Deferred<Value>
   {
-    let subscriber = SingleValueSubscriber<Value>(queue: queue)
-    var latest: Value? = nil
+    return SingleValueSubscriber<Value>(queue: queue) {
+      resolver in
+      var sub: Subscription? = nil
+      var latest: Value? = nil
 
-    self.subscribe(
-      subscriber: subscriber,
-      subscriptionHandler: {
-        subscription in
-        subscriber.setSubscription(subscription)
-        subscription.requestAll()
-      },
-      notificationHandler: {
-        subscriber, event in
-        do {
-          latest = try event.get()
-        }
-        catch StreamCompleted.normally {
-          if let value = latest
-          {
-            subscriber.determine(Event(value: value))
+      self.subscribe(
+        subscriptionHandler: {
+          subscription in
+          sub = subscription
+          subscription.requestAll()
+        },
+        notificationHandler: {
+          event in
+          do {
+            latest = try event.get()
           }
-          else
-          {
-            subscriber.cancel("Source stream completed without producing a value")
+          catch StreamCompleted.normally {
+            if let value = latest
+            {
+              resolver.resolve(Event(value: value))
+            }
+            else
+            {
+              resolver.cancel("Source stream completed without producing a value")
+            }
+          }
+          catch {
+            resolver.resolve(event)
           }
         }
-        catch {
-          subscriber.determine(event)
-        }
-      }
-    )
-
-    return Transferred(from: subscriber, on: queue)
+      )
+      return sub.unsafelyUnwrapped
+    }
   }
 }
