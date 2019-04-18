@@ -37,7 +37,7 @@ extension Result where Failure == Error
   }
 
   @inlinable
-  public var error: Error? {
+  public var error: Failure? {
     if case .failure(let error) = self { return error }
     return nil
   }
@@ -68,10 +68,7 @@ extension Result where Failure == Error
   public var streamError: Error?
   {
     guard case .failure(let error) = self else { return nil }
-    if let completed = error as? StreamCompleted, completed == .normally
-    {
-      return nil
-    }
+    if (error as? StreamCompleted) == .normally { return nil }
     return error
   }
 }
@@ -99,9 +96,7 @@ extension Event
 
   public var streamError: Error? {
     guard let error = error else { return nil }
-    if let completed = error as? StreamCompleted,
-       completed == .normally
-    { return nil }
+    if (error as? StreamCompleted) == .normally { return nil }
     return error
   }
 }
