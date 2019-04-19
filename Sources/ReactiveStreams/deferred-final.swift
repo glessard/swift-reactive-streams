@@ -38,7 +38,11 @@ extension EventStream
           catch StreamCompleted.normally {
             if let value = latest
             {
+#if compiler(>=5.0)
+              resolver.resolve(.success(value))
+#else
               resolver.resolve(Event(value: value))
+#endif
             }
             else
             {

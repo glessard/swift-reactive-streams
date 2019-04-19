@@ -39,3 +39,21 @@ public class SingleValueSubscriber<Value>: TBD<Value>
     subscription?.request(additional)
   }
 }
+
+extension Resolver
+{
+  @discardableResult
+  public func resolve(_ event: Event<Value>) -> Bool
+  {
+#if compiler(>=5.0)
+    return resolve(event.result ?? .failure(StreamCompleted.normally))
+#else
+    do {
+      return resolve(value: try event.get())
+    }
+    catch {
+      return resolve(error: error)
+    }
+#endif
+  }
+}
