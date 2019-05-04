@@ -12,33 +12,21 @@ import CAtomics
 
 public class SingleValueSubscriber<Value>: TBD<Value>
 {
-  private var sub = UnsafeMutablePointer<OpaqueUnmanagedHelper>.allocate(capacity: 1)
+  private weak var subscription: Subscription? = nil
 
   public init(queue: DispatchQueue, execute: (Resolver<Value>) -> Subscription)
   {
-    super.init(queue: queue) {
-      [sub] resolver in
-      let subscription = execute(resolver)
-      sub.initialize(subscription)
-    }
+    var resolver: Resolver<Value>!
+    super.init(queue: queue) { resolver = $0 }
 
-    self.enqueue(task: {
-      [weak self] _ in
-      let subscription = self?.sub.take()
-      subscription?.cancel()
-    })
+    let subscription = execute(resolver)
+    resolver.notify { [weak subscription] in subscription?.cancel() }
+    resolver.retainSource(subscription)
+    self.subscription = subscription
   }
 
   deinit {
-    let subscription = sub.take()
     subscription?.cancel()
-    sub.deallocate()
-  }
-
-  open func setSubscription(_ subscription: Subscription)
-  {
-    assert(CAtomicsLoad(sub, .sequential) == nil, "SingleValueSubscriber cannot subscribe to multiple streams")
-    sub.initialize(subscription)
   }
 
   public func requestAll()
@@ -48,7 +36,6 @@ public class SingleValueSubscriber<Value>: TBD<Value>
 
   public func request(_ additional: Int64)
   {
-    let subscription = sub.load()
     subscription?.request(additional)
   }
 }
