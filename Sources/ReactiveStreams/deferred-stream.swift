@@ -30,7 +30,7 @@ public class DeferredStream<Value>: EventStream<Value>
     self.deferred = deferred
     super.init(validated: validated)
 
-    deferred.enqueue(queue: queue) {
+    deferred.notify(queue: validated.queue) {
       [weak self] outcome in
       self?.dispatchOutcome(outcome)
     }
