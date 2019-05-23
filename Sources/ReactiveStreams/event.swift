@@ -6,98 +6,185 @@
 //  Copyright © 2015 Guillaume Lessard. All rights reserved.
 //
 
-#if compiler(>=5.0)
+import class Foundation.NSError
 
-public typealias Event<Value> = Result<Value, Error>
-
-extension Result where Failure == Error
+public struct Event<Value>
 {
-  @inlinable
-  public init(value: Success)
+#if compiler(>=5.0)
+  @usableFromInline var state: Result<Value, Swift.Error>?
+
+  private init(state: Result<Value, Swift.Error>?)
   {
-    self = .success(value)
+    self.state = state
+  }
+#else
+  @usableFromInline let state: State<Value>?
+
+  private init(state: State<Value>?)
+  {
+    self.state = state
+  }
+#endif
+
+  @inlinable
+  public init(value: Value)
+  {
+    state = .success(value)
   }
 
   @inlinable
   public init(error: Error)
   {
-    self = .failure(error)
+    if (error as? StreamCompleted) == .normally
+    {
+      state = nil
+    }
+    else
+    {
+      state = .failure(error)
+    }
+  }
+
+  public static var streamCompleted: Event {
+    return Event(state: nil)
   }
 
   @inlinable
-  public init(final: StreamCompleted)
+  public func get() throws -> Value
   {
-    self = .failure(final)
+    switch state
+    {
+    case .success(let value)?: return value
+    case .failure(let error)?: throw error
+    case .none:                throw StreamCompleted.normally
+    }
   }
 
   @inlinable
-  public var value: Success? {
-    if case .success(let value) = self { return value }
+  public var value: Value? {
+    if case .success(let value)? = state { return value }
     return nil
   }
 
   @inlinable
-  public var error: Failure? {
-    if case .failure(let error) = self { return error }
+  public var error: Error? {
+    if case .failure(let error)? = state { return error }
     return nil
+  }
+
+  @inlinable
+  public var completedNormally: Bool {
+    return state == nil
   }
 
   @inlinable
   public var isValue: Bool {
-    if case .success = self { return true }
+    if case .success? = state { return true }
     return false
   }
 
   @inlinable
   public var isError: Bool {
-    if case .failure = self { return true }
+    if case .failure? = state { return true }
     return false
   }
+}
 
-  public static var streamCompleted: Result<Success, Error> {
-    return .failure(StreamCompleted.normally)
+extension Event: CustomStringConvertible
+{
+  public var description: String {
+    switch state
+    {
+    case .success(let value)?: return "Value: \(value)"
+    case .failure(let error)?: return "Error: \(error)"
+    case nil:                  return "Stream Completed"
+    }
   }
+}
 
-  @inlinable
-  public var streamCompleted: StreamCompleted? {
-    if case .failure(let final as StreamCompleted) = self { return final }
-    return nil
-  }
-
-  @inlinable
-  public var streamError: Error?
+extension Event: Equatable where Value: Equatable
+{
+  public static func ==(lhe: Event, rhe: Event) -> Bool
   {
-    guard case .failure(let error) = self else { return nil }
-    if (error as? StreamCompleted) == .normally { return nil }
-    return error
+    switch (lhe.state, rhe.state)
+    {
+    case (nil, nil):
+      return true
+    case (.success(let lhv)?, .success(let rhv)?):
+      return lhv == rhv
+    case (.failure(let lhe)?, .failure(let rhe)?):
+      let lhs = "\(lhe) \(lhe as NSError)"
+      let rhs = "\(rhe) \(rhe as NSError)"
+      return lhs == rhs
+    default:
+      return false
+    }
+  }
+}
+
+extension Event: Hashable where Value: Hashable
+{
+  public func hash(into hasher: inout Hasher)
+  {
+    switch state
+    {
+    case nil:
+      Int(0).hash(into: &hasher)
+    case .success(let value)?:
+      Int(1).hash(into: &hasher)
+      value.hash(into: &hasher)
+    case .failure(let error)?:
+      Int(2).hash(into: &hasher)
+      "\(error) \(error as NSError)".hash(into: &hasher)
+    }
+  }
+}
+
+#if compiler(>=5.0)
+
+extension Event
+{
+  public init(_ result: Result<Value, Error>)
+  {
+    state = result
+  }
+
+  @inlinable
+  public var result: Result<Value, Swift.Error>? {
+    get { return state }
+    set {
+      if case .failure(let error)? = newValue, (error as? StreamCompleted) == .normally
+      {
+        state = nil
+        return
+      }
+
+      state = newValue
+    }
   }
 }
 
 #else
 
-import Outcome
+@usableFromInline
+enum State<Value>
+{
+  case success(Value)
+  case failure(Error)
+}
 
-public typealias Event = Outcome
+import Outcome
 
 extension Event
 {
-  public init(final: StreamCompleted)
+  public init(_ outcome: Outcome<Value>)
   {
-    self.init(error: final)
-  }
-
-  public static var streamCompleted: Event<Value> {
-    return Event(final: StreamCompleted.normally)
-  }
-
-  public var streamCompleted: StreamCompleted? {
-    return self.error as? StreamCompleted
-  }
-
-  public var streamError: Error? {
-    guard let error = error else { return nil }
-    if (error as? StreamCompleted) == .normally { return nil }
-    return error
+    do {
+      self.init(value: try outcome.get())
+    }
+    catch {
+      self.init(error: error)
+    }
   }
 }
 

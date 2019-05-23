@@ -25,7 +25,10 @@ extension SingleValueSubscriberTests {
 
 extension eventTests {
     static let __allTests = [
+        ("testDescription", testDescription),
+        ("testEquals", testEquals),
         ("testGetters", testGetters),
+        ("testHashable", testHashable),
     ]
 }
 

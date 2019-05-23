@@ -74,7 +74,7 @@ public class MergeStream<Value>: SubStream<Value>
           if event.isValue == false
           { // event terminates merged stream; remove it from sources
             merged.subscriptions.remove(subscription)
-            if event.error is StreamCompleted
+            if event.completedNormally || (event.error is StreamCompleted) // for .lateSubscription
             { // merged stream completed normally
               if (merged.closeWhenLastSourceCloses || merged.closed), merged.subscriptions.isEmpty
               { // no other event is forthcoming from any stream
@@ -85,7 +85,7 @@ public class MergeStream<Value>: SubStream<Value>
             }
             else if merged.delayErrorReporting
             {
-              let error = merged.delayedError ?? event.streamError!
+              let error = merged.delayedError ?? event.error!
               if merged.subscriptions.isEmpty
               {
                 merged.dispatch(Event(error: error))

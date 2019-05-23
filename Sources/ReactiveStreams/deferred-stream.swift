@@ -31,12 +31,12 @@ public class DeferredStream<Value>: EventStream<Value>
     super.init(validated: validated)
 
     deferred.notify(queue: validated.queue) {
-      [weak self] outcome in
-      self?.dispatchOutcome(outcome)
+      [weak self] result in
+      self?.dispatch(result)
     }
   }
 
-  private func dispatchOutcome(_ event: Event<Value>)
+  private func dispatch(_ result: Result<Value, Error>)
   {
 #if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
     if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
@@ -47,8 +47,9 @@ public class DeferredStream<Value>: EventStream<Value>
 
     guard requested > 0 else { return }
 
-    deferred = nil
+    let event = Event(result)
     dispatch(event)
+    deferred = nil
     if event.isValue
     {
       dispatch(Event.streamCompleted)
@@ -63,11 +64,11 @@ public class DeferredStream<Value>: EventStream<Value>
 
   open override func processAdditionalRequest(_ additional: Int64)
   {
-    if let outcome = deferred?.peek()
+    if let result = deferred?.peek()
     {
       queue.async {
         [weak self] in
-        self?.dispatchOutcome(outcome)
+        self?.dispatch(result)
       }
     }
   }
