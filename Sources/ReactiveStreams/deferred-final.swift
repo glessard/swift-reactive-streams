@@ -32,25 +32,15 @@ extension EventStream
         },
         notificationHandler: {
           event in
-          do {
-            latest = try event.get()
-          }
-          catch StreamCompleted.normally {
-            if let value = latest
-            {
-#if compiler(>=5.0)
-              resolver.resolve(.success(value))
-#else
-              resolver.resolve(Event(value: value))
-#endif
-            }
-            else
-            {
-              resolver.cancel("Source stream completed without producing a value")
-            }
-          }
-          catch {
+          switch event.state
+          {
+          case .success(let value)?:
+            latest = value
+          case .failure?:
             resolver.resolve(event)
+          case nil:
+            _ = latest.map { resolver.resolve(value: $0) } ??
+                resolver.cancel("Source stream completed without producing a value")
           }
         }
       )
