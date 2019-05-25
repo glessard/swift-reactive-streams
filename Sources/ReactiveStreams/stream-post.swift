@@ -101,11 +101,14 @@ open class PostBox<Value>: EventStream<Value>
     }
 #endif
 
+    let requested = self.requested
+    if requested <= 0 && CAtomicsLoad(last, .relaxed) == nil { return }
+
     // try to dequeue the next event
     let head = Node(storage: CAtomicsLoad(self.head, .acquire))
     let next = CAtomicsLoad(head.next, .acquire)
 
-    if requested <= 0 && next != CAtomicsLoad(last, .relaxed) { return }
+    if requested <= 0 && CAtomicsLoad(last, .relaxed) != next { return }
 
     if let next = next
     {
