@@ -48,7 +48,7 @@ open class OnRequestStream: EventStream<Int>
 
     dispatch(Event(value: counter))
     counter += 1
-    queue.async(execute: self.processNext)
+    queue.async(execute: { [weak self] in self?.processNext() })
   }
 
   open func start()
