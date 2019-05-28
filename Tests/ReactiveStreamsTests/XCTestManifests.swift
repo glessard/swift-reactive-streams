@@ -89,6 +89,7 @@ extension notificationTests {
 
 extension onRequestTests {
     static let __allTests = [
+        ("testLifetime", testLifetime),
         ("testOnRequest1", testOnRequest1),
         ("testOnRequest2", testOnRequest2),
         ("testOnRequest3", testOnRequest3),

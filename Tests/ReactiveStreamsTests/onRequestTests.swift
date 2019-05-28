@@ -116,4 +116,24 @@ class onRequestTests: XCTestCase
 
     waitForExpectations(timeout: 1.0)
   }
+
+  func testLifetime()
+  {
+    class SpyStream: OnRequestStream
+    {
+      let e: XCTestExpectation
+      init(_ expectation: XCTestExpectation)
+      {
+        e = expectation
+        super.init(validated: ValidatedQueue(label: "test", qos: .utility))
+      }
+      deinit { e.fulfill() }
+    }
+
+    let s = SpyStream(expectation(description: #function)).map { 2*$0 }
+    s.updateRequest(.max)
+    s.close()
+
+    waitForExpectations(timeout: 0.1)
+  }
 }
