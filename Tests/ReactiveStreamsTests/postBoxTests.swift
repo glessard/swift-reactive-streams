@@ -146,4 +146,18 @@ class postBoxTests: XCTestCase
       XCTAssertEqual(count, iterations)
     }
   }
+
+  func testPostBoxSubClass()
+  {
+    class TestBox: PostBox<Int> {}
+
+    let t = TestBox()
+    let c = t.countEvents()
+
+    t.post(1)
+    t.close()
+
+    let count = c.finalOutcome().value
+    XCTAssertEqual(count, 1)
+  }
 }

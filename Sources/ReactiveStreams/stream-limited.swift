@@ -25,7 +25,7 @@ open class LimitedStream<Value>: SubStream<Value>
     self.init(validated: ValidatedQueue(label: "limitedstream", target: queue), count: max(count,0))
   }
 
-  init(validated: ValidatedQueue, count: Int64)
+  public init(validated: ValidatedQueue, count: Int64)
   {
     assert(count >= 0)
     CAtomicsInitialize(counter, 0)
