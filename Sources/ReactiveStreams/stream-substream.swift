@@ -12,7 +12,7 @@ open class SubStream<Value>: EventStream<Value>
 {
   private var sub = UnsafeMutablePointer<OpaqueUnmanagedHelper>.allocate(capacity: 1)
 
-  override init(validated: ValidatedQueue)
+  public override init(validated: ValidatedQueue)
   {
     CAtomicsInitialize(sub, nil)
     super.init(validated: validated)

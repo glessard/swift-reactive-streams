@@ -25,7 +25,7 @@ open class PostBox<Value>: EventStream<Value>
     return (s+lastOffset).assumingMemoryBound(to: AtomicOptionalMutableRawPointer.self)
   }
 
-  override init(validated: ValidatedQueue)
+  public override init(validated: ValidatedQueue)
   {
     super.init(validated: validated)
 

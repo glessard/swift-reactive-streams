@@ -99,6 +99,7 @@ extension postBoxTests {
     static let __allTests = [
         ("testPerformanceDequeue", testPerformanceDequeue),
         ("testPostAfterCompletion", testPostAfterCompletion),
+        ("testPostBoxSubClass", testPostBoxSubClass),
         ("testPostConcurrentProducers", testPostConcurrentProducers),
         ("testPostDeinitWithPendingEvents", testPostDeinitWithPendingEvents),
         ("testPostDoubleTermination", testPostDoubleTermination),
