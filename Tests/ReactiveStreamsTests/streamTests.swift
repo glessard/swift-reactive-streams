@@ -88,6 +88,20 @@ class streamTests: XCTestCase
     // the SpyStream should leak because one of its observers is kept alive by the pointer
   }
 
+  func testRequested()
+  {
+    let stream = OnRequestStream()
+    XCTAssertEqual(stream.requested, 0)
+    let final = stream.finalOutcome()
+    XCTAssertEqual(stream.requested, .max)
+    final.cancel()
+
+    let mapped = stream.map(transform: { $0 })
+    XCTAssertNotEqual(stream.requested, .max)
+    XCTAssertEqual(stream.requested, 0)
+    mapped.close()
+  }
+
   func testStreamState()
   {
     let s = PostBox<Int>()
