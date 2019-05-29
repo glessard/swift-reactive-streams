@@ -41,14 +41,18 @@ class onRequestTests: XCTestCase
     let f = expectation(description: "completion")
     let g = expectation(description: "data")
 
-    class Test: OnRequestStream
+    class Test: OnRequestStream<Double>
     {
       let e: XCTestExpectation
 
       init(expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(label: "test", qos: .utility))
+        super.init(validated: ValidatedQueue(label: "test", qos: .utility)) {
+          i throws -> Double in
+          guard i < 4 else { throw TestError(i) }
+          return Double(i)*0.01
+        }
       }
 
       deinit
@@ -58,7 +62,7 @@ class onRequestTests: XCTestCase
     }
 
     let t = Test(expectation: e).paused()
-    let s = t.next(count: 5).map(transform: { if $0 == 4 { throw TestError($0) }}).countEvents()
+    let s = t.next(count: 5).countEvents()
     s.notify {
       event in
       do {
@@ -119,13 +123,13 @@ class onRequestTests: XCTestCase
 
   func testLifetime()
   {
-    class SpyStream: OnRequestStream
+    class SpyStream: OnRequestStream<Int>
     {
       let e: XCTestExpectation
       init(_ expectation: XCTestExpectation)
       {
         e = expectation
-        super.init(validated: ValidatedQueue(label: "test", qos: .utility))
+        super.init(validated: ValidatedQueue(label: "test", qos: .utility), task: { $0 })
       }
       deinit { e.fulfill() }
     }
