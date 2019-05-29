@@ -120,11 +120,13 @@ extension UnsafeMutablePointer where Pointee == OpaqueUnmanagedHelper
   {
     guard let pointer = CAtomicsUnmanagedLockAndLoad(self, .acquire) else { return nil }
 
+    CAtomicsThreadFence(.acquire)
     assert(CAtomicsLoad(self, .acquire) == UnsafeRawPointer(bitPattern: 0x7))
     // atomic container is locked; increment the reference count
     let unmanaged = Unmanaged<Subscription>.fromOpaque(pointer).retain()
     // ensure the reference counting operation has occurred before unlocking,
     // by performing our store operation with StoreMemoryOrder.release
+    CAtomicsThreadFence(.release)
     CAtomicsStore(self, pointer, .release)
     // atomic container is unlocked
     return unmanaged.takeRetainedValue()
