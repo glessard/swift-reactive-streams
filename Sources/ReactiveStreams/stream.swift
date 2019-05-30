@@ -175,7 +175,7 @@ open class EventStream<Value>: Publisher
   {
     subscribe(subscriptionHandler: subscriber.onSubscription) {
       [weak subscriber = subscriber] (event: Event<Value>) in
-      if let subscriber = subscriber { subscriber.notify(event) }
+      if let subscriber = subscriber { subscriber.onEvent(event) }
     }
   }
 

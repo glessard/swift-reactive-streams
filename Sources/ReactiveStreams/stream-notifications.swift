@@ -8,14 +8,12 @@
 
 import Dispatch
 
-private class NotificationSubscriber<T>: Subscriber
+private class NotificationSubscriber<Value>: Subscriber
 {
-  typealias Value = T
-
   private let queue: DispatchQueue
   private var subscription: Subscription? = nil
 
-  var eventHandler: ((T) -> Void)? = nil
+  var valueHandler: ((Value) -> Void)? = nil
   var errorHandler: ((Error) -> Void)? = nil
   var completionHandler: (() -> Void)? = nil
 
@@ -30,15 +28,12 @@ private class NotificationSubscriber<T>: Subscriber
 
     self.subscription = subscription
     // only request events if the event handler for value exists
-    if eventHandler != nil { subscription.requestAll() }
+    if valueHandler != nil { subscription.requestAll() }
   }
 
-  func onValue(_ value: T)
+  func onValue(_ value: Value)
   {
-    if let handler = self.eventHandler
-    {
-      queue.async { handler(value) }
-    }
+    if let handler = self.valueHandler { queue.async { handler(value) } }
   }
 
   func onError(_ error: Error)
@@ -59,7 +54,7 @@ private class NotificationSubscriber<T>: Subscriber
 
   private func cleanup()
   {
-    eventHandler = nil
+    valueHandler = nil
     errorHandler = nil
     completionHandler = nil
   }
@@ -67,10 +62,10 @@ private class NotificationSubscriber<T>: Subscriber
 
 extension EventStream
 {
-  private func performNotify(_ validated: ValidatedQueue, task: @escaping (Event<Value>) -> Void)
+  private func performOnEvent(_ validated: ValidatedQueue, task: @escaping (Event<Value>) -> Void)
   {
     let notifier = NotificationSubscriber<Value>(validated.queue)
-    notifier.eventHandler = { task(Event(value: $0)) }
+    notifier.valueHandler = { task(Event(value: $0)) }
     // making Subscriber.notify overrideable might be better, but not problem-free
     notifier.errorHandler = { task(Event(error: $0)) }
     notifier.completionHandler = { withExtendedLifetime(notifier) { task(Event.streamCompleted) } }
@@ -78,14 +73,14 @@ extension EventStream
     self.subscribe(notifier)
   }
 
-  public func notify(qos: DispatchQoS? = nil, task: @escaping (Event<Value>) -> Void)
+  public func onEvent(qos: DispatchQoS? = nil, task: @escaping (Event<Value>) -> Void)
   {
-    performNotify(ValidatedQueue(label: "notify", qos: qos ?? self.qos), task: task)
+    performOnEvent(ValidatedQueue(label: "notify", qos: qos ?? self.qos), task: task)
   }
 
-  public func notify(queue: DispatchQueue, task: @escaping (Event<Value>) -> Void)
+  public func onEvent(queue: DispatchQueue, task: @escaping (Event<Value>) -> Void)
   {
-    performNotify(ValidatedQueue(label: "notify", target: queue), task: task)
+    performOnEvent(ValidatedQueue(label: "notify", target: queue), task: task)
   }
 }
 
@@ -94,7 +89,7 @@ extension EventStream
   private func performOnValue(_ validated: ValidatedQueue, task: @escaping (Value) -> Void)
   {
     let notifier = NotificationSubscriber<Value>(validated.queue)
-    notifier.eventHandler = { value in withExtendedLifetime(notifier) { task(value) } }
+    notifier.valueHandler = { value in withExtendedLifetime(notifier) { task(value) } }
     self.subscribe(notifier)
   }
 

@@ -18,16 +18,13 @@ public protocol Subscriber: class
 
 extension Subscriber
 {
-  func notify(_ event: Event<Value>)
+  func onEvent(_ event: Event<Value>)
   {
-    do {
-      self.onValue(try event.get())
-    }
-    catch StreamCompleted.normally {
-      self.onCompletion()
-    }
-    catch {
-      self.onError(error)
+    switch event.state
+    {
+    case .success(let value)?: self.onValue(value)
+    case .failure(let error)?: self.onError(error)
+    case nil:                  self.onCompletion()
     }
   }
 }
