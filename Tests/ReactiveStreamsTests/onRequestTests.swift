@@ -18,7 +18,7 @@ class onRequestTests: XCTestCase
 
     let o = OnRequestStream(queue: DispatchQueue.global(qos: .background), autostart: false)
 
-    o.next(count: 10).reduce(0, +).notify {
+    o.next(count: 10).reduce(0, +).onEvent {
       event in
       do {
         let value = try event.get()
@@ -63,7 +63,7 @@ class onRequestTests: XCTestCase
 
     let t = Test(expectation: e).paused()
     let s = t.next(count: 5).countEvents()
-    s.notify {
+    s.onEvent {
       event in
       do {
         let count = try event.get()
@@ -87,7 +87,7 @@ class onRequestTests: XCTestCase
 
     let e0 = expectation(description: "first")
     let p0 = s.0.paused()
-    p0.next(count: 10).reduce(0, +).notify {
+    p0.next(count: 10).reduce(0, +).onEvent {
       event in
       do {
         let value = try event.get()
@@ -105,7 +105,7 @@ class onRequestTests: XCTestCase
 
     let e1 = expectation(description: "second")
     let p1 = s.1.paused()
-    p1.next(count: 10).reduce(0, +).notify {
+    p1.next(count: 10).reduce(0, +).onEvent {
       event in
       do {
         let value = try event.get()

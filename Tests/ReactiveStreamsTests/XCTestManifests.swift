@@ -87,6 +87,15 @@ extension notificationTests {
     ]
 }
 
+extension notifierTests {
+    static let __allTests = [
+        ("testNotify", testNotify),
+        ("testOnComplete", testOnComplete),
+        ("testOnError", testOnError),
+        ("testOnValue", testOnValue),
+    ]
+}
+
 extension onRequestTests {
     static let __allTests = [
         ("testLifetime", testLifetime),
@@ -170,6 +179,7 @@ public func __allTests() -> [XCTestCaseEntry] {
         testCase(mapTests.__allTests),
         testCase(mergeTests.__allTests),
         testCase(notificationTests.__allTests),
+        testCase(notifierTests.__allTests),
         testCase(onRequestTests.__allTests),
         testCase(postBoxTests.__allTests),
         testCase(reduceTests.__allTests),
