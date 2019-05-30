@@ -131,6 +131,7 @@ extension streamTests {
         ("testPaused1", testPaused1),
         ("testPaused2", testPaused2),
         ("testPaused3", testPaused3),
+        ("testRequested", testRequested),
         ("testSkipN", testSkipN),
         ("testSplit0", testSplit0),
         ("testSplit1", testSplit1),

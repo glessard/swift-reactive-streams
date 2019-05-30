@@ -119,6 +119,12 @@ open class EventStream<Value>: Publisher
         self.observers.removeValue(forKey: ws)
       }
     }
+
+    if self.observers.isEmpty && (prev > 1)
+    { // try to reset `pending` to zero
+      prev = (prev == .max) ? .max : prev-1
+      CAtomicsCompareAndExchange(pending, prev, 0, .strong, .relaxed)
+    }
   }
 
   /// precondition: must run on this stream's serial queue
