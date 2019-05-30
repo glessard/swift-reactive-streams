@@ -12,7 +12,7 @@ import ReactiveStreams
 
 class notifierTests: XCTestCase
 {
-  func testNotify()
+  func testOnEvent()
   {
     let events = 10
     let queue = DispatchQueue(label: #function, qos: .userInitiated)
@@ -106,7 +106,7 @@ class notifierTests: XCTestCase
 
 class notificationTests: XCTestCase
 {
-  func testNotify()
+  func testOnEvent()
   {
     let events = 10
     let queue = DispatchQueue(label: #function, qos: .userInitiated)
