@@ -114,7 +114,7 @@ class notificationTests: XCTestCase
 
     let e1 = expectation(description: "observation onValue")
     let e2 = expectation(description: "observation onError")
-    stream.notify(queue: .global()) {
+    stream.onEvent(queue: .global()) {
       event in
       do {
         let value = try event.get()
@@ -132,7 +132,7 @@ class notificationTests: XCTestCase
     waitForExpectations(timeout: 1.0)
 
     let e3 = expectation(description: #function)
-    stream.notify() {
+    stream.onEvent {
       event in
       do {
         _ = try event.get()

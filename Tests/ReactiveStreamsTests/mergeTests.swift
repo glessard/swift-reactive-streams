@@ -22,7 +22,7 @@ class mergeTests: XCTestCase
 
     let e1 = expectation(description: "observation ends \(#function)")
 
-    merged.countEvents().notify {
+    merged.countEvents().onEvent {
       event in
       do {
         let value = try event.get()
@@ -56,7 +56,7 @@ class mergeTests: XCTestCase
 
     let e1 = expectation(description: "observation ends \(#function)")
 
-    merged.countEvents().notify {
+    merged.countEvents().onEvent {
       event in
       do {
         let value = try event.get()
@@ -123,7 +123,7 @@ class mergeTests: XCTestCase
     let merged = s.merge(with: [t])
 
     let e1 = expectation(description: "observation ends \(#function)")
-    merged.countEvents().notify {
+    merged.countEvents().onEvent {
       event in
       do {
         let counted = try event.get()
@@ -240,7 +240,7 @@ class mergeTests: XCTestCase
     let m4 = s1.merge(with: s2)
     let e4 = expectation(description: "m4")
     let c4 = m4.countEvents()
-    c4.notify {
+    c4.onEvent {
       event in
       do {
         let count = try event.get()
@@ -274,11 +274,11 @@ class mergeTests: XCTestCase
 
     let s2 = PostBox<Int>(qos: .utility)
     let e2 = expectation(description: "postbox 2")
-    s2.notify { e in if !e.isValue { e2.fulfill() } }
+    s2.onEvent { e in if !e.isValue { e2.fulfill() } }
 
     let m3 = EventStream.merge(streams: [s2, s1], delayingErrors: true)
     let e3 = expectation(description: "merge delaying errors")
-    m3.countEvents().notify {
+    m3.countEvents().onEvent {
       e in
       do {
         let countedEvents = try e.get()

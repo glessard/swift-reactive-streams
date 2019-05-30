@@ -24,7 +24,7 @@ class postBoxTests: XCTestCase
     stream.post(Event(value: 1))
     stream.post(StreamCompleted.normally)
 
-    stream.reduce(0, +).notify {
+    stream.reduce(0, +).onEvent {
       event in
       do {
         let r = try event.get()

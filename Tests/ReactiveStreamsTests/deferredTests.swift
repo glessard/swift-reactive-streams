@@ -144,7 +144,7 @@ class DeferredStreamTests: XCTestCase
     let e2 = expectation(description: "observe completion")
 
     XCTAssertEqual(stream.requested, 0)
-    stream.notify {
+    stream.onEvent {
       event in
       do {
         let value = try event.get()
@@ -173,7 +173,7 @@ class DeferredStreamTests: XCTestCase
     let e = expectation(description: "observe error")
 
     XCTAssertEqual(stream.requested, 0)
-    stream.notify {
+    stream.onEvent {
       event in
       do {
         let _ = try event.get()

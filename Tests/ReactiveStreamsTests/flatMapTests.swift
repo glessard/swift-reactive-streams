@@ -25,7 +25,7 @@ class flatMapTests: XCTestCase
       return s
     }
 
-    m.notify {
+    m.onEvent {
       event in
       do {
         _ = try event.get()
@@ -79,7 +79,7 @@ class flatMapTests: XCTestCase
       return s
     }
 
-    m.countEvents().notify {
+    m.countEvents().onEvent {
       event in
       do {
         let value = try event.get()
@@ -106,7 +106,7 @@ class flatMapTests: XCTestCase
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
-    m.countEvents().notify {
+    m.countEvents().onEvent {
       event in
       do {
         let value = try event.get()
@@ -142,7 +142,7 @@ class flatMapTests: XCTestCase
       return s
     }
 
-    m.notify {
+    m.onEvent {
       event in
       do {
         let value = try event.get()
@@ -172,7 +172,7 @@ class flatMapTests: XCTestCase
 
     let m = stream.flatMap { OnRequestStream().next(count: $0) }
 
-    m.countEvents().notify {
+    m.countEvents().onEvent {
       event in
       do {
         let value = try event.get()
@@ -204,7 +204,7 @@ class flatMapTests: XCTestCase
 
     let m = stream.flatMap { $0 }
 
-    m.countEvents().notify {
+    m.countEvents().onEvent {
       event in
       do {
         let value = try event.get()

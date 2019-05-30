@@ -129,7 +129,7 @@ class streamTests: XCTestCase
     XCTAssertEqual(String(describing: s.state), "EventStream waiting to begin processing events")
 
     let n = s.next(count: 2)
-    n.notify {
+    n.onEvent {
       event in
     }
 
@@ -162,7 +162,7 @@ class streamTests: XCTestCase
     let n = m.next(count: count).skip(queue: DispatchQueue.global(), count: count)
     XCTAssertEqual(stream.requested, Int64(2*count))
 
-    n.notify {
+    n.onEvent {
       event in
       do {
         _ = try event.get()
@@ -191,7 +191,7 @@ class streamTests: XCTestCase
     let e2 = expectation(description: "observation onError")
 
     let m = stream.next(queue: DispatchQueue.global(), count: limit)
-    m.notify {
+    m.onEvent {
       event in
       do {
         let value = try event.get()
@@ -229,7 +229,7 @@ class streamTests: XCTestCase
       if i <= truncation { return i }
       throw TestError(id)
     }
-    t.notify {
+    t.onEvent {
       event in
       do {
         let value = try event.get()
@@ -269,7 +269,7 @@ class streamTests: XCTestCase
     let e2 = expectation(description: "split.0 onError")
 
     var a0 = [Int]()
-    split.0.coalesce().notify {
+    split.0.coalesce().onEvent {
       event in
       do {
         let value = try event.get()
@@ -386,7 +386,7 @@ class streamTests: XCTestCase
     }
 
     let sem = DispatchSemaphore(value: 0)
-    split.1.notify {
+    split.1.onEvent {
       event in
       do {
         let value = try event.get()
@@ -425,7 +425,7 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0)
     XCTAssertEqual(stream.requested, 0)
 
-    split.1.next(count: 5).notify { _ in }
+    split.1.next(count: 5).onEvent { _ in }
     XCTAssertEqual(stream.requested, 0)
   }
 

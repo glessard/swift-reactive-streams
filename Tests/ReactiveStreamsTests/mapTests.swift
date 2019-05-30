@@ -91,7 +91,7 @@ class mapTests: XCTestCase
 
     let m2 = m1.map(queue: DispatchQueue.global()) { Event(value: $0+1) }
 
-    m2.notify {
+    m2.onEvent {
       event in
       do {
         let v = try event.get()

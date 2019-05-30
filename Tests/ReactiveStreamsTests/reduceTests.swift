@@ -42,7 +42,7 @@ class reduceTests: XCTestCase
     let e = expectation(description: "observation onValue")
 
     let f = stream.finalValue(queue: DispatchQueue.global())
-    f.notify {
+    f.onEvent {
       event in
       do {
         _ = try event.get()
@@ -68,7 +68,7 @@ class reduceTests: XCTestCase
     let e2 = expectation(description: "observation onCompletion")
 
     let m = stream.reduce(0, +)
-    m.notify {
+    m.onEvent {
       event in
       do {
         let value = try event.get()
@@ -100,7 +100,7 @@ class reduceTests: XCTestCase
       guard sum <= events else { throw TestError() }
       return sum+e
     })
-    m.notify {
+    m.onEvent {
       event in
       do {
         let value = try event.get()
@@ -128,7 +128,7 @@ class reduceTests: XCTestCase
     let e2 = expectation(description: #function+"2")
 
     let m = stream.reduce(initial, { (c: Int, _) in c-1 })
-    m.notify {
+    m.onEvent {
       event in
       do {
         let value = try event.get()
@@ -161,7 +161,7 @@ class reduceTests: XCTestCase
     waitForExpectations(timeout: 1.0)
 
     let e1 = expectation(description: #function+"1")
-    m.notify {
+    m.onEvent {
       event in
       do {
         let count = try event.get()
@@ -175,7 +175,7 @@ class reduceTests: XCTestCase
 
     let e2 = expectation(description: #function+"2")
     let z = stream.countEvents()
-    z.notify {
+    z.onEvent {
       event in
       do {
         let count = try event.get()
@@ -209,7 +209,7 @@ class reduceTests: XCTestCase
     waitForExpectations(timeout: 1.0)
 
     let e1 = expectation(description: #function+"1")
-    m.notify {
+    m.onEvent {
       event in
       do {
         let coalesced = try event.get()
@@ -223,7 +223,7 @@ class reduceTests: XCTestCase
 
     let o = stream.coalesce()
     let e2 = expectation(description: #function+"2")
-    o.notify {
+    o.onEvent {
       event in
       do {
         let coalesced = try event.get()
