@@ -12,14 +12,13 @@ import ReactiveStreams
 
 class notifierTests: XCTestCase
 {
-  func testNotify()
+  func testOnEvent()
   {
     let events = 10
     let queue = DispatchQueue(label: #function, qos: .userInitiated)
     let stream = PostBox<Int>(queue: queue)
 
     let e1 = expectation(description: "observation onValue")
-    let e2 = expectation(description: "observation onError")
     var notifier = StreamNotifier(stream, onEvent: {
       event in
       do {
@@ -28,14 +27,14 @@ class notifierTests: XCTestCase
       }
       catch {
         XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
       }
     })
 
     for i in 1...events { stream.post(i) }
-    stream.close()
 
     waitForExpectations(timeout: 1.0)
+    notifier.close()
+    stream.close()
 
     let e3 = expectation(description: #function)
     notifier = StreamNotifier(stream, onEvent: {
@@ -106,7 +105,7 @@ class notifierTests: XCTestCase
 
 class notificationTests: XCTestCase
 {
-  func testNotify()
+  func testOnEvent()
   {
     let events = 10
     let queue = DispatchQueue(label: #function, qos: .userInitiated)

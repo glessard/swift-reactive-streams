@@ -7,21 +7,22 @@
 //
 
 import Dispatch
+import CAtomics
 
 public class StreamNotifier<Value>
 {
-  private var subscription: Subscription?
+  private var sub = UnsafeMutablePointer<OpaqueUnmanagedHelper>.allocate(capacity: 1)
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onEvent: @escaping (Event<Value>) -> Void)
   {
     let queue = ValidatedQueue(label: #function, target: queue)
     stream.subscribe(
-      subscriptionHandler: { self.subscription = $0; $0.requestAll() },
+      subscriptionHandler: { self.sub.initialize($0); $0.requestAll() },
       notificationHandler: {
         [weak self, queue = queue.queue] event in
         queue.async {
           onEvent(event)
-          if event.isValue == false { self?.subscription = nil }
+          if event.isValue == false { self?.close() }
         }
       }
     )
@@ -31,13 +32,13 @@ public class StreamNotifier<Value>
   {
     let queue = ValidatedQueue(label: #function, target: queue)
     stream.subscribe(
-      subscriptionHandler: { self.subscription = $0; $0.requestAll() },
+      subscriptionHandler: { self.sub.initialize($0); $0.requestAll() },
       notificationHandler: {
         [weak self, queue = queue.queue] event in
         if let value = event.value
         { queue.async { onValue(value) } }
         else
-        { self?.subscription = nil }
+        { self?.close() }
       }
     )
   }
@@ -45,12 +46,12 @@ public class StreamNotifier<Value>
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onError: @escaping (Error) -> Void)
   {
     stream.subscribe(
-      subscriptionHandler: { self.subscription = $0 },
+      subscriptionHandler: { self.sub.initialize($0) },
       notificationHandler: {
         [weak self] event in
         assert(event.value == nil)
         if let error = event.error { queue.async { onError(error) } }
-        self?.subscription = nil
+        self?.close()
       }
     )
   }
@@ -58,17 +59,25 @@ public class StreamNotifier<Value>
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onCompletion: @escaping () -> Void)
   {
     stream.subscribe(
-      subscriptionHandler: { self.subscription = $0 },
+      subscriptionHandler: { self.sub.initialize($0) },
       notificationHandler: {
         [weak self] event in
         assert(event.value == nil)
         if event.state == nil { queue.async { onCompletion() } }
-        self?.subscription = nil
+        self?.close()
       }
     )
   }
 
-  deinit {
+  public func close()
+  {
+    let subscription = sub.take()
     subscription?.cancel()
+  }
+
+  deinit {
+    let subscription = sub.take()
+    subscription?.cancel()
+    sub.deallocate()
   }
 }

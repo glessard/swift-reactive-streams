@@ -80,18 +80,18 @@ extension mergeTests {
 
 extension notificationTests {
     static let __allTests = [
-        ("testNotify", testNotify),
         ("testOnComplete", testOnComplete),
         ("testOnError", testOnError),
+        ("testOnEvent", testOnEvent),
         ("testOnValue", testOnValue),
     ]
 }
 
 extension notifierTests {
     static let __allTests = [
-        ("testNotify", testNotify),
         ("testOnComplete", testOnComplete),
         ("testOnError", testOnError),
+        ("testOnEvent", testOnEvent),
         ("testOnValue", testOnValue),
     ]
 }
