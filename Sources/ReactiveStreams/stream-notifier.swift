@@ -68,6 +68,12 @@ public class StreamNotifier<Value>
     )
   }
 
+  public func close()
+  {
+    subscription?.cancel()
+    subscription = nil
+  }
+
   deinit {
     subscription?.cancel()
   }
