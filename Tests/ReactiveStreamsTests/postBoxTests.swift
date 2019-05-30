@@ -127,12 +127,7 @@ class postBoxTests: XCTestCase
   {
     let iterations = 10_000
 
-#if (!swift(>=4.1) && os(Linux))
-    let metrics = XCTestCase.defaultPerformanceMetrics()
-#else
-    let metrics = XCTestCase.defaultPerformanceMetrics
-#endif
-    measureMetrics(metrics, automaticallyStartMeasuring: false) {
+    measureMetrics(XCTestCase.defaultPerformanceMetrics, automaticallyStartMeasuring: false) {
       let s = PostBox<Int>()
       for i in 0..<iterations { s.post(i) }
       s.close()
