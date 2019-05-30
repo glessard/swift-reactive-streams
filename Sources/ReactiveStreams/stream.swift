@@ -197,7 +197,6 @@ open class EventStream<Value>: Publisher
     }
   }
 
-#if swift(>=4.1.50)
   final public func subscribe<T: AnyObject>(subscriber: T,
                                             subscriptionHandler: (Subscription) -> Void,
                                             notificationHandler: @escaping (T, Event<Value>) -> Void)
@@ -207,17 +206,6 @@ open class EventStream<Value>: Publisher
       if let subscriber = subscriber { notificationHandler(subscriber, event) }
     }
   }
-#else
-  final public func subscribe<T: AnyObject>(subscriber: T,
-                                            subscriptionHandler: @escaping (Subscription) -> Void,
-                                            notificationHandler: @escaping (T, Event<Value>) -> Void)
-  {
-  subscribe(subscriptionHandler: subscriptionHandler) {
-      [weak subscriber = subscriber] (event: Event<Value>) in
-      if let subscriber = subscriber { notificationHandler(subscriber, event) }
-    }
-  }
-#endif
 
   final public func subscribe(subscriptionHandler: (Subscription) -> Void,
                               notificationHandler: @escaping (Event<Value>) -> Void)
@@ -298,12 +286,8 @@ private struct WeakSubscription: Equatable, Hashable
     return l.identifier == r.identifier
   }
 
-#if swift(>=4.1.50)
   func hash(into hasher: inout Hasher)
   {
     identifier.hash(into: &hasher)
   }
-#else
-  var hashValue: Int { return identifier.hashValue }
-#endif
 }

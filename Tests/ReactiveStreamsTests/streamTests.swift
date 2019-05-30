@@ -59,11 +59,7 @@ class streamTests: XCTestCase
     p.deinitialize(count: 1)
 
     waitForExpectations(timeout: 1.0)
-#if swift(>=4.1)
     p.deallocate()
-#else
-    p.deallocate(capacity: 1)
-#endif
   }
 
   func testLifetime3()

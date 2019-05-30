@@ -98,14 +98,10 @@ extension Subscription: Equatable
 
 extension Subscription: Hashable
 {
-#if swift(>=4.1.50)
   public func hash(into hasher: inout Hasher)
   {
     ObjectIdentifier(self).hash(into: &hasher)
   }
-#else
-  public var hashValue: Int { return ObjectIdentifier(self).hashValue }
-#endif
 }
 
 extension UnsafeMutablePointer where Pointee == OpaqueUnmanagedHelper
