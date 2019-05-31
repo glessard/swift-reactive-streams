@@ -65,8 +65,8 @@ open class EventStream<Value>: Publisher
     switch requested
     {
     case Int64.min:         return .ended
-    case let n where n > 0: return .streaming
     case 0:                 return .waiting
+    case let n where n > 0: return .streaming
     default: /* n < 0 */    fatalError()
     }
   }
