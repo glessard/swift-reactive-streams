@@ -14,7 +14,7 @@ open class SubStream<Value>: EventStream<Value>
 
   public override init(validated: ValidatedQueue)
   {
-    CAtomicsInitialize(sub, nil)
+    sub.initialize()
     super.init(validated: validated)
   }
 
@@ -27,8 +27,7 @@ open class SubStream<Value>: EventStream<Value>
 
   open func setSubscription(_ subscription: Subscription)
   {
-    assert(CAtomicsLoad(sub, .sequential) == nil, "SubStream cannot subscribe to multiple streams")
-    sub.initialize(subscription)
+    sub.assign(subscription)
   }
 
   /// precondition: must run on a barrier block or a serial queue

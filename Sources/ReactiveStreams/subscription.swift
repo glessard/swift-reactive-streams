@@ -106,10 +106,19 @@ extension Subscription: Hashable
 
 extension UnsafeMutablePointer where Pointee == OpaqueUnmanagedHelper
 {
-  func initialize(_ subscription: Subscription)
+  func initialize()
   {
-    let unmanaged = Unmanaged.passRetained(subscription)
-    CAtomicsInitialize(self, unmanaged.toOpaque())
+    CAtomicsInitialize(self, nil)
+  }
+
+  func assign(_ subscription: Subscription)
+  {
+    let unmanaged = Unmanaged.passUnretained(subscription)
+    // don't overwrite an existing reference
+    if CAtomicsCompareAndExchange(self, nil, unmanaged.toOpaque(), .strong, .release)
+    {
+      _ = unmanaged.retain()
+    }
   }
 
   func load() -> Subscription?

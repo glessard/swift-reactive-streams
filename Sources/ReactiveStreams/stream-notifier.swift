@@ -16,10 +16,11 @@ public class StreamNotifier<Value>
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onEvent: @escaping (Event<Value>) -> Void)
   {
+    sub.initialize()
     self.queue = ValidatedQueue(label: #function, target: queue).queue
     stream.subscribe(
       subscriber: self,
-      subscriptionHandler: { self.sub.initialize($0); $0.requestAll() },
+      subscriptionHandler: { self.sub.assign($0); $0.requestAll() },
       notificationHandler: {
         notifier, event in
         notifier.queue.async {
@@ -32,10 +33,11 @@ public class StreamNotifier<Value>
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onValue: @escaping (Value) -> Void)
   {
+    sub.initialize()
     self.queue = ValidatedQueue(label: #function, target: queue).queue
     stream.subscribe(
       subscriber: self,
-      subscriptionHandler: { self.sub.initialize($0); $0.requestAll() },
+      subscriptionHandler: { self.sub.assign($0); $0.requestAll() },
       notificationHandler: {
         notifier, event in
         if let value = event.value
@@ -48,10 +50,11 @@ public class StreamNotifier<Value>
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onError: @escaping (Error) -> Void)
   {
+    sub.initialize()
     self.queue = queue
     stream.subscribe(
       subscriber: self,
-      subscriptionHandler: { self.sub.initialize($0) },
+      subscriptionHandler: { self.sub.assign($0) },
       notificationHandler: {
         notifier, event in
         assert(event.value == nil)
@@ -63,10 +66,11 @@ public class StreamNotifier<Value>
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onCompletion: @escaping () -> Void)
   {
+    sub.initialize()
     self.queue = queue
     stream.subscribe(
       subscriber: self,
-      subscriptionHandler: { self.sub.initialize($0) },
+      subscriptionHandler: { self.sub.assign($0) },
       notificationHandler: {
         notifier, event in
         assert(event.value == nil)
