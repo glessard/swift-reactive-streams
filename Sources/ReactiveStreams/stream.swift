@@ -72,7 +72,7 @@ open class EventStream<Value>: Publisher
   }
 
   public var qos: DispatchQoS {
-    return self.queue.qos
+    return queue.qos
   }
 
   /// precondition: must run on this stream's serial queue
@@ -108,7 +108,7 @@ open class EventStream<Value>: Publisher
       if prev <= 0 { return }
     } while !CAtomicsCompareAndExchange(pending, &prev, prev-1, .weak, .relaxed, .relaxed)
 
-    for (ws, notificationHandler) in self.observers
+    for (ws, notificationHandler) in observers
     {
       if let subscription = ws.subscription
       {
@@ -116,11 +116,11 @@ open class EventStream<Value>: Publisher
       }
       else
       { // subscription no longer exists: remove handler.
-        self.observers.removeValue(forKey: ws)
+        observers.removeValue(forKey: ws)
       }
     }
 
-    if self.observers.isEmpty && (prev > 1)
+    if observers.isEmpty && (prev > 1)
     { // try to reset `pending` to zero
       prev = (prev == .max) ? .max : prev-1
       CAtomicsCompareAndExchange(pending, prev, 0, .strong, .relaxed)
@@ -138,18 +138,18 @@ open class EventStream<Value>: Publisher
       if prev == .min { return }
     } while !CAtomicsCompareAndExchange(pending, &prev, .min, .weak, .relaxed, .relaxed)
 
-    for (ws, notificationHandler) in self.observers
+    for (ws, notificationHandler) in observers
     {
       ws.subscription?.cancel(self)
       notificationHandler(error)
     }
-    self.finalizeStream()
+    finalizeStream()
   }
 
   open func close()
   {
     guard !completed else { return }
-    self.queue.async {
+    queue.async {
       self.dispatch(Event.streamCompleted)
     }
   }
@@ -165,7 +165,7 @@ open class EventStream<Value>: Publisher
     }
 #endif
 
-    self.observers.removeAll()
+    observers.removeAll()
   }
 
   // subscription methods
