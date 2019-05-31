@@ -114,6 +114,7 @@ extension postBoxTests {
         ("testPostDeinitWithPendingEvents", testPostDeinitWithPendingEvents),
         ("testPostDoubleTermination", testPostDoubleTermination),
         ("testPostErrorWithoutRequest", testPostErrorWithoutRequest),
+        ("testPostErrorWithoutSubscribers", testPostErrorWithoutSubscribers),
         ("testPostNormal", testPostNormal),
     ]
 }

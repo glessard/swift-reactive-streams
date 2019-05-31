@@ -88,6 +88,24 @@ class postBoxTests: XCTestCase
     waitForExpectations(timeout: 1.0)
   }
 
+  func testPostErrorWithoutSubscribers()
+  {
+    let stream = PostBox<Int>()
+
+    XCTAssertEqual(stream.isEmpty, true)
+    XCTAssertEqual(stream.requested, 0)
+    stream.close()
+
+    let e = expectation(description: #function)
+    stream.finalValue().onError {
+      XCTAssertErrorEquals($0, StreamCompleted.lateSubscription)
+      e.fulfill()
+    }
+    waitForExpectations(timeout: 1.0)
+    XCTAssertEqual(stream.isEmpty, true)
+    XCTAssertEqual(stream.completed, true)
+  }
+
   func testPostConcurrentProducers() throws
   {
     let producers = 2
