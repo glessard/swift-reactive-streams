@@ -12,17 +12,19 @@ import CAtomics
 public class StreamNotifier<Value>
 {
   private var sub = UnsafeMutablePointer<OpaqueUnmanagedHelper>.allocate(capacity: 1)
+  private let queue: DispatchQueue
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onEvent: @escaping (Event<Value>) -> Void)
   {
-    let queue = ValidatedQueue(label: #function, target: queue)
+    self.queue = ValidatedQueue(label: #function, target: queue).queue
     stream.subscribe(
+      subscriber: self,
       subscriptionHandler: { self.sub.initialize($0); $0.requestAll() },
       notificationHandler: {
-        [weak self, queue = queue.queue] event in
-        queue.async {
+        notifier, event in
+        notifier.queue.async {
           onEvent(event)
-          if event.isValue == false { self?.close() }
+          if event.isValue == false { notifier.close() }
         }
       }
     )
@@ -30,41 +32,46 @@ public class StreamNotifier<Value>
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onValue: @escaping (Value) -> Void)
   {
-    let queue = ValidatedQueue(label: #function, target: queue)
+    self.queue = ValidatedQueue(label: #function, target: queue).queue
     stream.subscribe(
+      subscriber: self,
       subscriptionHandler: { self.sub.initialize($0); $0.requestAll() },
       notificationHandler: {
-        [weak self, queue = queue.queue] event in
+        notifier, event in
         if let value = event.value
-        { queue.async { onValue(value) } }
+        { notifier.queue.async { onValue(value) } }
         else
-        { self?.close() }
+        { notifier.close() }
       }
     )
   }
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onError: @escaping (Error) -> Void)
   {
+    self.queue = queue
     stream.subscribe(
+      subscriber: self,
       subscriptionHandler: { self.sub.initialize($0) },
       notificationHandler: {
-        [weak self] event in
+        notifier, event in
         assert(event.value == nil)
-        if let error = event.error { queue.async { onError(error) } }
-        self?.close()
+        if let error = event.error { notifier.queue.async { onError(error) } }
+        notifier.close()
       }
     )
   }
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onCompletion: @escaping () -> Void)
   {
+    self.queue = queue
     stream.subscribe(
+      subscriber: self,
       subscriptionHandler: { self.sub.initialize($0) },
       notificationHandler: {
-        [weak self] event in
+        notifier, event in
         assert(event.value == nil)
-        if event.state == nil { queue.async { onCompletion() } }
-        self?.close()
+        if event.state == nil { notifier.queue.async { onCompletion() } }
+        notifier.close()
       }
     )
   }
