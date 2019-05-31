@@ -48,12 +48,14 @@ extension Resolver
 #if compiler(>=5.0)
     return resolve(event.result ?? .failure(StreamCompleted.normally))
 #else
+    let resolved: Bool
     do {
-      return resolve(value: try event.get())
+      resolved = resolve(value: try event.get())
     }
     catch {
-      return resolve(error: error)
+      resolved = resolve(error: error)
     }
+    return resolved
 #endif
   }
 }
