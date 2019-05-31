@@ -156,6 +156,7 @@ extension subscriberTests {
     static let __allTests = [
         ("testSubscriber1", testSubscriber1),
         ("testSubscriber2", testSubscriber2),
+        ("testSubscriber3", testSubscriber3),
     ]
 }
 

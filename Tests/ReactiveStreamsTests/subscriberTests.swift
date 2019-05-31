@@ -89,4 +89,20 @@ class subscriberTests: XCTestCase
 
     waitForExpectations(timeout: 1.0)
   }
+
+  func testSubscriber3()
+  {
+    let e = expectation(description: #function)
+
+    let stream = PostBox<Int>()
+
+    let subscriber = TestSubscriber(expectation: e)
+
+    stream.subscribe(subscriber)
+    stream.post(1)
+    stream.post(1)
+    subscriber.subscription.cancel()
+
+    waitForExpectations(timeout: 1.0)
+  }
 }
