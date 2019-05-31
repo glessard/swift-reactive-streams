@@ -23,10 +23,8 @@ private class NotificationSubscriber<Value>: Subscriber
   }
 
   func onSubscription(_ subscription: Subscription)
-  {
-    assert(self.subscription == nil, "received multiple calls to \(#function)")
-
-    self.subscription = subscription
+  { // never accept a subscription if we already have one
+    self.subscription = self.subscription ?? subscription
     // only request events if the event handler for value exists
     if valueHandler != nil { subscription.requestAll() }
   }
