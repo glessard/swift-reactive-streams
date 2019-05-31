@@ -123,7 +123,10 @@ open class EventStream<Value>: Publisher
     if observers.isEmpty && (prev > 1)
     { // try to reset `pending` to zero
       prev = (prev == .max) ? .max : prev-1
-      CAtomicsCompareAndExchange(pending, prev, 0, .strong, .relaxed)
+      if CAtomicsCompareAndExchange(pending, prev, 0, .strong, .relaxed)
+      {
+        lastSubscriptionWasCanceled()
+      }
     }
   }
 
@@ -257,6 +260,10 @@ open class EventStream<Value>: Publisher
 
         if let notificationHandler = self.observers.removeValue(forKey: key)
         {
+          if self.observers.isEmpty
+          {
+            self.lastSubscriptionWasCanceled()
+          }
           notificationHandler(Event.streamCompleted)
         }
       }
@@ -268,6 +275,11 @@ open class EventStream<Value>: Publisher
   open func processAdditionalRequest(_ additional: Int64)
   { // this is a only a customization point
     assert(additional > 0)
+  }
+
+  open func lastSubscriptionWasCanceled()
+  {
+    assert(observers.isEmpty)
   }
 }
 
