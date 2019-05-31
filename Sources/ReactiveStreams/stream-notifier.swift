@@ -24,7 +24,7 @@ public class StreamNotifier<Value>
         notifier, event in
         notifier.queue.async {
           onEvent(event)
-          if event.isValue == false { notifier.close() }
+          if event.isValue == false { _ = notifier.sub.take() }
         }
       }
     )
@@ -41,7 +41,7 @@ public class StreamNotifier<Value>
         if let value = event.value
         { notifier.queue.async { onValue(value) } }
         else
-        { notifier.close() }
+        { _ = notifier.sub.take() }
       }
     )
   }
@@ -56,7 +56,7 @@ public class StreamNotifier<Value>
         notifier, event in
         assert(event.value == nil)
         if let error = event.error { notifier.queue.async { onError(error) } }
-        notifier.close()
+        _ = notifier.sub.take()
       }
     )
   }
@@ -71,14 +71,14 @@ public class StreamNotifier<Value>
         notifier, event in
         assert(event.value == nil)
         if event.state == nil { notifier.queue.async { onCompletion() } }
-        notifier.close()
+        _ = notifier.sub.take()
       }
     )
   }
 
   public func close()
   {
-    let subscription = sub.take()
+    let subscription = sub.load()
     subscription?.cancel()
   }
 
