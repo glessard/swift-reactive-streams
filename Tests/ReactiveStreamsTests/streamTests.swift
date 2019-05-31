@@ -117,6 +117,43 @@ class streamTests: XCTestCase
     next.close()
   }
 
+  class SelfTerminatingPostBox<Value>: PostBox<Value>
+  {
+    override func lastSubscriptionWasCanceled()
+    {
+      super.lastSubscriptionWasCanceled()
+      close()
+    }
+  }
+
+  func testLastSubscriber()
+  {
+    let stream = SelfTerminatingPostBox<Int>()
+    stream.post(1)
+
+    var e = expectation(description: #function + "-1")
+    var s: Subscription?
+    stream.subscribe(
+      subscriptionHandler: {
+        subscription in
+        s = subscription
+        subscription.request(1)
+      },
+      notificationHandler: {
+        if $0.isValue { s?.cancel() }
+        else { e.fulfill() }
+      }
+    )
+    waitForExpectations(timeout: 1.0)
+
+    e = expectation(description: #function + "-2")
+    stream.finalValue().onError {
+      XCTAssertErrorEquals($0, StreamCompleted.lateSubscription)
+      e.fulfill()
+    }
+    waitForExpectations(timeout: 1.0)
+  }
+
   func testStreamState()
   {
     let s = PostBox<Int>()
