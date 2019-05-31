@@ -247,11 +247,6 @@ open class EventStream<Value>: Publisher
     processAdditionalRequest(additional)
   }
 
-  open func processAdditionalRequest(_ additional: Int64)
-  { // this is a only a customization point
-    assert(additional > 0)
-  }
-
   final public func cancel(subscription: Subscription)
   {
     if !completed
@@ -266,6 +261,13 @@ open class EventStream<Value>: Publisher
         }
       }
     }
+  }
+
+  // MARK: Publisher customization points
+
+  open func processAdditionalRequest(_ additional: Int64)
+  { // this is a only a customization point
+    assert(additional > 0)
   }
 }
 
