@@ -18,7 +18,7 @@ class notifierTests: XCTestCase
     let queue = DispatchQueue(label: #function, qos: .userInitiated)
     let stream = PostBox<Int>(queue: queue)
 
-    let e1 = expectation(description: "observation onValue")
+    let e1 = expectation(description: "onEvent: values")
     var notifier = StreamNotifier(stream, onEvent: {
       event in
       do {
@@ -31,12 +31,20 @@ class notifierTests: XCTestCase
     })
 
     for i in 1...events { stream.post(i) }
-
     waitForExpectations(timeout: 1.0)
-    notifier.close()
-    stream.close()
 
-    let e3 = expectation(description: #function)
+    let e2 = expectation(description: "onEvent: completion")
+    notifier = StreamNotifier(stream, onEvent: {
+      event in
+      XCTAssert(event.completedNormally)
+      e2.fulfill()
+    })
+    notifier.close()
+    waitForExpectations(timeout: 1.0)
+
+    XCTAssert(stream.isEmpty)
+    stream.close()
+    let e3 = expectation(description: "onEvent: error")
     notifier = StreamNotifier(stream, onEvent: {
       event in
       XCTAssertErrorEquals(event.error, StreamCompleted.lateSubscription)

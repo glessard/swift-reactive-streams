@@ -34,10 +34,13 @@ func XCTAssertErrorEquals<EquatableError>(_ error: Error?, _ target: EquatableEr
   {
     XCTAssertEqual(e, target, message(), file: file, line: line)
   }
+  else if let d = error.map(String.init(describing:))
+  {
+    XCTAssertEqual(d, String(describing: target), message(), file: file, line: line)
+  }
   else
   {
-    let d = error.map(String.init(describing:)) ?? "error"
-    XCTAssertEqual(d, String(describing: target), message(), file: file, line: line)
+    XCTAssertEqual(Optional<EquatableError>.none, target, message(), file: file, line: line)
   }
 }
 
