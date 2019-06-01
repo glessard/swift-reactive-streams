@@ -114,6 +114,7 @@ extension postBoxTests {
         ("testPostDeinitWithPendingEvents", testPostDeinitWithPendingEvents),
         ("testPostDoubleTermination", testPostDoubleTermination),
         ("testPostErrorWithoutRequest", testPostErrorWithoutRequest),
+        ("testPostErrorWithoutSubscribers", testPostErrorWithoutSubscribers),
         ("testPostNormal", testPostNormal),
     ]
 }
@@ -132,6 +133,7 @@ extension reduceTests {
 
 extension streamTests {
     static let __allTests = [
+        ("testLastSubscriber", testLastSubscriber),
         ("testLifetime1", testLifetime1),
         ("testLifetime2", testLifetime2),
         ("testLifetime3", testLifetime3),

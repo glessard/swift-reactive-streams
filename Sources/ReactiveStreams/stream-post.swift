@@ -59,7 +59,7 @@ open class PostBox<Value>: EventStream<Value>
     guard completed == false, CAtomicsLoad(last, .relaxed) == nil else { return }
 
     let node = Node(initializedWith: event)
-    if event.isError
+    if event.isValue == false
     {
       guard CAtomicsCompareAndExchange(last, nil, node.storage, .strong, .relaxed) else { return }
     }
