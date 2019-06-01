@@ -12,7 +12,7 @@ import ReactiveStreams
 
 class notifierTests: XCTestCase
 {
-  func testOnEvent()
+  func testOnEvent1()
   {
     let events = 10
     let queue = DispatchQueue(label: #function, qos: .userInitiated)
@@ -55,7 +55,32 @@ class notifierTests: XCTestCase
     _ = notifier
   }
 
-  func testOnValue()
+  func testOnEvent2()
+  {
+    let stream = OnRequestStream()
+
+    let e = expectation(description: #function)
+    let notifier = StreamNotifier(stream, onEvent: {
+      subscription, event in
+      if let c = event.value
+      {
+        if c < 10
+        { subscription.request(1) }
+        else
+        { subscription.cancel() }
+      }
+      else
+      {
+        e.fulfill()
+      }
+    })
+    notifier.request(1)
+
+    waitForExpectations(timeout: 1.0)
+    _ = notifier
+  }
+
+  func testOnValue1()
   {
     let events = 10
     let queue = DispatchQueue(label: #function, qos: .userInitiated)
@@ -73,6 +98,29 @@ class notifierTests: XCTestCase
     waitForExpectations(timeout: 1.0)
 
     stream.onValue() { _ in XCTFail("Shouldn't receive any values after the stream has been closed") }
+    _ = notifier
+  }
+
+  func testOnValue2()
+  {
+    let stream = OnRequestStream()
+
+    let e = expectation(description: #function)
+    let notifier = StreamNotifier(stream, onValue: {
+      subscription, value in
+      if value < 10
+      {
+        subscription.request(1)
+      }
+      else
+      {
+        subscription.cancel()
+        e.fulfill()
+      }
+    })
+    notifier.request(1)
+
+    waitForExpectations(timeout: 1.0)
     _ = notifier
   }
 

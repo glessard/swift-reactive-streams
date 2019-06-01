@@ -91,8 +91,10 @@ extension notifierTests {
     static let __allTests = [
         ("testOnComplete", testOnComplete),
         ("testOnError", testOnError),
-        ("testOnEvent", testOnEvent),
-        ("testOnValue", testOnValue),
+        ("testOnEvent1", testOnEvent1),
+        ("testOnEvent2", testOnEvent2),
+        ("testOnValue1", testOnValue1),
+        ("testOnValue2", testOnValue2),
     ]
 }
 

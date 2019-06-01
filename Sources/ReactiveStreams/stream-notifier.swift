@@ -31,6 +31,23 @@ public class StreamNotifier<Value>
     )
   }
 
+  public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onEvent: @escaping(Subscription, Event<Value>) -> Void)
+  {
+    sub.initialize()
+    self.queue = ValidatedQueue(label: #function, target: queue).queue
+    stream.subscribe(
+      subscriber: self,
+      subscriptionHandler: { self.sub.assign($0) },
+      notificationHandler: {
+        notifier, subscription, event in
+        notifier.queue.async {
+          onEvent(subscription, event)
+          if event.isValue == false { _ = notifier.sub.take() }
+        }
+      }
+    )
+  }
+
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onValue: @escaping (Value) -> Void)
   {
     sub.initialize()
@@ -42,6 +59,23 @@ public class StreamNotifier<Value>
         notifier, event in
         if let value = event.value
         { notifier.queue.async { onValue(value) } }
+        else
+        { _ = notifier.sub.take() }
+      }
+    )
+  }
+
+  public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onValue: @escaping (Subscription, Value) -> Void)
+  {
+    sub.initialize()
+    self.queue = ValidatedQueue(label: #function, target: queue).queue
+    stream.subscribe(
+      subscriber: self,
+      subscriptionHandler: { self.sub.assign($0) },
+      notificationHandler: {
+        notifier, subscription, event in
+        if let value = event.value
+        { notifier.queue.async { onValue(subscription, value) } }
         else
         { _ = notifier.sub.take() }
       }
@@ -78,6 +112,12 @@ public class StreamNotifier<Value>
         _ = notifier.sub.take()
       }
     )
+  }
+
+  public func request(_ count: Int)
+  {
+    let subscription = sub.load()
+    subscription?.request(count)
   }
 
   public func close()
