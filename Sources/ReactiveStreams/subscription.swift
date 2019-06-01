@@ -104,42 +104,34 @@ extension Subscription: Hashable
   }
 }
 
-extension UnsafeMutablePointer where Pointee == OpaqueUnmanagedHelper
+struct OneTime<Reference: AnyObject>
 {
-  func initialize()
+  private let ref: Unmanaged<Reference>
+  private weak var wref: Reference? = nil
+
+  init(_ reference: Reference)
   {
-    CAtomicsInitialize(self, nil)
+    ref = Unmanaged.passRetained(reference)
+    wref = reference
   }
 
-  func assign(_ subscription: Subscription)
-  {
-    let unmanaged = Unmanaged.passUnretained(subscription)
-    // don't overwrite an existing reference
-    if CAtomicsCompareAndExchange(self, nil, unmanaged.toOpaque(), .strong, .release)
-    {
-      _ = unmanaged.retain()
-    }
-  }
+  var reference: Reference? { return wref }
 
-  func load() -> Subscription?
-  {
-    guard let pointer = CAtomicsUnmanagedLockAndLoad(self, .acquire) else { return nil }
+  /// Clear the reference, and return it if it exists.
+  /// For any particular instance, all possible uses of this
+  /// cannot overlap with one another; use either serially,
+  /// in a barrier block or in a deinit.
+  ///
+  /// Making this a `mutating` function is not a valid way
+  /// to enforce the above restriction, as reading a value
+  /// is illegal during a mutating access; the restriction
+  /// for this method is strictly for simultaneous calls.
 
-    CAtomicsThreadFence(.acquire)
-    assert(CAtomicsLoad(self, .acquire) == UnsafeRawPointer(bitPattern: 0x7))
-    // atomic container is locked; increment the reference count
-    let unmanaged = Unmanaged<Subscription>.fromOpaque(pointer).retain()
-    // ensure the reference counting operation has occurred before unlocking,
-    // by performing our store operation with StoreMemoryOrder.release
-    CAtomicsThreadFence(.release)
-    CAtomicsStore(self, pointer, .release)
-    // atomic container is unlocked
-    return unmanaged.takeRetainedValue()
-  }
-
-  func take() -> Subscription?
+  func take() -> Reference?
   {
-    guard let pointer = CAtomicsExchange(self, nil, .acquire) else { return nil }
-    return Unmanaged.fromOpaque(pointer).takeRetainedValue()
+    guard let reference = wref else { return nil }
+
+    ref.release()
+    return reference
   }
 }
