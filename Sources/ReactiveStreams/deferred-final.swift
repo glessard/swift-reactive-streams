@@ -31,7 +31,7 @@ extension EventStream
           subscription.requestAll()
         },
         notificationHandler: {
-          event in
+          _, event in
           switch event.state
           {
           case .success(let value)?:

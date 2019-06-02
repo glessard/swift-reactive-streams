@@ -29,7 +29,7 @@ extension EventStream
           sub = subscription
           subscription.request(1)
         },
-        notificationHandler: { resolver.resolve($0) }
+        notificationHandler: { resolver.resolve($1) }
       )
       return sub.unsafelyUnwrapped
     }

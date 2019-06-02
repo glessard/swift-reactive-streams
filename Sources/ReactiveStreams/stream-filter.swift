@@ -12,22 +12,26 @@ extension EventStream
 {
   private func compactMap<U>(_ stream: SubStream<U>, transform: @escaping (Value) throws -> U?) -> EventStream<U>
   {
-    self.subscribe(substream: stream) {
-      mapped, event in
-      let newEvent: Event<U>
-      do {
-        guard let transformed = try transform(event.get())
-        else {
-          mapped.processAdditionalRequest(1)
-          return
+    self.subscribe(
+      subscriber: stream,
+      subscriptionHandler: stream.setSubscription,
+      notificationHandler: {
+        mapped, subscription, event in
+        let newEvent: Event<U>
+        do {
+          guard let transformed = try transform(event.get())
+          else {
+            subscription.request(1)
+            return
+          }
+          newEvent = Event(value: transformed)
         }
-        newEvent = Event(value: transformed)
+        catch {
+          newEvent = Event(error: error)
+        }
+        mapped.queue.async { mapped.dispatch(newEvent) }
       }
-      catch {
-        newEvent = Event(error: error)
-      }
-      mapped.queue.async { mapped.dispatch(newEvent) }
-    }
+    )
     return stream
   }
 
@@ -60,22 +64,26 @@ extension EventStream
   private func compact<U>(_ stream: SubStream<U>) -> EventStream<U>
     where Value == Optional<U>
   {
-    self.subscribe(substream: stream) {
-      mapped, event in
-      let newEvent: Event<U>
-      do {
-        guard let value = try event.get()
-        else {
-          mapped.processAdditionalRequest(1)
-          return
+    self.subscribe(
+      subscriber: stream,
+      subscriptionHandler: stream.setSubscription,
+      notificationHandler: {
+        mapped, subscription, event in
+        let newEvent: Event<U>
+        do {
+          guard let value = try event.get()
+          else {
+            subscription.request(1)
+            return
+          }
+          newEvent = Event(value: value)
         }
-        newEvent = Event(value: value)
+        catch {
+          newEvent = Event(error: error)
+        }
+        mapped.queue.async { mapped.dispatch(newEvent) }
       }
-      catch {
-        newEvent = Event(error: error)
-      }
-      mapped.queue.async { mapped.dispatch(newEvent) }
-    }
+    )
     return stream
   }
 

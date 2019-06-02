@@ -35,7 +35,7 @@ open class EventStream<Value>: Publisher
   public typealias EventType = Value
 
   let queue: DispatchQueue
-  private var observers = Dictionary<WeakSubscription, (Event<Value>) -> Void>()
+  private var observers = Dictionary<WeakSubscription, (Subscription, Event<Value>) -> Void>()
 
   private var pending = UnsafeMutablePointer<AtomicInt64>.allocate(capacity: 1)
   public  var requested: Int64 { return CAtomicsLoad(pending, .relaxed) }
@@ -112,7 +112,7 @@ open class EventStream<Value>: Publisher
     {
       if let subscription = ws.subscription
       {
-        if subscription.shouldNotify() { notificationHandler(value) }
+        if subscription.shouldNotify() { notificationHandler(subscription, value) }
       }
       else
       { // subscription no longer exists: remove handler.
@@ -143,8 +143,11 @@ open class EventStream<Value>: Publisher
 
     for (ws, notificationHandler) in observers
     {
-      ws.subscription?.cancel(self)
-      notificationHandler(error)
+      if let subscription = ws.subscription
+      {
+        subscription.cancel(self)
+        notificationHandler(subscription, error)
+      }
     }
     finalizeStream()
   }
@@ -177,7 +180,7 @@ open class EventStream<Value>: Publisher
     where S.Value == Value
   {
     subscribe(subscriptionHandler: subscriber.onSubscription) {
-      [weak subscriber = subscriber] (event: Event<Value>) in
+      [weak subscriber = subscriber] (_, event: Event<Value>) in
       if let subscriber = subscriber { subscriber.onEvent(event) }
     }
   }
@@ -185,7 +188,7 @@ open class EventStream<Value>: Publisher
   final public func subscribe<S>(substream: S) where S: SubStream<Value>
   {
     subscribe(subscriptionHandler: substream.setSubscription) {
-      [weak sub = substream] (event: Event<Value>) in
+      [weak sub = substream] (_, event: Event<Value>) in
       if let sub = sub { sub.queue.async { sub.dispatch(event) } }
     }
   }
@@ -195,7 +198,7 @@ open class EventStream<Value>: Publisher
     where S: SubStream<U>
   {
     subscribe(subscriptionHandler: substream.setSubscription) {
-      [weak subscriber = substream] (event: Event<Value>) in
+      [weak subscriber = substream] (_, event: Event<Value>) in
       if let substream = subscriber { notificationHandler(substream, event) }
     }
   }
@@ -205,13 +208,23 @@ open class EventStream<Value>: Publisher
                                             notificationHandler: @escaping (T, Event<Value>) -> Void)
   {
     subscribe(subscriptionHandler: subscriptionHandler) {
-      [weak subscriber = subscriber] (event: Event<Value>) in
+      [weak subscriber = subscriber] (_, event: Event<Value>) in
       if let subscriber = subscriber { notificationHandler(subscriber, event) }
     }
   }
 
+  final public func subscribe<T: AnyObject>(subscriber: T,
+                                            subscriptionHandler: (Subscription) -> Void,
+                                            notificationHandler: @escaping (T, Subscription, Event<Value>) -> Void)
+  {
+    subscribe(subscriptionHandler: subscriptionHandler) {
+      [weak subscriber = subscriber] (subscription, event: Event<Value>) in
+      if let subscriber = subscriber { notificationHandler(subscriber, subscription, event) }
+    }
+  }
+
   final public func subscribe(subscriptionHandler: (Subscription) -> Void,
-                              notificationHandler: @escaping (Event<Value>) -> Void)
+                              notificationHandler: @escaping (Subscription, Event<Value>) -> Void)
   {
     let subscription = Subscription(publisher: self)
 
@@ -230,7 +243,8 @@ open class EventStream<Value>: Publisher
       }
       else
       {
-        notificationHandler(Event(error: StreamCompleted.lateSubscription))
+        subscription.cancel(self)
+        notificationHandler(subscription, Event(error: StreamCompleted.lateSubscription))
       }
     }
   }
@@ -254,17 +268,18 @@ open class EventStream<Value>: Publisher
   {
     if !completed
     {
-      let key = WeakSubscription(subscription)
       queue.async {
         guard !self.completed else { return }
 
+        let key = WeakSubscription(subscription)
         if let notificationHandler = self.observers.removeValue(forKey: key)
         {
           if self.observers.isEmpty
           {
             self.lastSubscriptionWasCanceled()
           }
-          notificationHandler(Event.streamCompleted)
+          subscription.cancel(self)
+          notificationHandler(subscription, Event.streamCompleted)
         }
       }
     }
