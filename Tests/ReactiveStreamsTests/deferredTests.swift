@@ -21,7 +21,7 @@ public class SingleValueSubscriberTests: XCTestCase
       var sub: Subscription? = nil
       stream.subscribe(
         subscriptionHandler: { sub = $0 },
-        notificationHandler: { resolver.resolve($0) }
+        notificationHandler: { resolver.resolve($1) }
       )
       return sub.unsafelyUnwrapped
     }

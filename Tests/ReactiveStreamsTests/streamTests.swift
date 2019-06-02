@@ -140,7 +140,8 @@ class streamTests: XCTestCase
         subscription.request(1)
       },
       notificationHandler: {
-        if $0.isValue { s?.cancel() }
+        XCTAssert($0 === s)
+        if $1.isValue { s?.cancel() }
         else { e.fulfill() }
       }
     )
