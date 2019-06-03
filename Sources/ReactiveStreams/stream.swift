@@ -120,14 +120,7 @@ open class EventStream<Value>: Publisher
       }
     }
 
-    if observers.isEmpty && (prev > 1)
-    { // try to reset `pending` to zero
-      prev = (prev == .max) ? .max : prev-1
-      if CAtomicsCompareAndExchange(pending, prev, 0, .strong, .relaxed)
-      {
-        lastSubscriptionWasCanceled()
-      }
-    }
+    if observers.isEmpty { lastSubscriptionWasCanceled() }
   }
 
   /// precondition: must run on this stream's serial queue
@@ -294,7 +287,19 @@ open class EventStream<Value>: Publisher
 
   open func lastSubscriptionWasCanceled()
   {
-    assert(observers.isEmpty)
+#if DEBUG && (os(macOS) || os(iOS) || os(tvOS) || os(watchOS))
+    if #available(iOS 10, macOS 10.12, tvOS 10, watchOS 3, *)
+    {
+      dispatchPrecondition(condition: .onQueue(queue))
+    }
+#endif
+
+    guard CAtomicsLoad(pending, .relaxed) > 0 else { return }
+    // `pending` cannot be changed by a subscriber
+    // before the current block ends.  All other ways
+    // to modify `pending` must run serially on `queue`.
+    // We can therefore safely store 0 here.
+    CAtomicsStore(pending, 0, .relaxed)
   }
 }
 
