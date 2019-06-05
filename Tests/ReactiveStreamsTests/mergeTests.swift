@@ -72,9 +72,6 @@ class mergeTests: XCTestCase
     // therefore event count will be zero
     merged.close()
 
-    let e2 = expectation(description: "posting ends")
-    s.onCompletion { e2.fulfill() }
-
     for i in 0..<count { s.post(i+1) }
     s.close()
 
@@ -134,9 +131,6 @@ class mergeTests: XCTestCase
         e1.fulfill()
       }
     }
-
-    let e2 = expectation(description: "posting ends")
-    s.onCompletion { e2.fulfill() }
 
     s.post(0)
     t.post(TestError(id))
