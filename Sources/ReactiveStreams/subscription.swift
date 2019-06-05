@@ -67,6 +67,18 @@ final public class Subscription
     source.updateRequest(updated)
   }
 
+  // If a subscriber must reduce the number of events it needs to receive,
+  // reduce it to zero first, then raise again. This does carry the risk
+  // of dropped events.
+
+  public func requestNone()
+  {
+    var current = CAtomicsLoad(requested, .relaxed)
+    repeat {
+      if current < 1 { return }
+    } while !CAtomicsCompareAndExchange(requested, &current, 0, .weak, .relaxed, .relaxed)
+  }
+
   // called by our subscriber
 
   public func cancel()

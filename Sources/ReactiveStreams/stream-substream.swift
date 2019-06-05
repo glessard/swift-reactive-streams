@@ -39,6 +39,13 @@ open class SubStream<Value>: EventStream<Value>
     super.finalizeStream()
   }
 
+  override open func lastSubscriptionWasCanceled()
+  {
+    super.lastSubscriptionWasCanceled()
+    let subscription = sub.load()
+    subscription?.requestNone()
+  }
+
   override open func processAdditionalRequest(_ additional: Int64)
   {
     super.processAdditionalRequest(additional)
