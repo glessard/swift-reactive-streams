@@ -117,6 +117,27 @@ class streamTests: XCTestCase
     next.close()
   }
 
+  func testRequestedReset()
+  {
+    let queue = DispatchQueue(label: #function, qos: .utility)
+
+    var subscription: Subscription? = nil
+    let stream = OnRequestStream(queue: queue)
+    let e = expectation(description: #function)
+    stream.subscribe(
+      subscriber: queue,
+      subscriptionHandler: { subscription = $0 },
+      notificationHandler: {
+        (subscriber, subscription, event) in
+        subscription.requestNone()
+        e.fulfill()
+      }
+    )
+
+    subscription!.request(100)
+    waitForExpectations(timeout: 1.0)
+  }
+
   class SelfTerminatingPostBox<Value>: PostBox<Value>
   {
     override func lastSubscriptionWasCanceled()
