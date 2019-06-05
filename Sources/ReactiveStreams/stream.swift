@@ -108,11 +108,16 @@ open class EventStream<Value>: Publisher
       if prev <= 0 { return }
     } while !CAtomicsCompareAndExchange(pending, &prev, prev-1, .weak, .relaxed, .relaxed)
 
+    var notified = false
     for (ws, notificationHandler) in observers
     {
       if let subscription = ws.subscription
       {
-        if subscription.shouldNotify() { notificationHandler(subscription, value) }
+        if subscription.shouldNotify()
+        {
+          notificationHandler(subscription, value)
+          notified = true
+        }
       }
       else
       { // subscription no longer exists: remove handler.
@@ -120,7 +125,10 @@ open class EventStream<Value>: Publisher
       }
     }
 
-    if observers.isEmpty { lastSubscriptionWasCanceled() }
+    if observers.isEmpty
+    { lastSubscriptionWasCanceled() }
+    else if notified == false
+    { didNotNotify() }
   }
 
   /// precondition: must run on this stream's serial queue
@@ -300,6 +308,24 @@ open class EventStream<Value>: Publisher
     // to modify `pending` must run serially on `queue`.
     // We can therefore safely store 0 here.
     CAtomicsStore(pending, 0, .relaxed)
+  }
+
+  /// Whenever a `Value` event isn't dispatched to any subscriber,
+  /// we know that every remaining subscription expects zero events.
+  /// When that happens, we can set `pending` back to zero.
+  ///
+  /// However, since these subscriptions are active, we must
+  /// do so in a thread-safe way, as any of the subscriptions
+  /// could `updateRequest()` at any moment.
+
+  private func didNotNotify()
+  {
+    var current = CAtomicsLoad(pending, .relaxed)
+    var expected = current
+    repeat {
+      if current < 1 || current > expected { return }
+      expected = current
+    } while !CAtomicsCompareAndExchange(pending, &current, 0, .weak, .relaxed, .relaxed)
   }
 }
 
