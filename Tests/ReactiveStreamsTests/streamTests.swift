@@ -471,17 +471,17 @@ class streamTests: XCTestCase
 
     XCTAssertEqual(stream.requested, 2)
     XCTAssertEqual(split.0.requested, 3)
-    XCTAssertEqual(split.1.requested, 0)
+    XCTAssertEqual(split.1.requested, 0, String(#line))
 
     stream.post(0)
     let ne = expectation(description: "second value")
     stream.next(count: 1).onValue { _ in ne.fulfill() }
     stream.post(1)
     waitForExpectations(timeout: 1.0)
-    XCTAssertEqual(stream.requested, 0)
+    XCTAssertEqual(stream.requested, 0, String(#line))
 
     split.1.next(count: 5).onEvent { _ in }
-    XCTAssertEqual(stream.requested, 0)
+    XCTAssertEqual(stream.requested, 0, String(#line))
   }
 
   func testPaused1()
