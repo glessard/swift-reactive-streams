@@ -65,18 +65,18 @@ class eventTests: XCTestCase
     let i3 = i1*i2
 
     let e3 = Event(value: i1*i2)
-    XCTAssert(e3 == Event(value: i3))
-    XCTAssert(e3 != Event(value: i2))
+    XCTAssertEqual(e3, Event(value: i3))
+    XCTAssertNotEqual(e3, Event(value: i2))
 
     var e4 = e3
     e4 = Event(error: TestError(i1))
-    XCTAssert(e3 != e4)
-    XCTAssert(e4 != Event(error: TestError(i2)))
+    XCTAssertNotEqual(e3, e4)
+    XCTAssertNotEqual(e4, Event(error: TestError(i2)))
 
     var e5 = e4
     e5 = Event.streamCompleted
-    XCTAssert(e5 != e3)
-    XCTAssert(e5 == Event.streamCompleted)
+    XCTAssertNotEqual(e5, e3)
+    XCTAssertEqual(e5, Event.streamCompleted)
   }
 
   func testHashable()

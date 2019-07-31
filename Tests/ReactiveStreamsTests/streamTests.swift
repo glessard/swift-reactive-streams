@@ -467,21 +467,21 @@ class streamTests: XCTestCase
     let stream = PostBox<Int>()
     let split = stream.next(count: 2).split()
 
-    split.0.next(count: 3).onValue { _ in }
+    let e0 = expectation(description: String(#line))
+    split.0.next(count: 3).onValue { if $0 == 1 { e0.fulfill() } }
 
     XCTAssertEqual(stream.requested, 2)
     XCTAssertEqual(split.0.requested, 3)
-    XCTAssertEqual(split.1.requested, 0, String(#line))
+    XCTAssertEqual(split.1.requested, 0)
+
+    let e1 = expectation(description: String(#line))
+    split.1.onCompletion { e1.fulfill() }
 
     stream.post(0)
-    let ne = expectation(description: "second value")
-    stream.next(count: 1).onValue { _ in ne.fulfill() }
     stream.post(1)
     waitForExpectations(timeout: 1.0)
-    XCTAssertEqual(stream.requested, 0, String(#line))
-
-    split.1.next(count: 5).onEvent { _ in }
-    XCTAssertEqual(stream.requested, 0, String(#line))
+    XCTAssertEqual(stream.requested, 0)
+    XCTAssertEqual(stream.completed, false)
   }
 
   func testPaused1()
