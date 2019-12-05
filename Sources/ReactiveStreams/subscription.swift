@@ -135,7 +135,7 @@ extension UnsafeMutablePointer where Pointee == OpaqueUnmanagedHelper
 
   func load() -> Subscription?
   {
-    guard let pointer = CAtomicsUnmanagedLockAndLoad(self) else { return nil }
+    guard let pointer = CAtomicsUnmanagedLockAndLoad(self, .acquire) else { return nil }
 
     CAtomicsThreadFence(.acquire)
     assert(CAtomicsLoad(self, .acquire) == UnsafeRawPointer(bitPattern: 0x7))
