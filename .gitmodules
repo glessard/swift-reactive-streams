@@ -1,3 +1,0 @@
-[submodule "Xcode/dependencies/deferred"]
-	path = Xcode/dependencies/deferred
-	url = https://github.com/glessard/deferred.git

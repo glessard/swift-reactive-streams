@@ -3,17 +3,15 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		031BCE54217A8C3500F4B44B /* CAtomics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE57217A8C3500F4B44B /* CAtomics.framework */; };
 		031BCE55217A8C3500F4B44B /* CurrentQoS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE58217A8C3500F4B44B /* CurrentQoS.framework */; };
 		031BCE56217A8C3500F4B44B /* Outcome.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE59217A8C3500F4B44B /* Outcome.framework */; };
-		031BCE5A217A8C3500F4B44B /* deferred.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE40217A8B6400F4B44B /* deferred.framework */; };
 		031BCE5D217A8C5100F4B44B /* CAtomics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE57217A8C3500F4B44B /* CAtomics.framework */; };
 		031BCE5E217A8C5100F4B44B /* CurrentQoS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE58217A8C3500F4B44B /* CurrentQoS.framework */; };
-		031BCE5F217A8C5100F4B44B /* deferred.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE40217A8B6400F4B44B /* deferred.framework */; };
 		031BCE60217A8C5100F4B44B /* Outcome.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 031BCE59217A8C3500F4B44B /* Outcome.framework */; };
 		031BCE74217A931200F4B44B /* deferred-subscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE73217A931200F4B44B /* deferred-subscriber.swift */; };
 		031BCE81217A94F900F4B44B /* deferred-next.swift in Sources */ = {isa = PBXBuildFile; fileRef = 031BCE79217A945500F4B44B /* deferred-next.swift */; };
@@ -28,6 +26,7 @@
 		0333401B217B5F8D00F4B44B /* stream-filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03334017217B5F8D00F4B44B /* stream-filter.swift */; };
 		0333402A217BB9A200F4B44B /* deferred-final.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03334029217BB9A200F4B44B /* deferred-final.swift */; };
 		0343BF94229F009E00F4B44B /* stream-notifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0343BF93229F009E00F4B44B /* stream-notifier.swift */; };
+		034F955323E0A8DD0086343E /* deferred in Frameworks */ = {isa = PBXBuildFile; productRef = 034F955223E0A8DD0086343E /* deferred */; };
 		035312382224946E00F4B44B /* nzRandom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0353122B2224946E00F4B44B /* nzRandom.swift */; };
 		035312392224946E00F4B44B /* flatMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0353122C2224946E00F4B44B /* flatMapTests.swift */; };
 		0353123A2224946E00F4B44B /* onRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0353122D2224946E00F4B44B /* onRequestTests.swift */; };
@@ -61,48 +60,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		031BCE3F217A8B6400F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 03B4E06D1C14003B00F4B44B;
-			remoteInfo = deferred;
-		};
-		031BCE41217A8B6400F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 03B4E0761C14003C00F4B44B;
-			remoteInfo = deferredTests;
-		};
-		031BCE43217A8B6400F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 03B7767B20CAECFA00F4B44B;
-			remoteInfo = deferredTest;
-		};
-		031BCE45217A8B6400F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 03B7768E20CAECFC00F4B44B;
-			remoteInfo = deferredTestTests;
-		};
-		031BCE4E217A8C2D00F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 03B4E06C1C14003B00F4B44B;
-			remoteInfo = deferred;
-		};
-		031BCE5B217A8C4A00F4B44B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 03B4E06C1C14003B00F4B44B;
-			remoteInfo = deferred;
-		};
 		038527DE1CD46A1500F4B44B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 038527C91CD46A1500F4B44B /* Project object */;
@@ -113,7 +70,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		031BCE30217A8B6300F4B44B /* deferred.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = deferred.xcodeproj; path = dependencies/deferred/Xcode/deferred.xcodeproj; sourceTree = "<group>"; };
 		031BCE57217A8C3500F4B44B /* CAtomics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CAtomics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		031BCE58217A8C3500F4B44B /* CurrentQoS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CurrentQoS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		031BCE59217A8C3500F4B44B /* Outcome.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Outcome.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -178,7 +134,7 @@
 			files = (
 				031BCE54217A8C3500F4B44B /* CAtomics.framework in Frameworks */,
 				031BCE55217A8C3500F4B44B /* CurrentQoS.framework in Frameworks */,
-				031BCE5A217A8C3500F4B44B /* deferred.framework in Frameworks */,
+				034F955323E0A8DD0086343E /* deferred in Frameworks */,
 				031BCE56217A8C3500F4B44B /* Outcome.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -189,7 +145,6 @@
 			files = (
 				031BCE5D217A8C5100F4B44B /* CAtomics.framework in Frameworks */,
 				031BCE5E217A8C5100F4B44B /* CurrentQoS.framework in Frameworks */,
-				031BCE5F217A8C5100F4B44B /* deferred.framework in Frameworks */,
 				031BCE60217A8C5100F4B44B /* Outcome.framework in Frameworks */,
 				038527DD1CD46A1500F4B44B /* ReactiveStreams.framework in Frameworks */,
 			);
@@ -198,17 +153,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		031BCE31217A8B6300F4B44B /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				031BCE40217A8B6400F4B44B /* deferred.framework */,
-				031BCE42217A8B6400F4B44B /* deferredTests.xctest */,
-				031BCE44217A8B6400F4B44B /* deferredTest.app */,
-				031BCE46217A8B6400F4B44B /* deferredTestTests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		031BCE6F217A92F900F4B44B /* deferred operations */ = {
 			isa = PBXGroup;
 			children = (
@@ -272,7 +216,6 @@
 		036346AA20E1F58700F4B44B /* dependencies */ = {
 			isa = PBXGroup;
 			children = (
-				031BCE30217A8B6300F4B44B /* deferred.xcodeproj */,
 			);
 			name = dependencies;
 			sourceTree = "<group>";
@@ -379,9 +322,11 @@
 			buildRules = (
 			);
 			dependencies = (
-				031BCE4F217A8C2D00F4B44B /* PBXTargetDependency */,
 			);
 			name = ReactiveStreams;
+			packageProductDependencies = (
+				034F955223E0A8DD0086343E /* deferred */,
+			);
 			productName = stream;
 			productReference = 038527D21CD46A1500F4B44B /* ReactiveStreams.framework */;
 			productType = "com.apple.product-type.framework";
@@ -398,7 +343,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				031BCE5C217A8C4A00F4B44B /* PBXTargetDependency */,
 				038527DF1CD46A1500F4B44B /* PBXTargetDependency */,
 			);
 			name = ReactiveStreamsTests;
@@ -434,14 +378,11 @@
 				en,
 			);
 			mainGroup = 038527C81CD46A1500F4B44B;
+			packageReferences = (
+				034F955123E0A8DD0086343E /* XCRemoteSwiftPackageReference "deferred" */,
+			);
 			productRefGroup = 038527D31CD46A1500F4B44B /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 031BCE31217A8B6300F4B44B /* Products */;
-					ProjectRef = 031BCE30217A8B6300F4B44B /* deferred.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				038527D11CD46A1500F4B44B /* ReactiveStreams */,
@@ -449,37 +390,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		031BCE40217A8B6400F4B44B /* deferred.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = deferred.framework;
-			remoteRef = 031BCE3F217A8B6400F4B44B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		031BCE42217A8B6400F4B44B /* deferredTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = deferredTests.xctest;
-			remoteRef = 031BCE41217A8B6400F4B44B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		031BCE44217A8B6400F4B44B /* deferredTest.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = deferredTest.app;
-			remoteRef = 031BCE43217A8B6400F4B44B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		031BCE46217A8B6400F4B44B /* deferredTestTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = deferredTestTests.xctest;
-			remoteRef = 031BCE45217A8B6400F4B44B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		038527D01CD46A1500F4B44B /* Resources */ = {
@@ -574,16 +484,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		031BCE4F217A8C2D00F4B44B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = deferred;
-			targetProxy = 031BCE4E217A8C2D00F4B44B /* PBXContainerItemProxy */;
-		};
-		031BCE5C217A8C4A00F4B44B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = deferred;
-			targetProxy = 031BCE5B217A8C4A00F4B44B /* PBXContainerItemProxy */;
-		};
 		038527DF1CD46A1500F4B44B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 038527D11CD46A1500F4B44B /* ReactiveStreams */;
@@ -717,7 +617,11 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = stream/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tffenterprises.stream;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -736,12 +640,17 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = stream/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tffenterprises.stream;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
 		};
@@ -750,7 +659,11 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = streamTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tffenterprises.streamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -761,10 +674,15 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = streamTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tffenterprises.streamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
 		};
@@ -799,6 +717,26 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		034F955123E0A8DD0086343E /* XCRemoteSwiftPackageReference "deferred" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/glessard/deferred.git";
+			requirement = {
+				kind = versionRange;
+				maximumVersion = 5.1.0;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		034F955223E0A8DD0086343E /* deferred */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 034F955123E0A8DD0086343E /* XCRemoteSwiftPackageReference "deferred" */;
+			productName = deferred;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 038527C91CD46A1500F4B44B /* Project object */;
 }
