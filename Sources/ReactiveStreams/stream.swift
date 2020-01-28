@@ -343,7 +343,7 @@ private struct WeakSubscription: Equatable, Hashable
 
   static func == (l: WeakSubscription, r: WeakSubscription) -> Bool
   {
-    return l.identifier == r.identifier
+    return (l.identifier == r.identifier) && (l.subscription === r.subscription)
   }
 
   func hash(into hasher: inout Hasher)

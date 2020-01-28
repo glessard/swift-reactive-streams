@@ -111,10 +111,10 @@ class mergeTests: XCTestCase
 
   func testMerge4()
   { // make merged stream error before all posted events come through
-    let s = PostBox<Int>(qos: .utility)
+    let s = PostBox<Int>(qos: .background)
     let t = PostBox<Int>(qos: .userInitiated)
 
-    let posted = 10000
+    let posted = 25000
     let id = nzRandom()
 
     let merged = s.merge(with: [t])
