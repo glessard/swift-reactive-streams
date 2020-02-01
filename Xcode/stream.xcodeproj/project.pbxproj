@@ -376,6 +376,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 038527C81CD46A1500F4B44B;
 			packageReferences = (
