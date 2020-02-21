@@ -8,6 +8,14 @@
 
 import CAtomics
 
+#if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+import func Darwin.pthread_yield_np
+fileprivate func system_yield() { pthread_yield_np() }
+#else
+import func Glibc.sched_yield
+fileprivate func system_yield() { _ = sched_yield() }
+#endif
+
 final public class Subscription
 {
   private let source: EventSource
@@ -116,42 +124,62 @@ extension Subscription: Hashable
   }
 }
 
-extension UnsafeMutablePointer where Pointee == OpaqueUnmanagedHelper
+class LockedSubscription
 {
-  func initialize()
+  private var locked = UnsafeMutablePointer<AtomicBool>.allocate(capacity: 1)
+  private var subscription: Subscription? = nil
+
+  init()
   {
-    CAtomicsInitialize(self, nil)
+    CAtomicsInitialize(locked, false)
+  }
+
+  deinit {
+    locked.deallocate()
+  }
+
+  private func lock()
+  {
+    var c = 0
+    while !CAtomicsCompareAndExchange(locked, false, true, .weak, .acquire)
+    {
+      if c > 64
+      { system_yield() }
+      else
+      { c += 1 }
+    }
+    precondition(CAtomicsLoad(locked, .relaxed) == true)
+  }
+
+  private func unlock()
+  {
+    CAtomicsStore(locked, false, .release)
   }
 
   func assign(_ subscription: Subscription)
   {
-    let unmanaged = Unmanaged.passUnretained(subscription)
-    // don't overwrite an existing reference
-    if CAtomicsCompareAndExchange(self, nil, unmanaged.toOpaque(), .strong, .release)
+    lock()
+    if self.subscription == nil
     {
-      _ = unmanaged.retain()
+      self.subscription = subscription
     }
+    unlock()
   }
 
   func load() -> Subscription?
   {
-    guard let pointer = CAtomicsUnmanagedLockAndLoad(self, .acquire) else { return nil }
-
-    CAtomicsThreadFence(.acquire)
-    assert(CAtomicsLoad(self, .acquire) == UnsafeRawPointer(bitPattern: 0x7))
-    // atomic container is locked; increment the reference count
-    let unmanaged = Unmanaged<Subscription>.fromOpaque(pointer).retain()
-    // ensure the reference counting operation has occurred before unlocking,
-    // by performing our store operation with StoreMemoryOrder.release
-    CAtomicsThreadFence(.release)
-    CAtomicsStore(self, pointer, .release)
-    // atomic container is unlocked
-    return unmanaged.takeRetainedValue()
+    lock()
+    let s = subscription
+    unlock()
+    return s
   }
 
   func take() -> Subscription?
   {
-    guard let pointer = CAtomicsExchange(self, nil, .acquire) else { return nil }
-    return Unmanaged.fromOpaque(pointer).takeRetainedValue()
+    lock()
+    let s = subscription
+    subscription = nil
+    unlock()
+    return s
   }
 }

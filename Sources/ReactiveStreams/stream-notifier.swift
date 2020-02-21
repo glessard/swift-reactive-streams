@@ -7,16 +7,14 @@
 //
 
 import Dispatch
-import CAtomics
 
 public class StreamNotifier<Value>
 {
-  private var sub = UnsafeMutablePointer<OpaqueUnmanagedHelper>.allocate(capacity: 1)
+  private let sub = LockedSubscription()
   private let queue: DispatchQueue
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onEvent: @escaping (Event<Value>) -> Void)
   {
-    sub.initialize()
     self.queue = ValidatedQueue(label: #function, target: queue).queue
     stream.subscribe(
       subscriber: self,
@@ -33,7 +31,6 @@ public class StreamNotifier<Value>
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onEvent: @escaping(Subscription, Event<Value>) -> Void)
   {
-    sub.initialize()
     self.queue = ValidatedQueue(label: #function, target: queue).queue
     stream.subscribe(
       subscriber: self,
@@ -50,7 +47,6 @@ public class StreamNotifier<Value>
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onValue: @escaping (Value) -> Void)
   {
-    sub.initialize()
     self.queue = ValidatedQueue(label: #function, target: queue).queue
     stream.subscribe(
       subscriber: self,
@@ -67,7 +63,6 @@ public class StreamNotifier<Value>
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onValue: @escaping (Subscription, Value) -> Void)
   {
-    sub.initialize()
     self.queue = ValidatedQueue(label: #function, target: queue).queue
     stream.subscribe(
       subscriber: self,
@@ -84,7 +79,6 @@ public class StreamNotifier<Value>
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onError: @escaping (Error) -> Void)
   {
-    sub.initialize()
     self.queue = queue
     stream.subscribe(
       subscriber: self,
@@ -100,7 +94,6 @@ public class StreamNotifier<Value>
 
   public init(_ stream: EventStream<Value>, queue: DispatchQueue = .main, onCompletion: @escaping () -> Void)
   {
-    sub.initialize()
     self.queue = queue
     stream.subscribe(
       subscriber: self,
@@ -129,6 +122,5 @@ public class StreamNotifier<Value>
   deinit {
     let subscription = sub.take()
     subscription?.cancel()
-    sub.deallocate()
   }
 }

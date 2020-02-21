@@ -8,9 +8,9 @@ let package = Package(
     .library(name: "ReactiveStreams", targets: ["ReactiveStreams"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/glessard/swift-atomics.git", "5.0.0"..<"5.1.0"),
+    .package(url: "https://github.com/glessard/swift-atomics.git", from: "6.0.1"),
+    .package(url: "https://github.com/glessard/deferred.git", from: "6.2.0"),
     .package(url: "https://github.com/glessard/CurrentQoS.git", from: "1.1.0"),
-    .package(url: "https://github.com/glessard/deferred.git", from: "5.1.4"),
   ],
   targets: [
     .target(name: "ReactiveStreams", dependencies: ["CAtomics", "CurrentQoS", "deferred"]),

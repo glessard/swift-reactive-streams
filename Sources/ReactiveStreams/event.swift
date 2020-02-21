@@ -10,21 +10,12 @@ import class Foundation.NSError
 
 public struct Event<Value>
 {
-#if compiler(>=5.0)
   @usableFromInline var state: Result<Value, Swift.Error>?
 
   private init(state: Result<Value, Swift.Error>?)
   {
     self.state = state
   }
-#else
-  @usableFromInline let state: State<Value>?
-
-  private init(state: State<Value>?)
-  {
-    self.state = state
-  }
-#endif
 
   @inlinable
   public init(value: Value)
@@ -140,17 +131,15 @@ extension Event: Hashable where Value: Hashable
   }
 }
 
-#if compiler(>=5.0)
-
 extension Event
 {
   public init(_ result: Result<Value, Error>)
   {
-    state = result
+    self.result = result
   }
 
   @inlinable
-  public var result: Result<Value, Swift.Error>? {
+  public var result: Result<Value, Error>? {
     get { return state }
     set {
       if case .failure(let error)? = newValue, (error as? StreamCompleted) == .normally
@@ -163,29 +152,3 @@ extension Event
     }
   }
 }
-
-#else
-
-@usableFromInline
-enum State<Value>
-{
-  case success(Value)
-  case failure(Error)
-}
-
-import Outcome
-
-extension Event
-{
-  public init(_ outcome: Outcome<Value>)
-  {
-    do {
-      self.init(value: try outcome.get())
-    }
-    catch {
-      self.init(error: error)
-    }
-  }
-}
-
-#endif

@@ -65,7 +65,7 @@ public class SingleValueSubscriberTests: XCTestCase
 
     subscriber.requestAll()
     XCTAssertNil(subscriber.peek())
-    XCTAssert(subscriber.cancel())
+    subscriber.cancel()
 
     stream.post(1)
 
@@ -73,7 +73,7 @@ public class SingleValueSubscriberTests: XCTestCase
       let i = try subscriber.get()
       XCTFail("\(i) exists when it should not")
     }
-    catch DeferredError.canceled("") {}
+    catch Cancellation.canceled("") {}
 
     stream.close()
   }
@@ -86,10 +86,9 @@ class DeferredOperationsTests: XCTestCase
     let stream = PostBox<Int>()
 
     let events = 100
-    let limit = nzRandom() % events
+    let limit = Int.random(in: (events/10)..<events)
 
     let m = stream.skip(count: limit).next()
-
     XCTAssertEqual(stream.requested, Int64(limit+1))
 
     for i in 0..<events { stream.post(i) }
@@ -125,8 +124,11 @@ class DeferredOperationsTests: XCTestCase
       _ = try d3.get()
       XCTFail("stream not expected to produce a value")
     }
-    catch DeferredError.canceled(let m) {
+    catch Cancellation.canceled(let m) {
       XCTAssertNotEqual(m, "")
+    }
+    catch {
+      print(error)
     }
   }
 }
@@ -135,7 +137,7 @@ class DeferredStreamTests: XCTestCase
 {
   func testDeferredStreamWithValue() throws
   {
-    let (resolver, tbd) = TBD<Int>.CreatePair()
+    let (resolver, tbd) = Deferred<Int, Error>.CreatePair()
     let random = nzRandom()
     let queue = DispatchQueue(label: #function)
     let stream = DeferredStream(queue: queue, from: tbd)
@@ -166,7 +168,7 @@ class DeferredStreamTests: XCTestCase
 
   func testDeferredStreamWithError() throws
   {
-    let (resolver, tbd) = TBD<Int>.CreatePair()
+    let (resolver, tbd) = Deferred<Int, Error>.CreatePair()
     let random = nzRandom()
     let stream = tbd.eventStream
 
@@ -193,7 +195,7 @@ class DeferredStreamTests: XCTestCase
   func testDeferredStreamAlreadyDetermined() throws
   {
     let random = nzRandom()
-    let deferred = Deferred(value: random)
+    let deferred = Deferred<Int, Never>(value: random)
     let stream = deferred.eventStream
 
     // when `deferred` is already determined, the first stream

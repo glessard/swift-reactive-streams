@@ -11,18 +11,18 @@ import deferred
 
 extension EventStream
 {
-  public func finalOutcome(qos: DispatchQoS? = nil) -> Deferred<Value>
+  public func finalOutcome(qos: DispatchQoS? = nil) -> Deferred<Value, Error>
   {
     let queue = DispatchQueue(label: "final-outcome", qos: qos ?? self.qos)
     return finalOutcome(queue: queue)
   }
 
-  public func finalOutcome(queue: DispatchQueue) -> Deferred<Value>
+  public func finalOutcome(queue: DispatchQueue) -> Deferred<Value, Error>
   {
     return SingleValueSubscriber<Value>(queue: queue) {
       resolver in
       var sub: Subscription? = nil
-      var latest: Value? = nil
+      var latest: Event<Value>? = nil
 
       self.subscribe(
         subscriptionHandler: {
@@ -34,12 +34,12 @@ extension EventStream
           _, event in
           switch event.state
           {
-          case .success(let value)?:
-            latest = value
+          case .success?:
+            latest = event
           case .failure?:
             resolver.resolve(event)
           case nil:
-            _ = latest.map { resolver.resolve(value: $0) } ??
+            _ = latest?.result.map { resolver.resolve($0) } ??
                 resolver.cancel("Source stream completed without producing a value")
           }
         }
