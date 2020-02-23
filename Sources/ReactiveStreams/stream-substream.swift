@@ -10,11 +10,10 @@ import CAtomics
 
 open class SubStream<Value>: EventStream<Value>
 {
-  private var sub = UnsafeMutablePointer<OpaqueUnmanagedHelper>.allocate(capacity: 1)
+  private var sub = LockedSubscription()
 
   public override init(validated: ValidatedQueue)
   {
-    sub.initialize()
     super.init(validated: validated)
   }
 
@@ -22,7 +21,6 @@ open class SubStream<Value>: EventStream<Value>
   {
     let subscription = sub.take()
     subscription?.cancel()
-    sub.deallocate()
   }
 
   open func setSubscription(_ subscription: Subscription)

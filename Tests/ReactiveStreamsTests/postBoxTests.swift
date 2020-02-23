@@ -51,7 +51,7 @@ class postBoxTests: XCTestCase
     do {
       _ = try d.get()
     }
-    catch DeferredError.canceled {}
+    catch Cancellation.canceled {}
   }
 
   func testPostDoubleTermination() throws
@@ -66,7 +66,7 @@ class postBoxTests: XCTestCase
     do {
       _ = try d.get()
     }
-    catch DeferredError.canceled {}
+    catch Cancellation.canceled {}
   }
 
   func testPostErrorWithoutRequest()

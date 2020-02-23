@@ -8,25 +8,24 @@
 
 import Dispatch
 import deferred
-import CAtomics
 
-public class SingleValueSubscriber<Value>: TBD<Value>
+public class SingleValueSubscriber<Value>: Deferred<Value, Error>
 {
-  private weak var subscription: Subscription? = nil
+  private let subscription = LockedSubscription()
 
-  public init(queue: DispatchQueue, execute: (Resolver<Value>) -> Subscription)
+  public init(queue: DispatchQueue, task: @escaping (Resolver<Value, Error>) -> Subscription)
   {
-    var resolver: Resolver<Value>!
-    super.init(queue: queue) { resolver = $0 }
-
-    let subscription = execute(resolver)
-    resolver.notify { [weak subscription] in subscription?.cancel() }
-    resolver.retainSource(subscription)
-    self.subscription = subscription
+    super.init(notifyingOn: queue) {
+      [s = self.subscription] resolver in
+      let subscription = task(resolver)
+      resolver.notify { subscription.cancel() }
+      s.assign(subscription)
+    }
   }
 
   deinit {
-    subscription?.cancel()
+    let s = subscription.take()
+    s?.cancel()
   }
 
   public func requestAll()
@@ -36,26 +35,15 @@ public class SingleValueSubscriber<Value>: TBD<Value>
 
   public func request(_ additional: Int64)
   {
-    subscription?.request(additional)
+    let s = subscription.load()
+    s?.request(additional)
   }
 }
 
-extension Resolver
+extension Resolver where Failure == Error
 {
-  @discardableResult
-  public func resolve(_ event: Event<Value>) -> Bool
+  public func resolve(_ event: Event<Success>)
   {
-#if compiler(>=5.0)
-    return resolve(event.result ?? .failure(StreamCompleted.normally))
-#else
-    let resolved: Bool
-    do {
-      resolved = resolve(value: try event.get())
-    }
-    catch {
-      resolved = resolve(error: error)
-    }
-    return resolved
-#endif
+    resolve(event.result ?? .failure(StreamCompleted.normally))
   }
 }
