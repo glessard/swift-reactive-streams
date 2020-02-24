@@ -40,6 +40,7 @@ extension eventTests {
     static let __allTests__eventTests = [
         ("testDescription", testDescription),
         ("testEquals", testEquals),
+        ("testGet", testGet),
         ("testGetters", testGetters),
         ("testHashable", testHashable),
     ]
@@ -187,7 +188,6 @@ extension streamTests {
         ("testPaused1", testPaused1),
         ("testPaused2", testPaused2),
         ("testPaused3", testPaused3),
-        ("testRequested", testRequested),
         ("testRequestedReset", testRequestedReset),
         ("testSkipN", testSkipN),
         ("testSplit0", testSplit0),

@@ -84,39 +84,6 @@ class streamTests: XCTestCase
     // the SpyStream should leak because one of its observers is kept alive by the pointer
   }
 
-  func testRequested()
-  {
-    let queue = DispatchQueue(label: #function, qos: .utility)
-
-    let stream = OnRequestStream(queue: queue)
-    XCTAssertEqual(stream.requested, 0)
-    let final = stream.finalOutcome()
-    XCTAssertEqual(stream.requested, .max)
-
-    let e = expectation(description: #function + "-1")
-    final.onError(queue: queue) { _ in e.fulfill() }
-    final.cancel()
-    waitForExpectations(timeout: 1.0)
-
-    let many = stream.next(queue: queue, count: 10_000)
-    XCTAssertNotEqual(stream.requested, .max)
-    XCTAssertEqual(stream.requested, 0)
-
-    let manyth = many.finalOutcome(queue: queue)
-    XCTAssertLessThanOrEqual(stream.requested, 10_000)
-    XCTAssertGreaterThan(stream.requested, 0)
-
-    let f = expectation(description: #function + "-2")
-    manyth.notify { _ in f.fulfill() }
-    many.close()
-    waitForExpectations(timeout: 1.0)
-
-    let next = stream.next(queue: queue, count: 10)
-    XCTAssertLessThan(stream.requested, 10_000)
-    XCTAssertEqual(stream.requested, 0)
-    next.close()
-  }
-
   func testRequestedReset()
   {
     let queue = DispatchQueue(label: #function, qos: .utility)
