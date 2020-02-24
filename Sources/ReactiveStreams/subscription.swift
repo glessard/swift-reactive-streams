@@ -9,11 +9,9 @@
 import CAtomics
 
 #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
-import func Darwin.pthread_yield_np
-fileprivate func system_yield() { pthread_yield_np() }
+import func Darwin.sched_yield
 #else
 import func Glibc.sched_yield
-fileprivate func system_yield() { _ = sched_yield() }
 #endif
 
 final public class Subscription
@@ -144,7 +142,7 @@ class LockedSubscription
     while !CAtomicsCompareAndExchange(locked, false, true, .weak, .acquire)
     {
       if c > 64
-      { system_yield() }
+      { _ = sched_yield() }
       else
       { c += 1 }
     }
@@ -177,8 +175,8 @@ class LockedSubscription
   func take() -> Subscription?
   {
     lock()
-    let s = subscription
-    subscription = nil
+    var s: Subscription? = nil
+    swap(&s, &subscription)
     unlock()
     return s
   }
