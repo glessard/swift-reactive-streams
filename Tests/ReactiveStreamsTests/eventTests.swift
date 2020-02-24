@@ -24,21 +24,45 @@ class eventTests: XCTestCase
     let error = Event<Int>(error: TestError.value(.min))
     XCTAssertNil(error.value)
     XCTAssertNotNil(error.error)
+    XCTAssertNotNil(error.result)
     XCTAssertEqual(error.isValue, false)
     XCTAssertEqual(error.isError, true)
     XCTAssertEqual(error.completedNormally, false)
 
-    let finalA = Event<Int>.streamCompleted
+    let finalA = Event<Int>(Result<Int, Error>.failure(StreamCompleted.normally))
     let finalB = Event<Int>(error: StreamCompleted.normally)
     XCTAssertNil(finalA.value)
     XCTAssertNil(finalA.error)
+    XCTAssertNil(finalA.result)
     XCTAssertEqual(finalA.completedNormally, true)
     XCTAssertEqual(finalA, finalB)
 
-    let tardy = Event<Int>(error: StreamCompleted.lateSubscription)
+    let tardy = Event<Int>(Result<Int, Error>.failure(StreamCompleted.lateSubscription))
     XCTAssertNil(tardy.value)
     XCTAssertNotNil(tardy.error)
     XCTAssertEqual(tardy.completedNormally, false)
+  }
+
+  func testGet() throws
+  {
+    let value = Event<Int>(value: .max)
+    XCTAssertEqual(try value.get(), .max)
+
+    let error = Event<Int>(error: TestError())
+    do {
+      _ = try error.get()
+    }
+    catch TestError.value(let e) {
+      XCTAssertEqual(e, 0)
+    }
+
+    let final = Event<Int>.streamCompleted
+    do {
+      _ = try final.get()
+    }
+    catch StreamCompleted.normally {
+      XCTAssert(true)
+    }
   }
 
   func testDescription()

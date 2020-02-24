@@ -40,6 +40,7 @@ extension eventTests {
     static let __allTests__eventTests = [
         ("testDescription", testDescription),
         ("testEquals", testEquals),
+        ("testGet", testGet),
         ("testGetters", testGetters),
         ("testHashable", testHashable),
     ]
