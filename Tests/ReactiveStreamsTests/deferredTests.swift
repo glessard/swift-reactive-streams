@@ -207,6 +207,8 @@ class DeferredStreamTests: XCTestCase
       e1.fulfill()
     }
 
+    waitForExpectations(timeout: 1.0)
+
     let flattener = PostBox<EventStream<Int>>()
     let e2 = expectation(description: #function+"-2")
     flattener.flatMap(transform: {$0}).countEvents().onValue {
