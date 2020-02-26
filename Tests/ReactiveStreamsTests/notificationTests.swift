@@ -32,6 +32,7 @@ class notifierTests: XCTestCase
 
     for i in 1...events { stream.post(i) }
     waitForExpectations(timeout: 1.0)
+    notifier.close()
 
     let e2 = expectation(description: "onEvent: completion")
     notifier = StreamNotifier(stream, onEvent: {
@@ -52,7 +53,6 @@ class notifierTests: XCTestCase
     })
 
     waitForExpectations(timeout: 1.0)
-    _ = notifier
   }
 
   func testOnEvent2()
