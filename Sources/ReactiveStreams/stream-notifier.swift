@@ -115,7 +115,7 @@ public class StreamNotifier<Value>
 
   public func close()
   {
-    let subscription = sub.load()
+    let subscription = sub.take()
     subscription?.cancel()
   }
 
