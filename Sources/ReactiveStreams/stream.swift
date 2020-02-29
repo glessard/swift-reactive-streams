@@ -332,22 +332,26 @@ open class EventStream<Value>: Publisher
 
 private struct WeakSubscription: Equatable, Hashable
 {
-  private let identifier: UInt64
+  let id: UInt64
   weak var subscription: Subscription?
 
   init(_ s: Subscription)
   {
     subscription = s
-    identifier = s.identifier
+    id = s.id
   }
 
   static func == (l: WeakSubscription, r: WeakSubscription) -> Bool
   {
-    return (l.identifier == r.identifier) && (l.subscription == r.subscription)
+    return (l.id == r.id) && (l.subscription == r.subscription)
   }
 
   func hash(into hasher: inout Hasher)
   {
-    identifier.hash(into: &hasher)
+    id.hash(into: &hasher)
   }
 }
+
+#if compiler(>=5.1)
+extension WeakSubscription: Identifiable {}
+#endif
