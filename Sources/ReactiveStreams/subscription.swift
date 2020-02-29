@@ -16,15 +16,23 @@ import func Glibc.sched_yield
 
 final public class Subscription
 {
-  private let source: EventSource
+  private static let serial: UnsafeMutablePointer<AtomicUInt64> = {
+    let p = UnsafeMutablePointer<AtomicUInt64>.allocate(capacity: 1)
+    CAtomicsInitialize(p, 0)
+    return p
+  }()
 
-  private var requested = UnsafeMutablePointer<AtomicInt64>.allocate(capacity: 1)
+  private let source: EventSource
+  private let requested = UnsafeMutablePointer<AtomicInt64>.allocate(capacity: 1)
+
+  internal let identifier: UInt64
 
   public var cancelled: Bool { return CAtomicsLoad(requested, .relaxed) == .min }
 
   init<P: Publisher>(publisher: P)
   {
     source = publisher as EventSource
+    identifier = CAtomicsAdd(Subscription.serial, 1, .relaxed)
     CAtomicsInitialize(requested, 0)
   }
   
@@ -110,7 +118,7 @@ extension Subscription: Equatable
 {
   public static func == (lhs: Subscription, rhs: Subscription) -> Bool
   {
-    return lhs === rhs
+    return (ObjectIdentifier(lhs) == ObjectIdentifier(rhs)) && (lhs.identifier == rhs.identifier)
   }
 }
 
@@ -118,7 +126,7 @@ extension Subscription: Hashable
 {
   public func hash(into hasher: inout Hasher)
   {
-    ObjectIdentifier(self).hash(into: &hasher)
+    identifier.hash(into: &hasher)
   }
 }
 
