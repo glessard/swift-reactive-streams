@@ -25,14 +25,14 @@ final public class Subscription
   private let source: EventSource
   private let requested = UnsafeMutablePointer<AtomicInt64>.allocate(capacity: 1)
 
-  internal let identifier: UInt64
+  public let id: UInt64
 
   public var cancelled: Bool { return CAtomicsLoad(requested, .relaxed) == .min }
 
   init<P: Publisher>(publisher: P)
   {
-    source = publisher as EventSource
-    identifier = CAtomicsAdd(Subscription.serial, 1, .relaxed)
+    self.source = publisher as EventSource
+    self.id = CAtomicsAdd(Subscription.serial, 1, .relaxed)
     CAtomicsInitialize(requested, 0)
   }
   
@@ -118,7 +118,7 @@ extension Subscription: Equatable
 {
   public static func == (lhs: Subscription, rhs: Subscription) -> Bool
   {
-    return (ObjectIdentifier(lhs) == ObjectIdentifier(rhs)) && (lhs.identifier == rhs.identifier)
+    return (lhs === rhs)
   }
 }
 
@@ -126,9 +126,13 @@ extension Subscription: Hashable
 {
   public func hash(into hasher: inout Hasher)
   {
-    identifier.hash(into: &hasher)
+    id.hash(into: &hasher)
   }
 }
+
+#if compiler(>=5.1)
+extension Subscription: Identifiable {}
+#endif
 
 class LockedSubscription
 {
