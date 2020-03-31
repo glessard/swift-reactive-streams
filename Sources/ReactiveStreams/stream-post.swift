@@ -145,12 +145,20 @@ private let headOffset = MemoryLayout.offset(of: \PostBoxState.head)!
 private let tailOffset = MemoryLayout.offset(of: \PostBoxState.tail)!
 private let lastOffset = MemoryLayout.offset(of: \PostBoxState.last)!
 
-private let nextOffset = 0
-private let dataOffset = (MemoryLayout<AtomicOptionalMutableRawPointer>.stride + 15) & ~15
+private struct NodePrefix
+{
+  var next: UnsafeMutableRawPointer?
+}
+private let nextOffset = MemoryLayout.offset(of: \NodePrefix.next)!
 
 private struct BufferNode<Element>: Equatable
 {
   let storage: UnsafeMutableRawPointer
+
+  private var dataOffset: Int {
+    let dataMask = MemoryLayout<Element>.alignment - 1
+    return (MemoryLayout<NodePrefix>.size + dataMask) & ~dataMask
+  }
 
   init(storage: UnsafeMutableRawPointer)
   {
@@ -165,8 +173,11 @@ private struct BufferNode<Element>: Equatable
 
   private init()
   {
+    let alignment  = max(MemoryLayout<NodePrefix>.alignment, MemoryLayout<Element>.alignment)
+    let dataMask   = MemoryLayout<Element>.alignment - 1
+    let dataOffset = (MemoryLayout<NodePrefix>.size + dataMask) & ~dataMask
     let size = dataOffset + MemoryLayout<Element>.size
-    storage = UnsafeMutableRawPointer.allocate(byteCount: size, alignment: 16)
+    storage = UnsafeMutableRawPointer.allocate(byteCount: size, alignment: alignment)
     (storage+nextOffset).bindMemory(to: AtomicOptionalMutableRawPointer.self, capacity: 1)
     CAtomicsInitialize(next, nil)
     (storage+dataOffset).bindMemory(to: Element.self, capacity: 1)
