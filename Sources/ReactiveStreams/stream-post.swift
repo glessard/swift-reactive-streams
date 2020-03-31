@@ -9,12 +9,22 @@
 import Dispatch
 import CAtomics
 
+private struct PostBoxState
+{
+  var head: AtomicMutableRawPointer
+  var tail: AtomicMutableRawPointer
+  var last: AtomicOptionalMutableRawPointer
+}
+private let headOffset = MemoryLayout.offset(of: \PostBoxState.head)!
+private let tailOffset = MemoryLayout.offset(of: \PostBoxState.tail)!
+private let lastOffset = MemoryLayout.offset(of: \PostBoxState.last)!
+
 open class PostBox<Value>: EventStream<Value>
 {
   private typealias Node = BufferNode<Event<Value>>
 
-  private let s = UnsafeMutableRawPointer.allocate(byteCount: MemoryLayout<PostBoxState>.size,
-                                                   alignment: MemoryLayout<PostBoxState>.alignment)
+  private let s = UnsafeMutableRawPointer(UnsafeMutablePointer<PostBoxState>.allocate(capacity: 1))
+
   private var head: UnsafeMutablePointer<AtomicMutableRawPointer> {
     return (s+headOffset).assumingMemoryBound(to: AtomicMutableRawPointer.self)
   }
@@ -134,16 +144,6 @@ open class PostBox<Value>: EventStream<Value>
     queue.async(execute: self.processNext)
   }
 }
-
-private struct PostBoxState
-{
-  var head: AtomicMutableRawPointer
-  var tail: AtomicMutableRawPointer
-  var last: AtomicOptionalMutableRawPointer
-}
-private let headOffset = MemoryLayout.offset(of: \PostBoxState.head)!
-private let tailOffset = MemoryLayout.offset(of: \PostBoxState.tail)!
-private let lastOffset = MemoryLayout.offset(of: \PostBoxState.last)!
 
 private struct NodePrefix
 {
