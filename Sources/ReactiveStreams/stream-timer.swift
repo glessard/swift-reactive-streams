@@ -47,7 +47,7 @@ open class TimerStream: EventStream<Date>
       {
         return startDate
       }
-    } while !CAtomicsCompareAndExchange(started, &s, true, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(started, &s, true, .relaxed, .relaxed)
 
     source.suspend()
     source.setEventHandler {

@@ -64,7 +64,7 @@ open class OnRequestStream<Value>: EventStream<Value>
     var streaming = CAtomicsLoad(started, .relaxed)
     repeat {
       if streaming { return }
-    } while !CAtomicsCompareAndExchange(started, &streaming, true, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(started, &streaming, true, .relaxed, .relaxed)
 
     queue.async(execute: self.processNext)
   }

@@ -78,7 +78,9 @@ open class PostBox<Value>: EventStream<Value>
     let node = Node(initializedWith: event)
     if event.isValue == false
     {
-      guard CAtomicsCompareAndExchange(final, nil, node.storage, .strong, .relaxed) else { return }
+      var c: UnsafeMutableRawPointer? = nil
+      let exchanged = CAtomicsCompareAndExchangeStrong(final, &c, node.storage, .relaxed, .relaxed)
+      if !exchanged { return }
     }
 
     // events posted "simultaneously" synchronize with each other here

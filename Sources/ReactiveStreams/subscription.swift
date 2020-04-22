@@ -48,7 +48,7 @@ final public class Subscription
     repeat {
       if remaining == .max { break }
       if remaining <= 0 { return false }
-    } while !CAtomicsCompareAndExchange(requested, &remaining, remaining-1, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(requested, &remaining, remaining-1, .relaxed, .relaxed)
     return true
   }
 
@@ -76,7 +76,7 @@ final public class Subscription
       if current == .min || current == .max { return }
       updated = current &+ count // could overflow; avoid trapping
       if updated < 0 { updated = .max } // check and correct for overflow
-    } while !CAtomicsCompareAndExchange(requested, &current, updated, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(requested, &current, updated, .relaxed, .relaxed)
 
     source.updateRequest(updated)
   }
@@ -90,7 +90,7 @@ final public class Subscription
     var current = CAtomicsLoad(requested, .relaxed)
     repeat {
       if current < 1 { return }
-    } while !CAtomicsCompareAndExchange(requested, &current, 0, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(requested, &current, 0, .relaxed, .relaxed)
   }
 
   // called by our subscriber
@@ -100,7 +100,7 @@ final public class Subscription
     var prev = CAtomicsLoad(requested, .relaxed)
     repeat {
       if prev == .min { return }
-    } while !CAtomicsCompareAndExchange(requested, &prev, .min, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(requested, &prev, .min, .relaxed, .relaxed)
 
     source.cancel(subscription: self)
   }
@@ -151,12 +151,14 @@ class LockedSubscription
   private func lock()
   {
     var c = 0
-    while !CAtomicsCompareAndExchange(locked, false, true, .weak, .acquire)
+    var f = false
+    while !CAtomicsCompareAndExchangeWeak(locked, &f, true, .acquire, .acquire)
     {
       if c > 64
       { _ = sched_yield() }
       else
       { c += 1 }
+      f = false
     }
     precondition(CAtomicsLoad(locked, .relaxed) == true)
   }
