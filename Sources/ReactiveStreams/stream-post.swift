@@ -23,21 +23,21 @@ open class PostBox<Value>: EventStream<Value>
 {
   private typealias Node = BufferNode<Event<Value>>
 
-  private let s = UnsafeMutableRawPointer(UnsafeMutablePointer<PostBoxState>.allocate(capacity: 1))
+  private let storage = UnsafeMutableRawPointer(UnsafeMutablePointer<PostBoxState>.allocate(capacity: 1))
 
   private var head: UnsafeMutableRawPointer {
     unsafeAddress {
-      return UnsafeRawPointer(s+headOffset).assumingMemoryBound(to: UnsafeMutableRawPointer.self)
+      return UnsafeRawPointer(storage+headOffset).assumingMemoryBound(to: UnsafeMutableRawPointer.self)
     }
     unsafeMutableAddress {
-      return (s+headOffset).assumingMemoryBound(to: UnsafeMutableRawPointer.self)
+      return (storage+headOffset).assumingMemoryBound(to: UnsafeMutableRawPointer.self)
     }
   }
   private var tail: UnsafeMutablePointer<AtomicMutableRawPointer> {
-    return (s+tailOffset).assumingMemoryBound(to: AtomicMutableRawPointer.self)
+    return (storage+tailOffset).assumingMemoryBound(to: AtomicMutableRawPointer.self)
   }
-  private var last: UnsafeMutablePointer<AtomicOptionalMutableRawPointer> {
-    return (s+lastOffset).assumingMemoryBound(to: AtomicOptionalMutableRawPointer.self)
+  private var final: UnsafeMutablePointer<AtomicOptionalMutableRawPointer> {
+    return (storage+lastOffset).assumingMemoryBound(to: AtomicOptionalMutableRawPointer.self)
   }
 
   public override init(validated: ValidatedQueue)
@@ -46,12 +46,12 @@ open class PostBox<Value>: EventStream<Value>
 
     // set up an initial dummy node
     let node = Node.dummy
-    (s+headOffset).bindMemory(to: UnsafeMutableRawPointer.self, capacity: 1)
+    (storage+headOffset).bindMemory(to: UnsafeMutableRawPointer.self, capacity: 1)
     head = node.storage
-    (s+tailOffset).bindMemory(to: AtomicMutableRawPointer.self, capacity: 1)
+    (storage+tailOffset).bindMemory(to: AtomicMutableRawPointer.self, capacity: 1)
     CAtomicsInitialize(tail, node.storage)
-    (s+lastOffset).bindMemory(to: AtomicOptionalMutableRawPointer.self, capacity: 1)
-    CAtomicsInitialize(last, nil)
+    (storage+lastOffset).bindMemory(to: AtomicOptionalMutableRawPointer.self, capacity: 1)
+    CAtomicsInitialize(final, nil)
   }
 
   deinit {
@@ -66,19 +66,19 @@ open class PostBox<Value>: EventStream<Value>
     }
     head.deallocate()
 
-    s.deallocate()
+    storage.deallocate()
   }
 
   final public var isEmpty: Bool { return head == CAtomicsLoad(tail, .relaxed) }
 
   final public func post(_ event: Event<Value>)
   {
-    guard completed == false, CAtomicsLoad(last, .relaxed) == nil else { return }
+    guard completed == false, CAtomicsLoad(final, .relaxed) == nil else { return }
 
     let node = Node(initializedWith: event)
     if event.isValue == false
     {
-      guard CAtomicsCompareAndExchange(last, nil, node.storage, .strong, .relaxed) else { return }
+      guard CAtomicsCompareAndExchange(final, nil, node.storage, .strong, .relaxed) else { return }
     }
 
     // events posted "simultaneously" synchronize with each other here
@@ -119,13 +119,13 @@ open class PostBox<Value>: EventStream<Value>
 #endif
 
     let requested = self.requested
-    if requested <= 0 && CAtomicsLoad(last, .relaxed) == nil { return }
+    if requested <= 0 && CAtomicsLoad(final, .relaxed) == nil { return }
 
     // try to dequeue the next event
     let head = Node(storage: self.head)
     let next = CAtomicsLoad(head.next, .acquire)
 
-    if requested <= 0 && CAtomicsLoad(last, .relaxed) != next { return }
+    if requested <= 0 && CAtomicsLoad(final, .relaxed) != next { return }
 
     if let next = next
     {
@@ -152,19 +152,17 @@ open class PostBox<Value>: EventStream<Value>
   }
 }
 
-private struct NodePrefix
-{
-  var next: UnsafeMutableRawPointer?
-}
-private let nextOffset = MemoryLayout.offset(of: \NodePrefix.next)!
+private let nextOffset = 0
 
 private struct BufferNode<Element>: Equatable
 {
   let storage: UnsafeMutableRawPointer
 
   private var dataOffset: Int {
-    let dataMask = MemoryLayout<Element>.alignment - 1
-    return (MemoryLayout<NodePrefix>.size + dataMask) & ~dataMask
+    nonmutating get {
+      let dataMask = MemoryLayout<Element>.alignment - 1
+      return (MemoryLayout<AtomicOptionalMutableRawPointer>.size + dataMask) & ~dataMask
+    }
   }
 
   init(storage: UnsafeMutableRawPointer)
@@ -180,9 +178,9 @@ private struct BufferNode<Element>: Equatable
 
   private init()
   {
-    let alignment  = max(MemoryLayout<NodePrefix>.alignment, MemoryLayout<Element>.alignment)
+    let alignment  = max(MemoryLayout<AtomicOptionalMutableRawPointer>.alignment, MemoryLayout<Element>.alignment)
     let dataMask   = MemoryLayout<Element>.alignment - 1
-    let dataOffset = (MemoryLayout<NodePrefix>.size + dataMask) & ~dataMask
+    let dataOffset = (MemoryLayout<AtomicOptionalMutableRawPointer>.size + dataMask) & ~dataMask
     let size = dataOffset + MemoryLayout<Element>.size
     storage = UnsafeMutableRawPointer.allocate(byteCount: size, alignment: alignment)
     (storage+nextOffset).bindMemory(to: AtomicOptionalMutableRawPointer.self, capacity: 1)
