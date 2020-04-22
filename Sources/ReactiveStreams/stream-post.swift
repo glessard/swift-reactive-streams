@@ -64,6 +64,7 @@ open class PostBox<Value>: EventStream<Value>
       node.deinitialize()
       node.deallocate()
     }
+    head.deallocate()
 
     s.deallocate()
   }
