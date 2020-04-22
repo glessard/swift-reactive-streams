@@ -39,7 +39,7 @@ open class Paused<Value>: SubStream<Value>
       if request == .max { return }
       updated = request &+ requested // could overflow; avoid trapping
       if updated < 0 { updated = .max } // check and correct for overflow
-    } while !CAtomicsCompareAndExchange(pending, &request, updated, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(pending, &request, updated, .relaxed, .relaxed)
   }
 
   open func start()
@@ -47,7 +47,7 @@ open class Paused<Value>: SubStream<Value>
     var request = CAtomicsLoad(pending, .relaxed)
     repeat {
       if request == .min { return }
-    } while !CAtomicsCompareAndExchange(pending, &request, .min, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(pending, &request, .min, .relaxed, .relaxed)
 
     if request > 0 { super.updateRequest(request) }
   }

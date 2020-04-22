@@ -106,7 +106,7 @@ open class EventStream<Value>: Publisher
     repeat {
       if prev == .max { break }
       if prev <= 0 { return }
-    } while !CAtomicsCompareAndExchange(pending, &prev, prev-1, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(pending, &prev, prev-1, .relaxed, .relaxed)
 
     var notified = false
     for (ws, notificationHandler) in observers
@@ -140,7 +140,7 @@ open class EventStream<Value>: Publisher
     var prev = CAtomicsLoad(pending, .relaxed)
     repeat {
       if prev == .min { return }
-    } while !CAtomicsCompareAndExchange(pending, &prev, .min, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(pending, &prev, .min, .relaxed, .relaxed)
 
     for (ws, notificationHandler) in observers
     {
@@ -259,7 +259,7 @@ open class EventStream<Value>: Publisher
     var prev = CAtomicsLoad(pending, .relaxed)
     repeat {
       if prev >= requested || prev == .min { return }
-    } while !CAtomicsCompareAndExchange(pending, &prev, requested, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(pending, &prev, requested, .relaxed, .relaxed)
 
     let additional = (requested == .max) ? .max : (requested-prev)
     processAdditionalRequest(additional)
@@ -325,7 +325,7 @@ open class EventStream<Value>: Publisher
     repeat {
       if current < 1 || current > expected { return }
       expected = current
-    } while !CAtomicsCompareAndExchange(pending, &current, 0, .weak, .relaxed, .relaxed)
+    } while !CAtomicsCompareAndExchangeWeak(pending, &current, 0, .relaxed, .relaxed)
   }
 }
 
