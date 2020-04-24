@@ -25,12 +25,12 @@ open class PostBox<Value>: EventStream<Value>
 
   private let storage = UnsafeMutableRawPointer(UnsafeMutablePointer<PostBoxState>.allocate(capacity: 1))
 
-  private var head: UnsafeMutableRawPointer {
-    unsafeAddress {
-      return UnsafeRawPointer(storage+headOffset).assumingMemoryBound(to: UnsafeMutableRawPointer.self)
+  private var head: Node {
+    get {
+      return Node(storage: (storage+headOffset).assumingMemoryBound(to: UnsafeMutableRawPointer.self).pointee)
     }
-    unsafeMutableAddress {
-      return (storage+headOffset).assumingMemoryBound(to: UnsafeMutableRawPointer.self)
+    set {
+      (storage+headOffset).assumingMemoryBound(to: UnsafeMutableRawPointer.self).pointee = newValue.storage
     }
   }
   private var tail: UnsafeMutablePointer<AtomicMutableRawPointer> {
@@ -47,7 +47,7 @@ open class PostBox<Value>: EventStream<Value>
     // set up an initial dummy node
     let node = Node.dummy
     (storage+headOffset).bindMemory(to: UnsafeMutableRawPointer.self, capacity: 1)
-    head = node.storage
+    head = node
     (storage+tailOffset).bindMemory(to: AtomicMutableRawPointer.self, capacity: 1)
     CAtomicsInitialize(tail, node.storage)
     (storage+lastOffset).bindMemory(to: AtomicOptionalMutableRawPointer.self, capacity: 1)
@@ -56,7 +56,7 @@ open class PostBox<Value>: EventStream<Value>
 
   deinit {
     // empty the queue
-    let head = Node(storage: self.head)
+    let head = self.head
     var next = Node(storage: CAtomicsLoad(head.next, .relaxed))
     while let node = next
     {
@@ -69,7 +69,7 @@ open class PostBox<Value>: EventStream<Value>
     storage.deallocate()
   }
 
-  final public var isEmpty: Bool { return head == CAtomicsLoad(tail, .relaxed) }
+  final public var isEmpty: Bool { return head.storage == CAtomicsLoad(tail, .relaxed) }
 
   final public func post(_ event: Event<Value>)
   {
@@ -89,7 +89,7 @@ open class PostBox<Value>: EventStream<Value>
     // publish the new node to processing loop here
     CAtomicsStore(previousTail.next, node.storage, .release)
 
-    if previousTail.storage == head
+    if previousTail == head
     { // the queue had been empty or blocked
       // resume processing enqueued events
       queue.async(execute: self.processNext)
@@ -124,16 +124,15 @@ open class PostBox<Value>: EventStream<Value>
     if requested <= 0 && CAtomicsLoad(final, .relaxed) == nil { return }
 
     // try to dequeue the next event
-    let head = Node(storage: self.head)
+    let head = self.head
     let next = CAtomicsLoad(head.next, .acquire)
 
     if requested <= 0 && CAtomicsLoad(final, .relaxed) != next { return }
 
-    if let next = next
+    if let node = Node(storage: next)
     {
-      let node = Node(storage: next)
       let event = node.move()
-      self.head = next
+      self.head = node
       head.deallocate()
 
       dispatch(event)
