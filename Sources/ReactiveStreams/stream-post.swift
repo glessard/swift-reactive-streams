@@ -121,15 +121,13 @@ open class PostBox<Value>: EventStream<Value>
 #endif
 
     let requested = self.requested
-    if requested <= 0 && CAtomicsLoad(final, .relaxed) == nil { return }
+    let terminal = Node(storage: CAtomicsLoad(self.final, .relaxed))
+    if requested <= 0 && terminal == nil { return }
 
     // try to dequeue the next event
     let head = self.head
-    let next = CAtomicsLoad(head.next, .acquire)
-
-    if requested <= 0 && CAtomicsLoad(final, .relaxed) != next { return }
-
-    if let node = Node(storage: next)
+    if let node = Node(storage: CAtomicsLoad(head.next, .acquire)),
+       requested > 0 || node == terminal
     {
       let event = node.move()
       self.head = node
@@ -140,9 +138,9 @@ open class PostBox<Value>: EventStream<Value>
       return
     }
 
-    // Either the queue is empty, or processing is blocked.
-    // Either way, processing will resume once
-    // a node has been linked after the current `head`
+    // The queue is empty, there is no request, or processing is blocked.
+    // In any case, processing will resume once there is either
+    // a node linked after the current `head` or a non-zero request.
   }
 
   open override func processAdditionalRequest(_ additional: Int64)
