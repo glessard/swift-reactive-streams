@@ -25,9 +25,8 @@ class notifierTests: XCTestCase
         let value = try event.get()
         if value == events { e1.fulfill() }
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-      }
+      catch is StreamCompleted {}
+      catch { XCTFail("\(error)") }
     })
 
     for i in 1...events { stream.post(i) }
@@ -48,7 +47,7 @@ class notifierTests: XCTestCase
     let e3 = expectation(description: "onEvent: error")
     notifier = StreamNotifier(stream, onEvent: {
       event in
-      XCTAssertErrorEquals(event.error, StreamCompleted.lateSubscription)
+      XCTAssert(event.completedNormally)
       e3.fulfill()
     })
 
@@ -175,10 +174,8 @@ class notificationTests: XCTestCase
         let value = try event.get()
         if value == events { e1.fulfill() }
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
-      }
+      catch is StreamCompleted { e2.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     for i in 1...events { stream.post(i) }
@@ -193,10 +190,8 @@ class notificationTests: XCTestCase
         _ = try event.get()
         XCTFail("stream not expected to produce a value")
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.lateSubscription)
-        e3.fulfill()
-      }
+      catch is StreamCompleted { e3.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     waitForExpectations(timeout: 1.0)

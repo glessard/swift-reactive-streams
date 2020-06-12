@@ -19,6 +19,9 @@ extension EventStream
           let transformed = try transform(event.get())
           mapped.dispatch(Event(value: transformed))
         }
+        catch is StreamCompleted {
+          mapped.dispatch(Event.streamCompleted)
+        }
         catch {
           mapped.dispatch(Event(error: error))
         }
@@ -48,6 +51,9 @@ extension EventStream
         do {
           let transformed = try transform(event.get())
           mapped.dispatch(transformed)
+        }
+        catch is StreamCompleted {
+          mapped.dispatch(Event.streamCompleted)
         }
         catch {
           mapped.dispatch(Event(error: error))

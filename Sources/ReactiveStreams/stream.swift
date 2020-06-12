@@ -24,12 +24,6 @@ public enum StreamState: CustomStringConvertible
   }
 }
 
-public enum StreamCompleted: Error
-{
-  case normally         // after the last value
-  case lateSubscription // attempted to subscribe to a completed stream
-}
-
 open class EventStream<Value>: Publisher
 {
   public typealias EventType = Value
@@ -245,7 +239,7 @@ open class EventStream<Value>: Publisher
       else
       {
         subscription.cancel(self)
-        notificationHandler(subscription, Event(error: StreamCompleted.lateSubscription))
+        notificationHandler(subscription, Event(error: nil))
       }
     }
   }

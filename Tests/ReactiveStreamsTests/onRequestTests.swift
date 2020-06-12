@@ -25,9 +25,8 @@ class onRequestTests: XCTestCase
         XCTAssertEqual(value, 45)
         e.fulfill()
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-      }
+      catch is StreamCompleted {}
+      catch { XCTFail("\(error)") }
     }
 
     o.start()
@@ -93,10 +92,8 @@ class onRequestTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, 45)
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e0.fulfill()
-      }
+      catch is StreamCompleted { e0.fulfill() }
+      catch { XCTFail("\(error)") }
     }
     p0.start()
 
@@ -111,10 +108,8 @@ class onRequestTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, 145)
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e1.fulfill()
-      }
+      catch is StreamCompleted { e1.fulfill() }
+      catch { XCTFail("\(error)") }
     }
     p1.start()
 

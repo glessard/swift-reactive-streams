@@ -27,7 +27,7 @@ extension EventStream
           newEvent = Event(value: transformed)
         }
         catch {
-          newEvent = Event(error: error)
+          newEvent = Event(error: event.error)
         }
         mapped.queue.async { mapped.dispatch(newEvent) }
       }
@@ -79,7 +79,7 @@ extension EventStream
           newEvent = Event(value: value)
         }
         catch {
-          newEvent = Event(error: error)
+          newEvent = Event(error: event.error)
         }
         mapped.queue.async { mapped.dispatch(newEvent) }
       }

@@ -24,16 +24,14 @@ public struct Event<Value>
   }
 
   @inlinable
-  public init(error: Error)
+  public init(error: Error?)
   {
-    if (error as? StreamCompleted) == .normally
-    {
-      state = nil
-    }
-    else
-    {
-      state = .failure(error)
-    }
+    assert((error as? StreamCompleted) != StreamCompleted())
+#if swift(>=5.1)
+    state = error.map(Result.failure)
+#else
+    state = error.map({ Result.failure($0) })
+#endif
   }
 
   public static var streamCompleted: Event {
@@ -47,7 +45,7 @@ public struct Event<Value>
     {
     case .success(let value)?: return value
     case .failure(let error)?: throw error
-    case .none:                throw StreamCompleted.normally
+    case .none:                throw StreamCompleted()
     }
   }
 
@@ -142,7 +140,7 @@ extension Event
   public var result: Result<Value, Error>? {
     get { return state }
     set {
-      if case .failure(let error)? = newValue, (error as? StreamCompleted) == .normally
+      if case .failure(let error)? = newValue, error is StreamCompleted
       {
         state = nil
         return
@@ -151,4 +149,9 @@ extension Event
       state = newValue
     }
   }
+}
+
+public struct StreamCompleted: Error, Equatable, Hashable
+{
+  @usableFromInline init() {}
 }

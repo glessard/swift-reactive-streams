@@ -29,18 +29,11 @@ class eventTests: XCTestCase
     XCTAssertEqual(error.isError, true)
     XCTAssertEqual(error.completedNormally, false)
 
-    let finalA = Event<Int>(Result<Int, Error>.failure(StreamCompleted.normally))
-    let finalB = Event<Int>(error: StreamCompleted.normally)
-    XCTAssertNil(finalA.value)
-    XCTAssertNil(finalA.error)
-    XCTAssertNil(finalA.result)
-    XCTAssertEqual(finalA.completedNormally, true)
-    XCTAssertEqual(finalA, finalB)
-
-    let tardy = Event<Int>(Result<Int, Error>.failure(StreamCompleted.lateSubscription))
-    XCTAssertNil(tardy.value)
-    XCTAssertNotNil(tardy.error)
-    XCTAssertEqual(tardy.completedNormally, false)
+    let final = Event<Int>(error: nil)
+    XCTAssertNil(final.value)
+    XCTAssertNil(final.error)
+    XCTAssertNil(final.result)
+    XCTAssertEqual(final.completedNormally, true)
   }
 
   func testGet() throws
@@ -60,7 +53,7 @@ class eventTests: XCTestCase
     do {
       _ = try final.get()
     }
-    catch StreamCompleted.normally {
+    catch is StreamCompleted {
       XCTAssert(true)
     }
   }

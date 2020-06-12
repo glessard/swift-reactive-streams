@@ -31,10 +31,8 @@ class flatMapTests: XCTestCase
         _ = try event.get()
         XCTFail("unexpected execution")
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e.fulfill()
-      }
+      catch is StreamCompleted { e.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     s.close()
@@ -85,10 +83,8 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, 0)
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e.fulfill()
-      }
+      catch is StreamCompleted { e.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     s.post(events)
@@ -112,10 +108,8 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, events*events)
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e.fulfill()
-      }
+      catch is StreamCompleted { e.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     for _ in (0..<events) { stream.post(events) }
@@ -210,10 +204,8 @@ class flatMapTests: XCTestCase
         let value = try event.get()
         XCTAssertEqual(value, events*(streams/2))
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e.fulfill()
-      }
+      catch is StreamCompleted { e.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     for i in 1..<streams
