@@ -44,6 +44,6 @@ extension Resolver where Failure == Error
 {
   public func resolve(_ event: Event<Success>)
   {
-    resolve(event.result ?? .failure(StreamCompleted.normally))
+    resolve(event.result ?? .failure(StreamCompleted()))
   }
 }

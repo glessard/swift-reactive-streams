@@ -136,10 +136,8 @@ class streamTests: XCTestCase
     waitForExpectations(timeout: 1.0)
 
     e = expectation(description: #function + "-2")
-    stream.finalValue().onError {
-      XCTAssertErrorEquals($0, StreamCompleted.lateSubscription)
-      e.fulfill()
-    }
+    stream.finalValue().onCompletion { e.fulfill() }
+
     waitForExpectations(timeout: 1.0)
   }
 
@@ -190,10 +188,8 @@ class streamTests: XCTestCase
         _ = try event.get()
         XCTFail("unreachable function")
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e.fulfill()
-      }
+      catch is StreamCompleted { e.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     for i in 0...2*count { stream.post(i) }
@@ -219,10 +215,8 @@ class streamTests: XCTestCase
         let value = try event.get()
         if value == limit { e1.fulfill() }
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
-      }
+      catch is StreamCompleted { e2.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     XCTAssertEqual(stream.requested, Int64(limit))
@@ -299,10 +293,8 @@ class streamTests: XCTestCase
         XCTAssertEqual(value.count, events)
         e1.fulfill()
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
-      }
+      catch is StreamCompleted { e2.fulfill() }
+      catch { XCTFail("\(error)") }
     }
     XCTAssertEqual(split.0.requested, .max)
     XCTAssertEqual(split.1.requested, 0)
@@ -385,11 +377,7 @@ class streamTests: XCTestCase
     XCTAssertEqual(split.1.requested, .min)
 
     let e2 = expectation(description: "split.1 onError")
-    split.1.onError {
-      error in
-      XCTAssertErrorEquals(error, StreamCompleted.lateSubscription)
-      e2.fulfill()
-    }
+    split.1.onCompletion { e2.fulfill() }
 
     waitForExpectations(timeout: 1.0)
   }
@@ -414,10 +402,8 @@ class streamTests: XCTestCase
         let value = try event.get()
         if value == 1 { sem.signal() }
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
-      }
+      catch is StreamCompleted { e2.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     stream.post(0)

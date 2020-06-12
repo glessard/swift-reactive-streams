@@ -22,7 +22,7 @@ class postBoxTests: XCTestCase
 
     stream.post(0)
     stream.post(Event(value: 1))
-    stream.post(StreamCompleted.normally)
+    stream.post(Event.streamCompleted)
 
     stream.reduce(0, +).onEvent {
       event in
@@ -30,7 +30,7 @@ class postBoxTests: XCTestCase
         let r = try event.get()
         XCTAssertEqual(r, 1)
       }
-      catch StreamCompleted.normally { e.fulfill() }
+      catch is StreamCompleted { e.fulfill() }
       catch { XCTFail(String(describing: error)) }
     }
 
@@ -45,7 +45,7 @@ class postBoxTests: XCTestCase
 
     let d = stream.finalOutcome()
 
-    stream.post(StreamCompleted.normally)
+    stream.post(Event.streamCompleted)
     stream.post(42)
 
     do {
@@ -60,7 +60,7 @@ class postBoxTests: XCTestCase
 
     let d = stream.finalOutcome()
 
-    stream.post(StreamCompleted.normally)
+    stream.post(Event.streamCompleted)
     stream.post(TestError(42))
 
     do {
@@ -97,10 +97,8 @@ class postBoxTests: XCTestCase
     stream.close()
 
     let e = expectation(description: #function)
-    stream.finalValue().onError {
-      XCTAssertErrorEquals($0, StreamCompleted.lateSubscription)
-      e.fulfill()
-    }
+    stream.finalValue().onCompletion { e.fulfill() }
+
     waitForExpectations(timeout: 1.0)
     XCTAssertEqual(stream.isEmpty, true)
     XCTAssertEqual(stream.completed, true)

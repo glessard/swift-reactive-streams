@@ -75,10 +75,8 @@ class reduceTests: XCTestCase
         XCTAssertEqual(value, (events-1)*events/2)
         e1.fulfill()
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
-      }
+      catch is StreamCompleted { e2.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     for i in 0..<events { stream.post(i) }
@@ -135,10 +133,8 @@ class reduceTests: XCTestCase
         XCTAssertEqual(value, initial)
         e1.fulfill()
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
-      }
+      catch is StreamCompleted { e2.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     stream.post(Event.streamCompleted)
@@ -167,10 +163,8 @@ class reduceTests: XCTestCase
         let count = try event.get()
         XCTAssertEqual(count, events)
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e1.fulfill()
-      }
+      catch is StreamCompleted { e1.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     let e2 = expectation(description: #function+"2")
@@ -181,10 +175,8 @@ class reduceTests: XCTestCase
         let count = try event.get()
         XCTAssertEqual(count, 1)
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
-      }
+      catch is StreamCompleted { e2.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     stream.post(.max)
@@ -215,10 +207,8 @@ class reduceTests: XCTestCase
         let coalesced = try event.get()
         XCTAssertEqual(coalesced.count, events)
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e1.fulfill()
-      }
+      catch is StreamCompleted { e1.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     let o = stream.coalesce()
@@ -229,10 +219,8 @@ class reduceTests: XCTestCase
         let coalesced = try event.get()
         XCTAssertEqual(coalesced.count, 1)
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
-      }
+      catch is StreamCompleted { e2.fulfill() }
+      catch { XCTFail("\(error)") }
     }
 
     stream.post(.max)

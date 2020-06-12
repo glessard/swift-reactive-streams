@@ -54,7 +54,10 @@ class ReducingStream<InputValue, OutputValue>: SingleValueStream<InputValue, Out
     catch {
       queue.async {
         self.dispatch(Event(value: self.current))
-        self.dispatch(Event(error: error))
+        if (error is StreamCompleted)
+        { self.dispatch(Event.streamCompleted) }
+        else
+        { self.dispatch(Event(error: error)) }
       }
     }
   }

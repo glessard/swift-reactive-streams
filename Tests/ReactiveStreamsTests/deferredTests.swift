@@ -153,10 +153,8 @@ class DeferredStreamTests: XCTestCase
         XCTAssertEqual(value, random)
         e1.fulfill()
       }
-      catch {
-        XCTAssertErrorEquals(error, StreamCompleted.normally)
-        e2.fulfill()
-      }
+      catch is StreamCompleted { e2.fulfill() }
+      catch { XCTFail("\(error)") }
     }
     queue.sync {
       XCTAssertEqual(stream.requested, 1)
