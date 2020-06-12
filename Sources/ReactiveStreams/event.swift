@@ -27,7 +27,11 @@ public struct Event<Value>
   public init(error: Error?)
   {
     assert((error as? StreamCompleted) != StreamCompleted())
-    state = error.map(Result.failure(_:))
+#if swift(>=5.1)
+    state = error.map(Result.failure)
+#else
+    state = error.map({ Result.failure($0) })
+#endif
   }
 
   public static var streamCompleted: Event {
